@@ -1,6 +1,7 @@
-# 🚀 프로젝트 이름
+# 🚀 지구자구 - 지구를 구하고 자연을 구하자!
 
-![배너 이미지 또는 로고](링크)
+<img width="1799" height="2223" alt="image" src="https://github.com/user-attachments/assets/6fd512f9-f503-4c62-909b-fe927ef36c22" />
+
 
 > 간단한 한 줄 소개 – 프로젝트의 핵심 가치 또는 기능
 
