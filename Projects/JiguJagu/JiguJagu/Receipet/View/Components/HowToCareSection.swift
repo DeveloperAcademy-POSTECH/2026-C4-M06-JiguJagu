@@ -12,8 +12,8 @@ struct HowToCareSection: View {
     let careTips: [String]
     var body: some View {
         
-        VStack(alignment: .leading, spacing: 12) {
-            Text("How to Care")
+        VStack(spacing: 14) {
+            Text("How to care")
                 .font(.title3.bold())
             
             ForEach(Array(careTips.enumerated()), id: \.offset) { index, tip in

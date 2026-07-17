@@ -4,67 +4,115 @@
 //
 //  Created by 채유성 on 7/14/26.
 //
+
 import SwiftUI
 
 struct ReceiptView: View {
     var body: some View {
         ScrollView {
-            VStack(spacing: 24) {
+            
+            VStack(spacing: -32) {
                 
-                VStack(spacing: 6) {
-                    Text("Logo")
-                        .font(.title.bold())
-                    Text("GOOD FOR EARTH • GOOD FOR ENVIRONMENT")
-                        .font(.caption)
+                Image("ReceiptPrinter")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 355.72)
+                
+                VStack(spacing: 0) {
+                    
+                    VStack(spacing: 24) {
+                        
+                        VStack(spacing: 6) {
+                            Text("Logo")
+                                .font(.title.bold())
+                            
+                            Text("GOOD FOR EARTH • GOOD FOR ENVIRONMENT")
+                                .font(.caption)
+                        }
+                        .padding(.top, 20)
+                        
+                        
+                        InfoSection(
+                            category: "[ 상의 > 니트 ]",
+                            productName: "칙스 브러쉬드 더블 스트라이프 카라 니트"
+                        )
+                        
+                        Divider()
+                        
+                        
+                        HowToCareSection(
+                            careTips: [
+                                "니트는 옷걸이에 걸면 어깨가 튀어나오고 옷이 아래로 처지므로 말거나 접어서 서랍장에 보관하는 것이 좋습니다.",
+                                "습기가 없는 서랍장에 보관하고, 사이에 신문지를 끼워두면 습기와 좀벌레를 예방할 수 있습니다."
+                            ]
+                        )
+                        
+                        Divider()
+                        
+                        
+                        WashingGuideSection(
+                            guides: [
+                                WashingGuide(
+                                    washingIcon: "HandwashOnly",
+                                    washingDescription: "세탁 시 반드시 뒤집어서 30도씨의 중성세제를 사용하여 찬물로 단독 손 세탁을 하세요!"
+                                ),
+                                
+                                WashingGuide(
+                                    washingIcon: "DoNotBleach",
+                                    washingDescription: "염소 표백제나 강력 효소 세제는 제품에 손상을 줄 수 있으니 삼가 주시길 바랍니다."
+                                ),
+                                
+                                WashingGuide(
+                                    washingIcon: "Iron",
+                                    washingDescription: "다림질 시에는 저온으로 맞춰서 진행해주시고, 의류 손상이 적게 천천히 다림질해주시길 바랍니다."
+                                ),
+                                
+                                WashingGuide(
+                                    washingIcon: "DryInShade",
+                                    washingDescription: "건조기 사용 시 옷 형태나 컬러에 변형이 발생하니 자연 건조를 권장합니다."
+                                )
+                            ]
+                        )
+                        
+                        Divider()
+                        
+                        MaterialCompositionSection(
+                            materials: [
+                                Material(name: "Acrylic", percentage: 60),
+                                Material(name: "Polyester", percentage: 20),
+                                Material(name: "Wool", percentage: 15),
+                                Material(name: "Nylon", percentage: 5)
+                            ]
+                        )
+                        
+                        Divider()
+                        
+                        FooterSection()
+                    }
+                    .padding(
+                        EdgeInsets(
+                            top: 12,
+                            leading: 12,
+                            bottom: 20,
+                            trailing: 12
+                        )
+                    )
+                    .frame(width: 306)
+                    .background {
+                        Color("ReceiptColor")
+                    }
+                    
+                    Image("ReceiptBottom")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 306)
                 }
-                .padding(.top, 20)
-                
-                InfoSection(
-                    category: "[ 상의 > 니트 ]", productName: "칙스 브러쉬드 더블 스트라이프 카라 니트"
-                )
-                
-                Divider()
-                
-                HowToCareSection(
-                    careTips: [
-                        "접어서 보관하세요.",
-                        "습기가 없는 곳에 보관하세요."
-                    ]
-                )
-                
-                Divider()
-                
-                WashingGuideSection(
-                    guides: [
-                        "30°C 이하 손세탁",
-                        "표백제 사용 금지",
-                        "저온 다림질",
-                        "자연 건조"
-                    ]
-                )
-                
-                Divider()
-                
-                MaterialCompositionSection(
-                    materials: [
-                        Material(name: "Acrylic", percentage: 60),
-                        Material(name: "Polyester", percentage: 20),
-                        Material(name: "Wool", percentage: 15),
-                        Material(name: "Nylon", percentage: 5)
-                    ]
-                )
-                
-                Divider()
-                
-                FooterSection()
             }
-            .padding()
-            .frame(width: 306)
-            .background(Color.white)
             .padding(.vertical)
         }
     }
 }
+
 
 #Preview {
     ReceiptView()

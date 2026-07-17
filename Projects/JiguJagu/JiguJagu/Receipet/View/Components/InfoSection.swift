@@ -15,13 +15,14 @@ struct InfoSection: View {
     var body: some View {
         
         VStack(spacing: 20) {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(spacing: 10) {
                 Text(category)
                     .font(.headline)
                 Text(productName)
                     .font(.title3.weight(.semibold))
+                    .multilineTextAlignment(.center)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity)
             
             // 이미지 영역 (임시로 사각형)
             RoundedRectangle(cornerRadius: 12)
