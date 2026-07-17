@@ -17,7 +17,7 @@ struct WashingGuideSection: View {
             Text("Washing Guide")
                 .font(.title3.bold())
             
-            ForEach(guides) { guide in
+            ForEach(guides , id: \.id) { guide in
                 
                 HStack(alignment: .top, spacing: 16) {
                     
@@ -38,18 +38,22 @@ struct WashingGuideSection: View {
     WashingGuideSection(
         guides: [
             WashingGuide(
+                id: "handwash",
                 washingIcon: "wash",
                 washingDescription: "30°C 이하 손세탁"
             ),
             WashingGuide(
+                id: "bleach",
                 washingIcon: "bleach",
                 washingDescription: "표백제 사용 금지"
             ),
             WashingGuide(
+                id: "iron",
                 washingIcon: "iron",
                 washingDescription: "저온 다림질"
             ),
             WashingGuide(
+                id: "dry",
                 washingIcon: "dry",
                 washingDescription: "자연 건조"
             )
