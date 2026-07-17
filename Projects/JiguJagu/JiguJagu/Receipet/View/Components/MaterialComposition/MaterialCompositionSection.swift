@@ -10,6 +10,7 @@ import SwiftUI
 struct MaterialCompositionSection: View {
     
     let materials: [Material]
+    
     var body: some View {
         
         VStack(spacing: 14) {
@@ -23,12 +24,21 @@ struct MaterialCompositionSection: View {
                     materials: materials
                 )
                 
+                let maxPercentage = materials.max(by: { $0.percentage < $1.percentage })?.percentage ?? 0
+                
                 ForEach(materials, id: \.name) { material in
+
                     HStack {
                         Text(material.name)
+                            .fontWeight(material.percentage == maxPercentage ? .bold : .regular)
+                        
                         Spacer()
+
                         Text("\(material.percentage)%")
+
+                            .fontWeight(material.percentage == maxPercentage ? .bold : .regular)
                     }
+                    .frame(maxWidth: .infinity)
                 }
             }
         }
