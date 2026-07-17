@@ -54,16 +54,16 @@ struct BarcodeView: View {
         switch material.name {
             
         case "Acrylic":
-            return Color("Brown")
+            return Color("ReceiptBrown")
             
         case "Polyester":
-            return Color("LightBrown")
+            return Color("ReceiptLightBrown")
             
         case "Wool":
-            return Color("Olive")
+            return Color("ReceiptOlive")
             
         case "Nylon":
-            return Color("Orange")
+            return Color("ReceiptOrange")
             
         default:
             return .black
