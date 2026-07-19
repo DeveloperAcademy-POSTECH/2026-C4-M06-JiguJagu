@@ -10,7 +10,11 @@ import SwiftUI
 struct SearchResultGrid: View {
     
     let items: [Clothing]
-    let columns: [GridItem]
+    
+    private let columns = [
+        GridItem(.fixed(180), spacing: 10),
+        GridItem(.fixed(180))
+    ]
     
     var body: some View {
         LazyVGrid(
