@@ -46,7 +46,15 @@ private extension ArchiveView {
     var receiptArchiveContent: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
-                receiptCards(screenWidth: geometry.size.width)
+                if controller.filteredReceipts.isEmpty {
+                    ArchiveEmptyStateView(
+                        hasActiveFilter: controller.hasActiveFilter,
+                        onResetButtonTap: controller.resetFilters
+                    )
+                    .padding(.top, 50)
+                } else {
+                    receiptCards(screenWidth: geometry.size.width)
+                }
             }
             .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
             .background {
@@ -82,12 +90,12 @@ private extension ArchiveView {
     }
 
     func receiptCardItem(_ receipt: ArchiveReceipt) -> some View {
-        VStack(spacing: 18) {
+        VStack(spacing: 8) {
             Text(receipt.keptDaysText())
-                .font(.pretendard.head0)
+                .font(.pretendard.head4)
                 .foregroundStyle(Color.white)
                 .frame(width: 266)
-                .padding(.top, 22)
+                .padding(.top, 10)
 
             ArchiveReceiptCard(receipt: receipt)
         }
@@ -104,6 +112,10 @@ private extension ArchiveView {
 
 #Preview {
     ArchiveView(receipts: ArchiveReceipt.previewItems)
+}
+
+#Preview("Empty Archive") {
+    ArchiveView(receipts: [])
 }
 
 private extension ArchiveReceipt {

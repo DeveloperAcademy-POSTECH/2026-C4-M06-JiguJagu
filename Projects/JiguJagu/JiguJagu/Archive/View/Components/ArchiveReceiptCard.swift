@@ -20,7 +20,7 @@ struct ArchiveReceiptCard: View {
                 .fill(Color.BG)
                 .frame(height: 18)
 
-            VStack(spacing: 16) {
+            VStack(spacing: 14) {
                 receiptHeader
 
                 dottedDivider
@@ -34,7 +34,7 @@ struct ArchiveReceiptCard: View {
                 dateInfo
             }
             .padding(.horizontal, 24)
-            .padding(.vertical, 22)
+            .padding(.vertical, 18)
             .background(Color.BG)
 
             ReceiptTornEdge()
@@ -62,7 +62,7 @@ private extension ArchiveReceiptCard {
     }
 
     var productInfo: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 14) {
             VStack(spacing: 4) {
                 Text(receipt.brandName)
                     .font(.pretendard.head0)
@@ -77,7 +77,7 @@ private extension ArchiveReceiptCard {
             Image(receipt.productImageName)
                 .resizable()
                 .scaledToFit()
-                .frame(height: 154)
+                .frame(height: 140)
                 .overlay {
                     Gradient.Clothes
                 }
@@ -85,11 +85,11 @@ private extension ArchiveReceiptCard {
     }
 
     var materialInfo: some View {
-        VStack(spacing: 11) {
+        VStack(spacing: 9) {
             ArchiveMaterialBarcodeView(materials: receipt.materials)
                 .frame(height: 20)
 
-            VStack(spacing: 5) {
+            VStack(spacing: 4) {
                 ForEach(receipt.materials, id: \.name) { material in
                     materialRow(material)
                 }
