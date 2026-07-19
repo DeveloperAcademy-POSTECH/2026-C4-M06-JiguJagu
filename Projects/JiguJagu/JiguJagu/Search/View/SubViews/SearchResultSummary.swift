@@ -18,10 +18,11 @@ struct SearchResultSummary: View {
             HStack(spacing: 8) {
                 
                 Text("등록할 내 옷 찾기")
-                    .font(.headline)
+                    .font(Font.pretendard.head2)
                 
                 Text("\(count) results")
-                    .foregroundStyle(.secondary)
+                    .font(Font.pretendard.head4)
+                    .foregroundStyle(Color.grayScale300)
                 
             }
             
@@ -31,7 +32,10 @@ struct SearchResultSummary: View {
                 
                 HStack(spacing: 11) {
                     Text("옷 자체 등록")
+                        .font(Font.pretendard.body2)
+                        .foregroundStyle(Color.primary500)
                     Image(systemName: "chevron.right")
+                        .foregroundStyle(Color.primary500)
                 }
                 .font(.subheadline.weight(.semibold))
                 

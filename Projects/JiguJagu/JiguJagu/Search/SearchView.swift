@@ -41,8 +41,8 @@ struct SearchView: View {
                         
                         GeometryReader { geometry in
                             Text("검색 결과가 없습니다")
-                                .font(.headline)
-                                .foregroundStyle(.gray)
+                                .font(Font.pretendard.head3)
+                                .foregroundStyle(Color.grayScale600)
                                 .frame(width: geometry.size.width, height: geometry.size.height, alignment: .center)
                         }
                     }

@@ -18,7 +18,7 @@ struct ClothingCard: View {
             AsyncImage(url: item.productImageURL) { image in
                 image.resizable()
             } placeholder: {
-                Color.gray.opacity(0.1)
+                Color.grayScale100
             }
             .scaledToFit()
             .frame(width: 180, height: 182)
@@ -26,7 +26,7 @@ struct ClothingCard: View {
             .overlay(
                 RoundedRectangle(cornerRadius: 4)
                     .stroke(
-                        Color.gray.opacity(0.3),
+                        Color.grayScale200,
                         lineWidth: 1
                     )
             )
@@ -34,12 +34,14 @@ struct ClothingCard: View {
             VStack(alignment: .leading, spacing: 6) {
                 
                 Text(item.brand)
-                    .font(.headline)
+                    .font(Font.pretendard.body2)
+                    .foregroundStyle(Color.grayScale900)
                     .lineLimit(1)
                     .truncationMode(.tail)
                 
                 Text(item.productName)
-                    .font(.subheadline)
+                    .font(Font.pretendard.body3)
+                    .foregroundStyle(Color.grayScale900)
                     .lineLimit(2)
                     .truncationMode(.tail)
             }
