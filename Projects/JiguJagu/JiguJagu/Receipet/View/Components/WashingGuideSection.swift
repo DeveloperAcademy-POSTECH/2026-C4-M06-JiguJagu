@@ -15,7 +15,7 @@ struct WashingGuideSection: View {
         VStack(spacing: 14) {
             
             Text("Washing Guide")
-                .font(.title3.bold())
+                .font(Font.arrayFont.h0)
             
             ForEach(guides , id: \.id) { guide in
                 
@@ -26,8 +26,12 @@ struct WashingGuideSection: View {
                         .frame(width: 50, height: 50)
                     
                     Text(guide.washingDescription)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .frame(width: 206, height: 60, alignment: .leading)
+                        .font(Font.pretendard.body3)
+                        .foregroundStyle(Color.brown700)
+                        .lineSpacing(4)
                 }
+                .frame(width: 280, height: 60)
             }
         }
         .frame(maxWidth: .infinity)

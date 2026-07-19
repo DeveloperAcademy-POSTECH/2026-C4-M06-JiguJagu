@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct ReceiptView: View {
     
@@ -14,43 +15,61 @@ struct ReceiptView: View {
     
     var body: some View {
         ScrollViewReader { proxy in
-            ScrollView {
+            VStack(spacing: -50) {
                 
-                VStack(spacing: -38) {
-                    
-                    Image("ReceiptPrinter")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 355.72)
+                Image("ReceiptPrinter")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 355.72)
+                ScrollView(showsIndicators: false) {
                     
                     ZStack(alignment: .top) {
+                        
                         VStack(spacing: 0) {
                             
                             VStack(spacing: 24) {
-                                
-                                VStack(spacing: 6) {
-                                    Text("Logo")
-                                        .font(.title.bold())
+                                Image("BrownLogo")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 99.8, height: 18.85)
+                                    .padding(.top, 20)
+                                VStack(spacing: 10.66) {
+                                    
+                                    
+                                    Image("StarDevider")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 291.78, height: 3.66)
+                                    
                                     Text("GOOD FOR EARTH • GOOD FOR ENVIRONMENT")
+                                        .font(Font.arrayFont.sub2)
+                                    
+                                    Image("StarDevider")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 291.78, height: 3.66)
+                                    
+                                    
                                         .font(.caption)
                                 }
-                                .padding(.top, 20)
                                 
-                                InfoSection(
-                                    category: "[ 상의 > 니트 ]",
-                                    productName: "칙스 브러쉬드 더블 스트라이프 카라 니트"
-                                )
+                                VStack(spacing: 3) {
+                                    InfoSection(
+                                        category: "[ 상의 > 니트 ]",
+                                        brandName: "CHICKS",
+                                        productName: "더블 스트라이프 카라 니트",
+                                        productImageURL: "url"
+                                    )
                                 
-                                Divider()
+                                    HowToCareSection(
+                                        careTips: [
+                                            "니트는 옷걸이에 걸면 어깨가 튀어나오고 옷이 아래로 처지므로 말거나 접어서 서랍장에 보관하는 것이 좋습니다.",
+                                            "습기가 없는 서랍장에 보관하고, 사이에 신문지를 끼워두면 습기와 좀벌레를 예방할 수 있습니다."
+                                        ]
+                                    )
+                                }
                                 
-                                HowToCareSection(
-                                    careTips: [
-                                        "니트는 옷걸이에 걸면 어깨가 튀어나오고 옷이 아래로 처지므로 말거나 접어서 서랍장에 보관하는 것이 좋습니다.",
-                                        "습기가 없는 서랍장에 보관하고, 사이에 신문지를 끼워두면 습기와 좀벌레를 예방할 수 있습니다."
-                                    ]
-                                )
-                                
-                                Divider()
+                                Divider().background(Color.brown700)
                                 
                                 WashingGuideSection(
                                     guides: [
@@ -80,7 +99,7 @@ struct ReceiptView: View {
                                     ]
                                 )
                                 
-                                Divider()
+                                Divider().background(Color.brown700)
                                 
                                 MaterialCompositionSection(
                                     materials: [
@@ -91,9 +110,9 @@ struct ReceiptView: View {
                                     ]
                                 )
                                 
-                                Divider()
+                                Divider().background(Color.brown700)
                                 
-                                FooterSection()
+                                FooterSection(date: "28-July-2026", category: "상의 > 니트", tag: "#니트 #파랑 #줄무늬")
                             }
                             .padding(
                                 EdgeInsets(
@@ -104,7 +123,7 @@ struct ReceiptView: View {
                                 )
                             )
                             .frame(width: 306)
-                            .background(Color("ReceiptColor"))
+                            .background(Color(Color.BG))
                             
                             Image("ReceiptBottom")
                                 .resizable()
@@ -118,7 +137,23 @@ struct ReceiptView: View {
                     
                 }
                 .padding(.vertical)
-                  
+            }
+            .scrollBounceBehavior(.basedOnSize)
+            .background {
+                
+                Image("MainBG")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 532, height: 912)
+                    .clipped()
+                    .opacity(0.6)
+            }
+            .onAppear {
+                UIScrollView.appearance().bounces = false
+            }
+            
+            .onDisappear {
+                UIScrollView.appearance().bounces = true
             }
             .onAppear {
                 controller.startPrinting(proxy: proxy)

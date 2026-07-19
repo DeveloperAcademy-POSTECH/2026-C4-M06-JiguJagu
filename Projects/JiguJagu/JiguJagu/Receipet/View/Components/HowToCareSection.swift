@@ -14,10 +14,20 @@ struct HowToCareSection: View {
         
         VStack(spacing: 14) {
             Text("How to care")
-                .font(.title3.bold())
+                .font(Font.arrayFont.h0)
             
             ForEach(Array(careTips.enumerated()), id: \.offset) { index, tip in
-                Text("\(index + 1). \(tip)")
+                HStack(alignment: .top, spacing: 8) {
+                    Text("\(index + 1)")
+                        .font(Font.pretendard.body1)
+                        .foregroundStyle(Color.brown700)
+                        .frame(width: 12, alignment: .leading)
+                    
+                    Text(tip)
+                        .font(Font.pretendard.body3)
+                        .foregroundStyle(Color.brown700)
+                        .lineSpacing(4)
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

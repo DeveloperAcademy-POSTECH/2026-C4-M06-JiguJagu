@@ -16,9 +16,9 @@ struct MaterialCompositionSection: View {
         VStack(spacing: 14) {
             
             Text("Material Composition")
-                .font(.title3.bold())
+                .font(Font.arrayFont.h0)
             
-            VStack(spacing: 12) {
+            VStack(spacing: 12.53) {
                 
                 BarcodeView(
                     materials: materials
@@ -26,19 +26,28 @@ struct MaterialCompositionSection: View {
                 
                 let maxPercentage = materials.max(by: { $0.percentage < $1.percentage })?.percentage ?? 0
                 
-                ForEach(materials, id: \.name) { material in
-
-                    HStack {
-                        Text(material.name)
-                            .fontWeight(material.percentage == maxPercentage ? .bold : .regular)
+                VStack(spacing: 4) {
+                    ForEach(materials, id: \.name) { material in
                         
-                        Spacer()
-
-                        Text("\(material.percentage)%")
-
-                            .fontWeight(material.percentage == maxPercentage ? .bold : .regular)
+                        HStack {
+                            Text(material.name)
+                                .font(
+                                    material.percentage == maxPercentage
+                                    ? .pretendard.head4
+                                    : .pretendard.body6
+                                )
+                            
+                            Spacer()
+                            
+                            Text("\(material.percentage)%")
+                                .font(
+                                    material.percentage == maxPercentage
+                                    ? .pretendard.head4
+                                    : .pretendard.body6
+                                )
+                        }
+                        .frame(maxWidth: .infinity)
                     }
-                    .frame(maxWidth: .infinity)
                 }
             }
         }
