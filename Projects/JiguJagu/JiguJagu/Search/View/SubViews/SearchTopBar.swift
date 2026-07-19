@@ -9,6 +9,8 @@ import SwiftUI
 
 struct SearchTopBar: View {
     
+    @Binding var searchText: String
+    
     var body: some View {
         HStack(spacing: 12) {
             
@@ -19,7 +21,9 @@ struct SearchTopBar: View {
                     .foregroundColor(.black)
             }
             
-            SearchBar()
+            SearchBar(
+                text: $searchText
+            )
         }
     }
 }

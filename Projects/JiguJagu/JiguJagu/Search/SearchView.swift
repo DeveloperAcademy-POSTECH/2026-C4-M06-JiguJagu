@@ -9,12 +9,20 @@ import SwiftUI
 
 struct SearchView: View {
     
+    @State private var searchText = ""
+    
     let items: [Clothing]
     
-    private let columns = [
-        GridItem(.fixed(180), spacing: 10),
-        GridItem(.fixed(180))
-    ]
+    private var filteredItems: [Clothing] {
+        guard !searchText.isEmpty else {
+            return items
+        }
+        
+        return items.filter {
+            $0.brand.localizedCaseInsensitiveContains(searchText) ||
+            $0.productName.localizedCaseInsensitiveContains(searchText)
+        }
+    }
     
     var body: some View {
         ScrollViewReader { proxy in
@@ -28,16 +36,17 @@ struct SearchView: View {
                             .frame(height: 0)
                             .id("top")
                         
-                        SearchTopBar()
+                        SearchTopBar(
+                            searchText: $searchText
+                        )
                         
                         SearchResultSummary(
-                            count: items.count,
+                            count: filteredItems.count,
                             action: {}
                         )
                         
                         SearchResultGrid(
-                            items: items,
-                            columns: columns
+                            items: filteredItems,
                         )
                     }
                     .padding(.horizontal, 16)
@@ -60,7 +69,7 @@ struct SearchView: View {
 private extension SearchView {
     
     func scrollToTop(_ proxy: ScrollViewProxy) {
-        withAnimation(.easeInOut(duration: 0.5)) {
+        withAnimation(.easeInOut(duration: 0.25)) {
             proxy.scrollTo(
                 "top",
                 anchor: .top

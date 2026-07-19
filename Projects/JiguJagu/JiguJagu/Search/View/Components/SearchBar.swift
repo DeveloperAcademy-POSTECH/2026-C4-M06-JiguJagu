@@ -9,6 +9,8 @@ import SwiftUI
 
 struct SearchBar: View {
     
+    @Binding var text: String
+    
     var body: some View {
         HStack {
             
@@ -17,7 +19,7 @@ struct SearchBar: View {
             
             TextField(
                 "브랜드명, 상품명을 입력하세요!",
-                text: .constant("")
+                text: $text
             )
         }
         .padding(.horizontal, 14)
