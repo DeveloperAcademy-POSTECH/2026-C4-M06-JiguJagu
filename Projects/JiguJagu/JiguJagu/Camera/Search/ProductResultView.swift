@@ -17,7 +17,6 @@ struct ProductResultView: View {
     @State private var errorMessage: String?
     @State private var isLoading = true
 
-    // ⚠️ 아래 API 키 관리 관련 주의사항은 파일 하단 참고
     private let service = ProductSearchService(apiKey: APIConfig.openAIKey)
 
     var body: some View {
@@ -66,11 +65,14 @@ struct ProductResultView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                 }
 
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 8) {
                     Text(item.itemName)
                         .font(.system(size: 22, weight: .bold))
+
+                    // 카테고리: 대분류 · 세부분류 · 브랜드
                     HStack(spacing: 8) {
-                        tag(item.category)
+                        tag(item.categoryDisplayName)          // 상의 / 하의 / 아우터 / 기타
+                        tag(item.subCategory, highlighted: true) // 티셔츠 / 청바지 등
                         if let brand = item.brand, !brand.isEmpty {
                             tag(brand)
                         }
@@ -81,8 +83,22 @@ struct ProductResultView: View {
                     .font(.system(size: 15))
                     .foregroundStyle(.secondary)
 
-                if !item.colors.isEmpty {
-                    labeledRow("색상", values: item.colors)
+                // 신뢰도
+                if let confidence = item.confidence {
+                    confidenceRow(confidence)
+                }
+
+                // 속성들
+                VStack(alignment: .leading, spacing: 10) {
+                    if !item.colors.isEmpty {
+                        labeledRow("색상", value: item.colors.joined(separator: ", "))
+                    }
+                    if let material = item.material, !material.isEmpty {
+                        labeledRow("소재", value: material)
+                    }
+                    if let pattern = item.pattern, !pattern.isEmpty {
+                        labeledRow("패턴", value: pattern)
+                    }
                 }
 
                 if !item.searchKeywords.isEmpty {
@@ -90,7 +106,14 @@ struct ProductResultView: View {
                         Text("검색 키워드")
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(.secondary)
-                        FlowKeywords(keywords: item.searchKeywords)
+                        FlexibleWrap(items: item.searchKeywords) { keyword in
+                            Text("#\(keyword)")
+                                .font(.system(size: 13))
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
+                                .background(Color.blue.opacity(0.1))
+                                .clipShape(Capsule())
+                        }
                     }
                 }
             }
@@ -119,60 +142,41 @@ struct ProductResultView: View {
 
     // MARK: - Components
 
-    private func tag(_ text: String) -> some View {
+    private func tag(_ text: String, highlighted: Bool = false) -> some View {
         Text(text)
             .font(.system(size: 13, weight: .medium))
+            .foregroundStyle(highlighted ? Color.white : Color.primary)
             .padding(.horizontal, 10)
             .padding(.vertical, 4)
-            .background(Color.gray.opacity(0.15))
+            .background(highlighted ? Color.accentColor : Color.gray.opacity(0.15))
             .clipShape(Capsule())
     }
 
-    private func labeledRow(_ label: String, values: [String]) -> some View {
+    private func labeledRow(_ label: String, value: String) -> some View {
         HStack(alignment: .top, spacing: 8) {
             Text(label)
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(.secondary)
                 .frame(width: 44, alignment: .leading)
-            Text(values.joined(separator: ", "))
+            Text(value)
                 .font(.system(size: 15))
         }
     }
 
-    // MARK: - Action
-
-    private func identify() async {
-        isLoading = true
-        errorMessage = nil
-        result = nil
-
-        guard let image else {
-            errorMessage = "분석할 사진이 없습니다."
-            isLoading = false
-            return
-        }
-        do {
-            result = try await service.identify(image: image)
-        } catch {
-            errorMessage = error.localizedDescription
-        }
-        isLoading = false
-    }
-}
-
-/// 키워드를 여러 줄로 자동 줄바꿈해 보여주는 간단한 flow 레이아웃.
-private struct FlowKeywords: View {
-    let keywords: [String]
-
-    var body: some View {
-        // iOS 16+ 에서 사용 가능한 간단한 wrap 레이아웃
-        FlexibleWrap(items: keywords) { keyword in
-            Text("#\(keyword)")
-                .font(.system(size: 13))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .background(Color.blue.opacity(0.1))
-                .clipShape(Capsule())
+    private func confidenceRow(_ confidence: Double) -> some View {
+        let percent = Int((confidence * 100).rounded())
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text("분석 신뢰도")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Text("\(percent)%")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(confidence >= 0.7 ? .green : .orange)
+            }
+            ProgressView(value: confidence)
+                .tint(confidence >= 0.7 ? .green : .orange)
         }
     }
 }
@@ -208,5 +212,27 @@ private struct FlexibleWrap<Item: Hashable, Content: View>: View {
             }
         }
         .frame(height: 80)
+    }
+}
+
+// MARK: - Action
+
+private extension ProductResultView {
+    func identify() async {
+        isLoading = true
+        errorMessage = nil
+        result = nil
+
+        guard let image else {
+            errorMessage = "분석할 사진이 없습니다."
+            isLoading = false
+            return
+        }
+        do {
+            result = try await service.identify(image: image)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+        isLoading = false
     }
 }
