@@ -26,34 +26,56 @@ struct SearchView: View {
     
     var body: some View {
         ScrollViewReader { proxy in
-            
             ZStack(alignment: .bottomTrailing) {
-                
-                ScrollView {
+                if filteredItems.isEmpty {
                     VStack(spacing: 20) {
-                        
                         Color.clear
                             .frame(height: 0)
-                            .id("top")
                         
-                        SearchTopBar(
-                            searchText: $searchText
-                        )
+                        SearchTopBar(searchText: $searchText)
                         
                         SearchResultSummary(
-                            count: filteredItems.count,
+                            count: 0,
                             action: {}
                         )
                         
-                        SearchResultGrid(
-                            items: filteredItems,
-                        )
+                        GeometryReader { geometry in
+                            Text("검색 결과가 없습니다")
+                                .font(.headline)
+                                .foregroundStyle(.gray)
+                                .frame(width: geometry.size.width, height: geometry.size.height, alignment: .center)
+                        }
                     }
                     .padding(.horizontal, 16)
                     .padding(.bottom, 20)
+                } else {
+                    ScrollView {
+                        VStack(spacing: 20) {
+                            Color.clear
+                                .frame(height: 0)
+                                .id("top")
+                            
+                            SearchTopBar(
+                                searchText: $searchText
+                            )
+                            
+                            SearchResultSummary(
+                                count: filteredItems.count,
+                                action: {}
+                            )
+                            
+                            SearchResultGrid(
+                                items: filteredItems
+                            )
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 20)
+                    }
                 }
                 
-                BottomGradientOverlay()
+                if !filteredItems.isEmpty {
+                    BottomGradientOverlay()
+                }
                 
                 FloatingUpButton {
                     scrollToTop(proxy)
