@@ -18,9 +18,9 @@ struct ArchiveReceiptCard: View {
         VStack(spacing: 0) {
             ReceiptTornEdge()
                 .fill(Color.BG)
-                .frame(height: 36)
+                .frame(height: 18)
 
-            VStack(spacing: 26) {
+            VStack(spacing: 16) {
                 receiptHeader
 
                 dottedDivider
@@ -33,16 +33,16 @@ struct ArchiveReceiptCard: View {
 
                 dateInfo
             }
-            .padding(.horizontal, 48)
-            .padding(.vertical, 34)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 22)
             .background(Color.BG)
 
             ReceiptTornEdge()
                 .fill(Color.BG)
-                .frame(height: 36)
+                .frame(height: 18)
                 .rotationEffect(.degrees(180))
         }
-        .frame(width: 532)
+        .frame(width: 266)
     }
 }
 
@@ -62,8 +62,8 @@ private extension ArchiveReceiptCard {
     }
 
     var productInfo: some View {
-        VStack(spacing: 24) {
-            VStack(spacing: 8) {
+        VStack(spacing: 16) {
+            VStack(spacing: 4) {
                 Text(receipt.brandName)
                     .font(.pretendard.head0)
                     .foregroundStyle(Color.grayScale900)
@@ -77,7 +77,7 @@ private extension ArchiveReceiptCard {
             Image(receipt.productImageName)
                 .resizable()
                 .scaledToFit()
-                .frame(height: 268)
+                .frame(height: 154)
                 .overlay {
                     Gradient.Clothes
                 }
@@ -85,10 +85,11 @@ private extension ArchiveReceiptCard {
     }
 
     var materialInfo: some View {
-        VStack(spacing: 18) {
-            BarcodeView(materials: receipt.materials)
+        VStack(spacing: 11) {
+            ArchiveMaterialBarcodeView(materials: receipt.materials)
+                .frame(height: 20)
 
-            VStack(spacing: 8) {
+            VStack(spacing: 5) {
                 ForEach(receipt.materials, id: \.name) { material in
                     materialRow(material)
                 }
@@ -111,8 +112,8 @@ private extension ArchiveReceiptCard {
     }
 
     var dottedDivider: some View {
-        Text(String(repeating: "*", count: 68))
-            .font(.system(size: 12, weight: .bold, design: .monospaced))
+        Text(String(repeating: "*", count: 56))
+            .font(.system(size: 8, weight: .bold, design: .monospaced))
             .foregroundStyle(Color.grayScale900)
             .lineLimit(1)
             .minimumScaleFactor(0.6)
@@ -130,12 +131,93 @@ private extension ArchiveReceiptCard {
             Spacer()
             Text("\(material.percentage)%")
         }
-        .font(material.percentage == maxMaterialPercentage ? .pretendard.head1 : .pretendard.head2)
+        .font(materialFont(for: material))
         .foregroundStyle(Color.grayScale900)
+    }
+
+    func materialFont(for material: Material) -> Font {
+        let fontName = material.percentage == maxMaterialPercentage
+        ? "Pretendard-SemiBold"
+        : "Pretendard-Regular"
+
+        return .custom(fontName, size: 14)
     }
 
     var maxMaterialPercentage: Int {
         receipt.materials.map(\.percentage).max() ?? 0
+    }
+}
+
+private struct ArchiveMaterialBarcodeView: View {
+    let materials: [Material]
+    private let colors: [Color] = [
+        .brown600,
+        .progress2,
+        .progress3,
+        .progress4
+    ]
+
+    var body: some View {
+        GeometryReader { geometry in
+            HStack(alignment: .center, spacing: 1.5) {
+                ForEach(materials.indices, id: \.self) { index in
+                    let material = materials[index]
+                    let segmentWidth = segmentWidth(
+                        for: material,
+                        totalWidth: geometry.size.width
+                    )
+
+                    barcodeSegment(
+                        width: segmentWidth,
+                        color: color(for: material, at: index)
+                    )
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+}
+
+private extension ArchiveMaterialBarcodeView {
+    func barcodeSegment(width: CGFloat, color: Color) -> some View {
+        HStack(alignment: .center, spacing: 1) {
+            let barWidths = [1.0, 2.5, 1.5, 3.0, 1.0, 2.0]
+            let barCount = max(Int(width / 3), 1)
+
+            ForEach(0..<barCount, id: \.self) { index in
+                Rectangle()
+                    .fill(color)
+                    .frame(width: barWidths[index % barWidths.count], height: 20)
+            }
+        }
+        .frame(width: width, alignment: .leading)
+        .clipped()
+    }
+
+    func segmentWidth(for material: Material, totalWidth: CGFloat) -> CGFloat {
+        let availableWidth = totalWidth - CGFloat(max(materials.count - 1, 0)) * 1.5
+        return availableWidth * CGFloat(material.percentage) / 100
+    }
+
+    func color(for material: Material, at index: Int) -> Color {
+        switch material.name {
+        case "Acrylic":
+            return .brown600
+        case "Polyester":
+            return .progress2
+        case "Wool":
+            return .progress3
+        case "Nylon":
+            return .progress4
+        case "Cotton":
+            return .green600
+        case "Rayon":
+            return .primary500
+        case "Span":
+            return .grayScale500
+        default:
+            return colors[index % colors.count]
+        }
     }
 }
 

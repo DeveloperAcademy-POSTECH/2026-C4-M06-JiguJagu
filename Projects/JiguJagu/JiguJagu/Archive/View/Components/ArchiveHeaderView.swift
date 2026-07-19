@@ -12,11 +12,11 @@ struct ArchiveHeaderView: View {
     let onBackButtonTap: () -> Void
 
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 16) {
             HStack {
                 Button(action: onBackButtonTap) {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 30, weight: .regular))
+                        .font(.system(size: 24, weight: .regular))
                         .foregroundStyle(Color.grayScale900)
                         .frame(width: 44, height: 44)
                 }
@@ -26,7 +26,7 @@ struct ArchiveHeaderView: View {
                 Image("BrownLogo")
                     .resizable()
                     .scaledToFit()
-                    .frame(height: 38)
+                    .frame(height: 20)
 
                 Spacer()
 
@@ -36,7 +36,8 @@ struct ArchiveHeaderView: View {
 
             ArchiveSearchBar(searchText: $searchText)
         }
-        .padding(.horizontal, 32)
-        .padding(.top, 12)
+        .padding(.horizontal, 22)
+        .padding(.top, 18)
+        .padding(.bottom, 16)
     }
 }

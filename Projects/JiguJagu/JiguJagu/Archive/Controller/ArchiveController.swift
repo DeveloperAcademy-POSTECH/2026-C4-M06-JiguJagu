@@ -24,7 +24,11 @@ final class ArchiveController {
     }
 
     var availableSubcategories: [ArchiveSubcategory] {
-        selectedCategory.subcategories
+        if selectedCategory == .all {
+            return ArchiveSubcategory.all
+        }
+
+        return selectedCategory.subcategories
     }
 
     var filteredReceipts: [ArchiveReceipt] {
@@ -51,7 +55,6 @@ final class ArchiveController {
     }
 
     func selectSubcategory(_ subcategory: ArchiveSubcategory) {
-        selectedCategory = subcategory.category
         selectedSubcategory = subcategory
     }
 

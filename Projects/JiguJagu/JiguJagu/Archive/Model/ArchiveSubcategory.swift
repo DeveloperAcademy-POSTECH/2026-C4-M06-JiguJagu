@@ -14,6 +14,8 @@ struct ArchiveSubcategory: Identifiable, Equatable {
 }
 
 extension ArchiveSubcategory {
+    static let all: [ArchiveSubcategory] = tops + bottoms + outers
+
     static let tops: [ArchiveSubcategory] = [
         ArchiveSubcategory(id: "tops_tshirt", title: "티셔츠", category: .tops),
         ArchiveSubcategory(id: "tops_pique", title: "피케/카라티", category: .tops),

@@ -38,7 +38,7 @@ private extension ArchiveCategoryFilterView {
                         .font(.pretendard.head1)
                         .foregroundStyle(categoryTextColor(category))
                         .frame(maxWidth: .infinity)
-                        .frame(height: 66)
+                        .frame(height: 45)
                         .overlay(alignment: .bottom) {
                             if selectedCategory == category {
                                 Rectangle()
@@ -62,16 +62,16 @@ private extension ArchiveCategoryFilterView {
                         Text(subcategory.title)
                             .font(.pretendard.head3)
                             .foregroundStyle(chipTextColor(subcategory))
-                            .padding(.horizontal, 22)
-                            .frame(height: 68)
+                            .padding(.horizontal, 18)
+                            .frame(height: 34)
                             .background(chipBackgroundColor(subcategory))
                             .clipShape(Capsule())
                     }
                 }
             }
-            .padding(.horizontal, 32)
+            .padding(.horizontal, 16)
         }
-        .frame(height: 128)
+        .frame(height: 64)
         .background(Color.white)
     }
 
