@@ -15,10 +15,10 @@ extension Color {
     static let primary300 = Color("Primary300")
     static let primary400 = Color("Primary400")
     static let primary500 = Color("Primary500")
-    static let primary600 = Color("Primary200")
-    static let primary700 = Color("Primary300")
-    static let primary800 = Color("Primary400")
-    static let primary900 = Color("Primary500")
+    static let primary600 = Color("Primary600")
+    static let primary700 = Color("Primary700")
+    static let primary800 = Color("Primary800")
+    static let primary900 = Color("Primary900")
     
     // Green
     static let green100 = Color("Green100")
@@ -56,8 +56,8 @@ extension Color {
     
     // Receipt
     static let BG = Color("BG")
-    static let progress2 = Color("progress2")
-    static let progress3 = Color("progress3")
-    static let progress4 = Color("progress4")
+    static let progress2 = Color("Progress2")
+    static let progress3 = Color("Progress3")
+    static let progress4 = Color("Progress4")
     
 }
