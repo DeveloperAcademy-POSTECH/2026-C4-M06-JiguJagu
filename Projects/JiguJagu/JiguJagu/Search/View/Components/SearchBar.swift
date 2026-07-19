@@ -23,6 +23,15 @@ struct SearchBar: View {
             )
             .font(Font.pretendard.body5)
             .foregroundStyle(Color.grayScale500)
+            
+            if !text.isEmpty {
+                Button {
+                    text = ""
+                } label: {
+                    Image(systemName: "xmark")
+                        .foregroundStyle(Color.grayScale300)
+                }
+            }
         }
         .padding(.horizontal, 14)
         .frame(width: 328, height: 42)
