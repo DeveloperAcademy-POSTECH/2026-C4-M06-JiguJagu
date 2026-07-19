@@ -14,7 +14,7 @@ extension Clothing {
     static let mocks: [Clothing] = [
         Clothing(
             brand: "CHICKS",
-            productName: "브러쉬드 더블 스트라이프 카라 니트",
+            productName: "더블 스트라이프 카라 니트",
             productImageURL: nil
         ),
         Clothing(
