@@ -1,5 +1,5 @@
 //
-//  SearchResultHeader.swift
+//  SearchResultSummary.swift
 //  JiguJagu
 //
 //  Created by 채유성 on 7/18/26.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct SearchResultHeader: View {
+struct SearchResultSummary: View {
     
     let count: Int
     let action: () -> Void
@@ -29,7 +29,7 @@ struct SearchResultHeader: View {
             
             Button(action: action) {
                 
-                HStack(spacing: 4) {
+                HStack(spacing: 11) {
                     Text("옷 자체 등록")
                     Image(systemName: "chevron.right")
                 }
