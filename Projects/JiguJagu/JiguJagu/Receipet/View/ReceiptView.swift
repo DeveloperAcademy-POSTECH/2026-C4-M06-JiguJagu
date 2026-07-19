@@ -16,11 +16,15 @@ struct ReceiptView: View {
     var body: some View {
         ScrollViewReader { proxy in
             VStack(spacing: -50) {
-                
-                Image("ReceiptPrinter")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 355.72)
+                ZStack(alignment: .top) {
+                    Image("ReceiptPrinter")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 355.72)
+                        .padding(.top, 50)
+                    
+                    ReceiptTopActions()
+                }
                 ScrollView(showsIndicators: false) {
                     
                     ZStack(alignment: .top) {
@@ -33,9 +37,8 @@ struct ReceiptView: View {
                                     .scaledToFit()
                                     .frame(width: 99.8, height: 18.85)
                                     .padding(.top, 20)
+                                
                                 VStack(spacing: 10.66) {
-                                    
-                                    
                                     Image("StarDevider")
                                         .resizable()
                                         .scaledToFit()
@@ -60,7 +63,7 @@ struct ReceiptView: View {
                                         productName: "더블 스트라이프 카라 니트",
                                         productImageURL: "url"
                                     )
-                                
+                                    
                                     HowToCareSection(
                                         careTips: [
                                             "니트는 옷걸이에 걸면 어깨가 튀어나오고 옷이 아래로 처지므로 말거나 접어서 서랍장에 보관하는 것이 좋습니다.",
