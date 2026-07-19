@@ -225,12 +225,13 @@ struct CameraCaptureView: View {
     }
 }
 
-// MARK: - 사용 예시: 옷 → 택 2단계 촬영 플로우
+// MARK: - 사용 예시: 옷 → 택 → 상품 검색 플로우
 
-/// 옷을 먼저 촬영하고, 이어서 택을 촬영하는 예시 플로우.
+/// 옷을 먼저 촬영하고, 택을 촬영하거나 "택 촬영 건너뛰기"를 누르면
+/// 앞서 찍은 옷 사진으로 상품을 검색(식별)하는 플로우.
 struct LaundryCaptureFlow: View {
 
-    enum Step { case clothing, tag }
+    enum Step { case clothing, tag, result }
 
     @Environment(\.dismiss) private var dismiss
     @State private var step: Step = .clothing
@@ -254,18 +255,19 @@ struct LaundryCaptureFlow: View {
             CameraCaptureView(
                 config: .tag,
                 onLeadingAction: { step = .clothing },        // ← 옷 촬영으로 복귀
-                onHelperAction: { finish() },                 // 택 촬영 건너뛰기
+                onHelperAction: { step = .result },           // 택 촬영 건너뛰기 → 상품 검색
                 onCapture: { image in
                     tagImage = image
-                    finish()
+                    step = .result                            // 택 촬영 후에도 상품 검색
                 }
             )
-        }
-    }
 
-    private func finish() {
-        // clothingImage / tagImage 를 서버 업로드 등에 사용
-        dismiss()
+        case .result:
+            ProductResultView(
+                image: clothingImage,                         // 앞서 찍은 옷 사진으로 분석
+                onDone: { dismiss() }
+            )
+        }
     }
 }
 
