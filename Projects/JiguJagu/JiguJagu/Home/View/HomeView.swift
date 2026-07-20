@@ -11,7 +11,6 @@ struct HomeView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
             titleSection
-                .padding(.bottom, 61)
             ticketGrid
             Spacer()
             addButton
@@ -42,8 +41,9 @@ extension HomeView {
                 .font(.pretendard.body5)
                 .foregroundStyle(.white)
         }
-        .padding(.top, 30)
+        .padding(.top, 79)
         .padding(.leading, 16)
+        .ignoresSafeArea()
     }
 
     private var ticketGrid: some View {
@@ -65,7 +65,7 @@ extension HomeView {
                     // TODO
                 }
             }
-            .padding(.top, 40)
+            .padding(.top, 64)
         }
         .frame(maxWidth: .infinity)
     }

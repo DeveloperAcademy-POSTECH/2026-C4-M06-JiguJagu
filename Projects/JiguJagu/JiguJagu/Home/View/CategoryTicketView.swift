@@ -19,10 +19,10 @@ struct CategoryTicketButton: View {
                     .scaledToFit()
 
                 Text(title)
-//                    .font(.system(size: 18, weight: .heavy))
                     .font(.pretendard.body1)
                     .foregroundStyle(.black)
                     .padding(13)
+                    .padding(.top, 3)
             }
             .frame(width: 154, height: 157)
         }
