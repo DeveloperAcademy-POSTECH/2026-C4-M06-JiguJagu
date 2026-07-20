@@ -87,3 +87,14 @@ private extension ArchiveCategoryFilterView {
         selectedSubcategory == subcategory ? .primary500 : .grayScale100
     }
 }
+
+#Preview("Selected Subcategory") {
+    ArchiveCategoryFilterView(
+        categories: ArchiveCategory.allCases,
+        selectedCategory: .all,
+        subcategories: ArchiveSubcategory.all,
+        selectedSubcategory: ArchiveSubcategory.tops[0],
+        onCategoryTap: { _ in },
+        onSubcategoryTap: { _ in }
+    )
+}
