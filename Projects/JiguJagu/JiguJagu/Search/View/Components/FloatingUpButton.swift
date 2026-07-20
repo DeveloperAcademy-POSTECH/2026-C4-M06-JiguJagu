@@ -19,12 +19,12 @@ struct FloatingUpButton: View {
                 .font(.system(size: 24))
                 .frame(width: 54, height: 54)
                 .background(.white)
-                .foregroundStyle(Color.black)
+                .foregroundStyle(Color.grayScale900)
                 .clipShape(Circle())
                 .overlay(
                     Circle()
                         .inset(by: 0.5)
-                        .stroke(Color.gray.opacity(0.35), lineWidth: 1)
+                        .stroke(Color.grayScale200, lineWidth: 1)
                 )
             
         }
