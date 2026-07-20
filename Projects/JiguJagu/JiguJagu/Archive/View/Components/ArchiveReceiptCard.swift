@@ -150,6 +150,7 @@ private extension ArchiveReceiptCard {
 
 private struct ArchiveMaterialBarcodeView: View {
     let materials: [Material]
+    private let pattern = "535552853555383555386245523432525243564"
     private let colors: [Color] = [
         .brown600,
         .progress2,
@@ -159,18 +160,16 @@ private struct ArchiveMaterialBarcodeView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            HStack(alignment: .center, spacing: 1.5) {
-                ForEach(materials.indices, id: \.self) { index in
-                    let material = materials[index]
-                    let segmentWidth = segmentWidth(
-                        for: material,
-                        totalWidth: geometry.size.width
-                    )
+            HStack(alignment: .center, spacing: scaledSpacing(totalWidth: geometry.size.width)) {
+                ForEach(Array(pattern).indices, id: \.self) { index in
+                    let value = Int(String(Array(pattern)[index])) ?? 1
 
-                    barcodeSegment(
-                        width: segmentWidth,
-                        color: color(for: material, at: index)
-                    )
+                    Rectangle()
+                        .fill(colorFor(index: index))
+                        .frame(
+                            width: CGFloat(value) * widthScale(totalWidth: geometry.size.width),
+                            height: 20
+                        )
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -179,26 +178,10 @@ private struct ArchiveMaterialBarcodeView: View {
 }
 
 private extension ArchiveMaterialBarcodeView {
-    func barcodeSegment(width: CGFloat, color: Color) -> some View {
-        HStack(alignment: .center, spacing: 1) {
-            // 색상 면처럼 보이지 않도록 서로 다른 막대 폭을 반복해 바코드 질감을 유지합니다.
-            let barWidths = [1.0, 2.5, 1.5, 3.0, 1.0, 2.0]
-            let barCount = max(Int(width / 3), 1)
+    func colorFor(index: Int) -> Color {
+        let material = materialAt(index: index)
 
-            ForEach(0..<barCount, id: \.self) { index in
-                Rectangle()
-                    .fill(color)
-                    .frame(width: barWidths[index % barWidths.count], height: 20)
-            }
-        }
-        .frame(width: width, alignment: .leading)
-        .clipped()
-    }
-
-    func segmentWidth(for material: Material, totalWidth: CGFloat) -> CGFloat {
-        // 소재 비율을 바코드 영역 너비로 환산해 카드 안에서 성분 비중을 시각화합니다.
-        let availableWidth = totalWidth - CGFloat(max(materials.count - 1, 0)) * 1.5
-        return availableWidth * CGFloat(material.percentage) / 100
+        return color(for: material, at: index)
     }
 
     func color(for material: Material, at index: Int) -> Color {
@@ -220,6 +203,49 @@ private extension ArchiveMaterialBarcodeView {
         default:
             return colors[index % colors.count]
         }
+    }
+
+    func materialAt(index: Int) -> Material {
+        let totalWidth = pattern.reduce(0) { result, char in
+            result + (Int(String(char)) ?? 1)
+        }
+
+        let currentWidth = pattern
+            .prefix(index + 1)
+            .reduce(0) { result, char in
+                result + (Int(String(char)) ?? 1)
+            }
+
+        let ratio = Double(currentWidth) / Double(totalWidth)
+        var accumulated = 0.0
+
+        for material in materials {
+            accumulated += Double(material.percentage) / 100
+
+            if ratio <= accumulated {
+                return material
+            }
+        }
+
+        return materials.last ?? Material(name: "Unknown", percentage: 0)
+    }
+
+    func widthScale(totalWidth: CGFloat) -> CGFloat {
+        totalWidth / naturalWidth
+    }
+
+    func scaledSpacing(totalWidth: CGFloat) -> CGFloat {
+        widthScale(totalWidth: totalWidth)
+    }
+
+    var naturalWidth: CGFloat {
+        let barWidth = pattern.reduce(0) { result, char in
+            result + (Int(String(char)) ?? 1)
+        }
+
+        let totalSpacing = max(pattern.count - 1, 0)
+
+        return CGFloat(barWidth + totalSpacing)
     }
 }
 
