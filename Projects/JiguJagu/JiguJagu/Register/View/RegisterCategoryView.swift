@@ -9,11 +9,17 @@ import SwiftUI
 
 struct RegisterCategoryView: View {
     let onBack: () -> Void
+    let onNext: (String) -> Void
 
+    @State private var selectedCategoryID: String?
     private let categories = RegisterCategoryItem.allCases
 
-    init(onBack: @escaping () -> Void = {}) {
+    init(
+        onBack: @escaping () -> Void = {},
+        onNext: @escaping (String) -> Void = { _ in }
+    ) {
         self.onBack = onBack
+        self.onNext = onNext
     }
 
     var body: some View {
@@ -22,6 +28,7 @@ struct RegisterCategoryView: View {
             content
 
             Spacer()
+            nextButton
         }
         .background(Color.white)
     }
@@ -93,10 +100,44 @@ extension RegisterCategoryView {
                 RegisterCategoryCardView(
                     title: category.title,
                     imageName: category.imageName,
-                    imageSize: category.imageSize
-                )
+                    imageSize: category.imageSize,
+                    isSelected: selectedCategoryID == category.id
+                ) {
+                    selectedCategoryID = category.id
+                }
             }
         }
+    }
+
+    private var nextButton: some View {
+        Button {
+            guard let selectedCategoryID else { return }
+            onNext(selectedCategoryID)
+        } label: {
+            Text("다음")
+                .font(.pretendard.head3)
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 52)
+                .background(Color.primary500)
+                .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 16)
+        .padding(.bottom, 52)
+        .accessibilityLabel(nextButtonAccessibilityLabel)
+    }
+
+    private var nextButtonAccessibilityLabel: String {
+        guard let selectedCategory = selectedCategory else {
+            return "카테고리 선택 후 다음"
+        }
+
+        return "\(selectedCategory.title) 선택 후 다음"
+    }
+
+    private var selectedCategory: RegisterCategoryItem? {
+        categories.first { $0.id == selectedCategoryID }
     }
 }
 
