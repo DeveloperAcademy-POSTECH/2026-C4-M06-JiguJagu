@@ -181,6 +181,7 @@ private struct ArchiveMaterialBarcodeView: View {
 private extension ArchiveMaterialBarcodeView {
     func barcodeSegment(width: CGFloat, color: Color) -> some View {
         HStack(alignment: .center, spacing: 1) {
+            // 색상 면처럼 보이지 않도록 서로 다른 막대 폭을 반복해 바코드 질감을 유지합니다.
             let barWidths = [1.0, 2.5, 1.5, 3.0, 1.0, 2.0]
             let barCount = max(Int(width / 3), 1)
 
@@ -195,6 +196,7 @@ private extension ArchiveMaterialBarcodeView {
     }
 
     func segmentWidth(for material: Material, totalWidth: CGFloat) -> CGFloat {
+        // 소재 비율을 바코드 영역 너비로 환산해 카드 안에서 성분 비중을 시각화합니다.
         let availableWidth = totalWidth - CGFloat(max(materials.count - 1, 0)) * 1.5
         return availableWidth * CGFloat(material.percentage) / 100
     }

@@ -40,6 +40,7 @@ final class ArchiveController {
     }
 
     var hasActiveFilter: Bool {
+        // 필터나 검색어가 있으면 전체 빈 상태가 아니라 검색/필터 결과 없음 상태로 처리합니다.
         selectedCategory != .all ||
         selectedSubcategory != nil ||
         !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
