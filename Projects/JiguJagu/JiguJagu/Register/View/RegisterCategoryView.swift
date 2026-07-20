@@ -17,9 +17,7 @@ struct RegisterCategoryView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
-            titleSection
-                .padding(.top, 80)
-                .padding(.horizontal, 16)
+            content
 
             Spacer()
         }
@@ -29,6 +27,15 @@ struct RegisterCategoryView: View {
 
 // MARK: - Subviews
 extension RegisterCategoryView {
+
+    private var content: some View {
+        VStack(alignment: .leading, spacing: 32) {
+            RegisterStepIndicatorView(currentStep: 1, totalSteps: 3)
+            titleSection
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 36)
+    }
 
     private var header: some View {
         HStack {
