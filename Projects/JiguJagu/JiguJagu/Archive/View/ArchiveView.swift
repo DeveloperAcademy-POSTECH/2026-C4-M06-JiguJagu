@@ -74,11 +74,19 @@ private extension ArchiveView {
                     ForEach(controller.filteredReceipts) { receipt in
                         receiptCardItem(receipt)
                             .id(receipt.id)
+                            .scrollTransition(.interactive, axis: .horizontal) { content, phase in
+                                content
+                                    .scaleEffect(phase.isIdentity ? 1.0 : 0.86)
+                                    .opacity(phase.isIdentity ? 1.0 : 0.78)
+                                    .offset(y: phase.isIdentity ? 0 : 18)
+                            }
                     }
                 }
+                .scrollTargetLayout()
                 .padding(.horizontal, max((screenWidth - 266) / 2, 24))
             }
             .scrollBounceBehavior(.basedOnSize)
+            .scrollTargetBehavior(.viewAligned)
             .onAppear {
                 guard let focusedReceiptID else {
                     return
