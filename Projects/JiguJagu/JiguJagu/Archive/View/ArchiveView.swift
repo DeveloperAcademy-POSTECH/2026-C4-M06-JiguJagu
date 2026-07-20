@@ -71,9 +71,9 @@ private extension ArchiveView {
         ScrollViewReader { proxy in
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 30) {
-                    ForEach(controller.filteredReceipts) { receipt in
-                        receiptCardItem(receipt)
-                            .id(receipt.id)
+                    ForEach(displayReceiptItems) { item in
+                        receiptCardItem(item.receipt)
+                            .id(item.id)
                             .scrollTransition(.interactive, axis: .horizontal) { content, phase in
                                 content
                                     .scaleEffect(phase.isIdentity ? 1.0 : 0.86)
@@ -109,17 +109,64 @@ private extension ArchiveView {
         }
     }
 
-    var focusedReceiptID: String? {
-        guard controller.filteredReceipts.count > 1 else {
-            return controller.filteredReceipts.first?.id
+    var sortedReceipts: [ArchiveReceipt] {
+        controller.filteredReceipts.sorted { lhs, rhs in
+            lhs.registeredDate > rhs.registeredDate
+        }
+    }
+
+    var sortedReceiptIDs: [String] {
+        sortedReceipts.map(\.id)
+    }
+
+    var displayReceiptItems: [ArchiveReceiptDisplayItem] {
+        let receipts = sortedReceipts
+
+        if receipts.count == 2 {
+            return [
+                ArchiveReceiptDisplayItem(id: "left-\(receipts[1].id)", receipt: receipts[1]),
+                ArchiveReceiptDisplayItem(id: "center-\(receipts[0].id)", receipt: receipts[0]),
+                ArchiveReceiptDisplayItem(id: "right-\(receipts[1].id)", receipt: receipts[1])
+            ]
         }
 
-        return controller.filteredReceipts[1].id
+        if receipts.count >= 3 {
+            let oldestReceipt = receipts[receipts.count - 1]
+            let centerAndRightReceipts = receipts.dropLast()
+            let orderedReceipts = [oldestReceipt] + centerAndRightReceipts
+
+            return orderedReceipts.enumerated().map { index, receipt in
+                ArchiveReceiptDisplayItem(id: "\(index)-\(receipt.id)", receipt: receipt)
+            }
+        }
+
+        return receipts.map { receipt in
+            ArchiveReceiptDisplayItem(id: receipt.id, receipt: receipt)
+        }
     }
+
+    var focusedReceiptID: String? {
+        guard let newestReceipt = sortedReceipts.first else {
+            return nil
+        }
+
+        return sortedReceipts.count == 2 ? "center-\(newestReceipt.id)" : displayReceiptItems.first {
+            $0.receipt.id == newestReceipt.id
+        }?.id
+    }
+}
+
+private struct ArchiveReceiptDisplayItem: Identifiable {
+    let id: String
+    let receipt: ArchiveReceipt
 }
 
 #Preview {
     ArchiveView(receipts: ArchiveReceipt.previewItems)
+}
+
+#Preview("Two Receipts") {
+    ArchiveView(receipts: ArchiveReceipt.previewTwoItems)
 }
 
 #Preview("Empty Archive") {
@@ -127,6 +174,10 @@ private extension ArchiveView {
 }
 
 private extension ArchiveReceipt {
+    static var previewTwoItems: [ArchiveReceipt] {
+        Array(previewItems.prefix(2))
+    }
+
     static let previewItems: [ArchiveReceipt] = [
         ArchiveReceipt(
             id: "preview-outers",
