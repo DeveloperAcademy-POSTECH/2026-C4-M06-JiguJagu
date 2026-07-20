@@ -22,7 +22,7 @@ struct RegisterDetailSelectionView: View {
             VStack(alignment: .leading, spacing: 32) {
                 RegisterStepIndicatorView(currentStep: 2, totalSteps: 3)
                 titleSection
-                structureSummary
+                subcategorySelector
             }
             .padding(.horizontal, Layout.horizontalPadding)
             .padding(.top, Layout.contentTopPadding)
@@ -79,10 +79,28 @@ extension RegisterDetailSelectionView {
         .accessibilityElement(children: .combine)
     }
 
-    private var structureSummary: some View {
-        Color.clear
-            .frame(height: Layout.selectionAreaHeight)
-            .accessibilityHidden(true)
+    private var subcategorySelector: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            RegisterChipFlowLayout(
+                horizontalSpacing: Layout.chipHorizontalSpacing,
+                verticalSpacing: Layout.chipVerticalSpacing
+            ) {
+                ForEach(category.subcategories) { subcategory in
+                    RegisterSelectionChip(
+                        title: subcategory.title,
+                        isSelected: selectedSubcategory == subcategory
+                    ) {
+                        selectedSubcategory = subcategory
+                    }
+                }
+            }
+
+            Color.clear
+                .frame(height: Layout.colorSectionReservedHeight)
+                .accessibilityHidden(true)
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("\(category.displayName) 하위 카테고리 선택")
     }
 
     private var nextButton: some View {
@@ -118,7 +136,9 @@ private enum Layout {
     static let horizontalPadding: CGFloat = 16
     static let headerTopPadding: CGFloat = 14
     static let contentTopPadding: CGFloat = 36
-    static let selectionAreaHeight: CGFloat = 360
+    static let chipHorizontalSpacing: CGFloat = 8
+    static let chipVerticalSpacing: CGFloat = 16
+    static let colorSectionReservedHeight: CGFloat = 260
     static let nextButtonHeight: CGFloat = 52
     static let nextButtonBottomPadding: CGFloat = 52
 }
