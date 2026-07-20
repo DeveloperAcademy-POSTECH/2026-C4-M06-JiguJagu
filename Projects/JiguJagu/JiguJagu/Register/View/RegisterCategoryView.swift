@@ -9,14 +9,14 @@ import SwiftUI
 
 struct RegisterCategoryView: View {
     let onBack: () -> Void
-    let onNext: (String) -> Void
+    let onNext: (RegisterMainCategory) -> Void
 
-    @State private var selectedCategoryID: String?
+    @State private var selectedCategory: RegisterMainCategory?
     private let categories = RegisterCategoryItem.allCases
 
     init(
         onBack: @escaping () -> Void = {},
-        onNext: @escaping (String) -> Void = { _ in }
+        onNext: @escaping (RegisterMainCategory) -> Void = { _ in }
     ) {
         self.onBack = onBack
         self.onNext = onNext
@@ -104,9 +104,9 @@ extension RegisterCategoryView {
                     imageName: category.imageName,
                     selectedImageName: category.selectedImageName,
                     imageSize: category.imageSize,
-                    isSelected: selectedCategoryID == category.id
+                    isSelected: selectedCategory == category.category
                 ) {
-                    selectedCategoryID = category.id
+                    selectedCategory = category.category
                 }
             }
         }
@@ -114,8 +114,8 @@ extension RegisterCategoryView {
 
     private var nextButton: some View {
         Button {
-            guard let selectedCategoryID else { return }
-            onNext(selectedCategoryID)
+            guard let selectedCategory else { return }
+            onNext(selectedCategory)
         } label: {
             Text("다음")
                 .font(.pretendard.head3)
@@ -126,8 +126,8 @@ extension RegisterCategoryView {
                 .clipShape(Capsule())
         }
         .buttonStyle(.plain)
-        .disabled(selectedCategoryID == nil)
-        .opacity(selectedCategoryID == nil ? 0.45 : 1)
+        .disabled(selectedCategory == nil)
+        .opacity(selectedCategory == nil ? 0.45 : 1)
         .padding(.horizontal, Layout.horizontalPadding)
         .padding(.bottom, Layout.nextButtonBottomPadding)
         .accessibilityLabel(nextButtonAccessibilityLabel)
@@ -139,11 +139,7 @@ extension RegisterCategoryView {
             return "카테고리 선택 후 다음"
         }
 
-        return "\(selectedCategory.title) 선택 후 다음"
-    }
-
-    private var selectedCategory: RegisterCategoryItem? {
-        categories.first { $0.id == selectedCategoryID }
+        return "\(selectedCategory.displayName) 선택 후 다음"
     }
 }
 
@@ -158,37 +154,40 @@ private enum Layout {
 }
 
 private struct RegisterCategoryItem: Identifiable {
-    let id: String
-    let title: String
+    let category: RegisterMainCategory
     let imageName: String
     let selectedImageName: String?
     let imageSize: CGSize
 
+    var id: String {
+        category.id
+    }
+
+    var title: String {
+        category.displayName
+    }
+
     static let allCases: [RegisterCategoryItem] = [
         RegisterCategoryItem(
-            id: "tops",
-            title: "Tops",
+            category: .tops,
             imageName: "RegisterTops",
             selectedImageName: nil,
             imageSize: CGSize(width: 94, height: 73)
         ),
         RegisterCategoryItem(
-            id: "bottoms",
-            title: "Bottoms",
+            category: .bottoms,
             imageName: "RegisterBottoms",
             selectedImageName: nil,
             imageSize: CGSize(width: 71, height: 73)
         ),
         RegisterCategoryItem(
-            id: "outers",
-            title: "Outers",
+            category: .outers,
             imageName: "RegisterOuters",
             selectedImageName: nil,
             imageSize: CGSize(width: 96, height: 73)
         ),
         RegisterCategoryItem(
-            id: "etc",
-            title: "Etc",
+            category: .etc,
             imageName: "RegisterEtc",
             selectedImageName: "RegisterEtcSelected",
             imageSize: CGSize(width: 146, height: 59)
