@@ -4,8 +4,7 @@
 //
 //  Created by SIA on 7/18/26.
 //
-
-@preconcurrency import AVFoundation
+import AVFoundation
 import Combine
 import UIKit
 

@@ -69,26 +69,26 @@ struct ProductResultView: View {
                     Text(item.itemName)
                         .font(.system(size: 22, weight: .bold))
 
-                    // 카테고리: 대분류 · 세부분류 · 브랜드
+                    // 카테고리: 대분류 · 세부분류
                     HStack(spacing: 8) {
-                        tag(item.categoryDisplayName)          // 상의 / 하의 / 아우터 / 기타
-                        tag(item.subCategory, highlighted: true) // 티셔츠 / 청바지 등
-                        if let brand = item.brand, !brand.isEmpty {
-                            tag(brand)
-                        }
+                        tag(item.categoryDisplayName)
+                        tag(item.subCategory, highlighted: true)
                     }
+                }
+
+                // 브랜드 카드 (확정 또는 추측)
+                if let brand = item.displayBrand {
+                    brandCard(brand: brand, item: item)
                 }
 
                 Text(item.itemDescription)
                     .font(.system(size: 15))
                     .foregroundStyle(.secondary)
 
-                // 신뢰도
                 if let confidence = item.confidence {
-                    confidenceRow(confidence)
+                    confidenceRow("분석 신뢰도", value: confidence)
                 }
 
-                // 속성들
                 VStack(alignment: .leading, spacing: 10) {
                     if !item.colors.isEmpty {
                         labeledRow("색상", value: item.colors.joined(separator: ", "))
@@ -142,6 +142,59 @@ struct ProductResultView: View {
 
     // MARK: - Components
 
+    /// 브랜드 표시 카드. 추측이면 "추측" 뱃지와 근거를 함께 보여준다.
+    private func brandCard(brand: String, item: ClothingIdentification) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                Image(systemName: "tag.fill")
+                    .font(.system(size: 13))
+                    .foregroundStyle(.secondary)
+                Text(brand)
+                    .font(.system(size: 17, weight: .semibold))
+
+                if item.isBrandGuessed {
+                    Text("추측")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(.orange)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 3)
+                        .background(Color.orange.opacity(0.15))
+                        .clipShape(Capsule())
+                } else {
+                    Text("확인됨")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(.green)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 3)
+                        .background(Color.green.opacity(0.15))
+                        .clipShape(Capsule())
+                }
+                Spacer()
+                if let bc = item.brandConfidence {
+                    Text("\(Int((bc * 100).rounded()))%")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            if let reason = item.brandReason, !reason.isEmpty {
+                Text(reason)
+                    .font(.system(size: 13))
+                    .foregroundStyle(.secondary)
+            }
+
+            if item.isBrandGuessed {
+                Text("※ 로고가 확인되지 않아 디자인 특징으로 추측한 결과예요.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.orange.opacity(0.8))
+            }
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.gray.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
     private func tag(_ text: String, highlighted: Bool = false) -> some View {
         Text(text)
             .font(.system(size: 13, weight: .medium))
@@ -163,20 +216,19 @@ struct ProductResultView: View {
         }
     }
 
-    private func confidenceRow(_ confidence: Double) -> some View {
-        let percent = Int((confidence * 100).rounded())
-        return VStack(alignment: .leading, spacing: 6) {
+    private func confidenceRow(_ label: String, value: Double) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
             HStack {
-                Text("분석 신뢰도")
+                Text(label)
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(.secondary)
                 Spacer()
-                Text("\(percent)%")
+                Text("\(Int((value * 100).rounded()))%")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(confidence >= 0.7 ? .green : .orange)
+                    .foregroundStyle(value >= 0.7 ? .green : .orange)
             }
-            ProgressView(value: confidence)
-                .tint(confidence >= 0.7 ? .green : .orange)
+            ProgressView(value: value)
+                .tint(value >= 0.7 ? .green : .orange)
         }
     }
 }
