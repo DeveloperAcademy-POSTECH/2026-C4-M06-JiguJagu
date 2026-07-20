@@ -115,7 +115,7 @@ struct ReceiptView: View {
                                 
                                 Divider().background(Color.brown700)
                                 
-                                FooterSection(date: "28-July-2026", category: "상의 > 니트", tag: "#니트 #파랑 #줄무늬")
+                                FooterSection(date: "28-July-2026", category: "상의 > 니트")
                             }
                             .padding(
                                 EdgeInsets(
