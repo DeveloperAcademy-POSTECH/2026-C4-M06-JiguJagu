@@ -11,18 +11,18 @@ struct HomeView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
             titleSection
-            Spacer()
+                .padding(.bottom, 61)
             ticketGrid
             Spacer()
             addButton
         }
         .padding(.horizontal)
         .background {
-            Image("wall")
+            Image("MainBG")
                 .resizable()
-                .scaledToFill()
-                .offset(x: -34)
-                .ignoresSafeArea()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: 532, height: 912)
+                .clipped()
         }
     }
 }
@@ -32,19 +32,18 @@ extension HomeView {
 
     private var titleSection: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("오래입자구")
-                .font(.system(size: 46, weight: .black))
-                .foregroundStyle(.white)
+            Image("WhiteLogo")
 
             Text("Good for Earth, Good for Environment")
-                .font(.system(size: 14, weight: .medium))
+                .font(.arial.sub1)
                 .foregroundStyle(.white)
 
             Text("오래 입는 습관의 시작, 지속가능한 미래와 가까워지다")
-                .font(.system(size: 13, weight: .medium))
+                .font(.pretendard.body5)
                 .foregroundStyle(.white)
         }
         .padding(.top, 30)
+        .padding(.leading, 16)
     }
 
     private var ticketGrid: some View {
@@ -75,8 +74,8 @@ extension HomeView {
         Button {
             // TODO: add action
         } label: {
-            Text("Add")
-                .font(.system(size: 20, weight: .medium))
+            Text("옷 등록")
+                .font(.pretendard.head3)
                 .foregroundStyle(.black)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 10)
