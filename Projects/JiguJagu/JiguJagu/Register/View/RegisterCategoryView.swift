@@ -25,9 +25,11 @@ struct RegisterCategoryView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
+
             content
 
-            Spacer()
+            Spacer(minLength: 0)
+
             nextButton
         }
         .background(Color.white)
@@ -43,8 +45,8 @@ extension RegisterCategoryView {
             titleSection
             categoryGrid
         }
-        .padding(.horizontal, 16)
-        .padding(.top, 36)
+        .padding(.horizontal, Layout.horizontalPadding)
+        .padding(.top, Layout.contentTopPadding)
     }
 
     private var header: some View {
@@ -71,8 +73,8 @@ extension RegisterCategoryView {
             Color.clear
                 .frame(width: 44, height: 44)
         }
-        .padding(.horizontal, 16)
-        .padding(.top, 60)
+        .padding(.horizontal, Layout.horizontalPadding)
+        .padding(.top, Layout.headerTopPadding)
     }
 
     private var titleSection: some View {
@@ -91,15 +93,16 @@ extension RegisterCategoryView {
     private var categoryGrid: some View {
         LazyVGrid(
             columns: [
-                GridItem(.flexible(), spacing: 20),
-                GridItem(.flexible(), spacing: 20)
+                GridItem(.flexible(), spacing: Layout.gridColumnSpacing),
+                GridItem(.flexible(), spacing: Layout.gridColumnSpacing)
             ],
-            spacing: 24
+            spacing: Layout.gridRowSpacing
         ) {
             ForEach(categories) { category in
                 RegisterCategoryCardView(
                     title: category.title,
                     imageName: category.imageName,
+                    selectedImageName: category.selectedImageName,
                     imageSize: category.imageSize,
                     isSelected: selectedCategoryID == category.id
                 ) {
@@ -118,14 +121,17 @@ extension RegisterCategoryView {
                 .font(.pretendard.head3)
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
-                .frame(height: 52)
+                .frame(height: Layout.nextButtonHeight)
                 .background(Color.primary500)
                 .clipShape(Capsule())
         }
         .buttonStyle(.plain)
-        .padding(.horizontal, 16)
-        .padding(.bottom, 52)
+        .disabled(selectedCategoryID == nil)
+        .opacity(selectedCategoryID == nil ? 0.45 : 1)
+        .padding(.horizontal, Layout.horizontalPadding)
+        .padding(.bottom, Layout.nextButtonBottomPadding)
         .accessibilityLabel(nextButtonAccessibilityLabel)
+        .accessibilityHint("선택한 카테고리로 옷 등록을 이어갑니다")
     }
 
     private var nextButtonAccessibilityLabel: String {
@@ -141,10 +147,21 @@ extension RegisterCategoryView {
     }
 }
 
+private enum Layout {
+    static let horizontalPadding: CGFloat = 16
+    static let headerTopPadding: CGFloat = 14
+    static let contentTopPadding: CGFloat = 36
+    static let gridColumnSpacing: CGFloat = 20
+    static let gridRowSpacing: CGFloat = 24
+    static let nextButtonHeight: CGFloat = 52
+    static let nextButtonBottomPadding: CGFloat = 52
+}
+
 private struct RegisterCategoryItem: Identifiable {
     let id: String
     let title: String
     let imageName: String
+    let selectedImageName: String?
     let imageSize: CGSize
 
     static let allCases: [RegisterCategoryItem] = [
@@ -152,24 +169,28 @@ private struct RegisterCategoryItem: Identifiable {
             id: "tops",
             title: "Tops",
             imageName: "RegisterTops",
+            selectedImageName: nil,
             imageSize: CGSize(width: 94, height: 73)
         ),
         RegisterCategoryItem(
             id: "bottoms",
             title: "Bottoms",
             imageName: "RegisterBottoms",
+            selectedImageName: nil,
             imageSize: CGSize(width: 71, height: 73)
         ),
         RegisterCategoryItem(
             id: "outers",
             title: "Outers",
             imageName: "RegisterOuters",
+            selectedImageName: nil,
             imageSize: CGSize(width: 96, height: 73)
         ),
         RegisterCategoryItem(
             id: "etc",
             title: "Etc",
             imageName: "RegisterEtc",
+            selectedImageName: "RegisterEtcSelected",
             imageSize: CGSize(width: 146, height: 59)
         )
     ]
