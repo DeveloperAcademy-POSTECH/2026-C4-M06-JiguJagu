@@ -35,18 +35,18 @@ struct CameraCaptureConfig {
         helperActionTitle: "옷 검색하기"
     )
 
-    /// 택 촬영 화면
+    /// 세탁 라벨 촬영 화면
     static let tag = CameraCaptureConfig(
         leadingAction: .back,
-        instruction: "옷의 택을 촬영해 주세요.",
-        helperPrompt: "택이 보이지 않나요?",
-        helperActionTitle: "택 촬영 건너뛰기"
+        instruction: "옷의 세탁 라벨을 촬영해 주세요.",
+        helperPrompt: "세탁 라벨이 보이지 않나요?",
+        helperActionTitle: "촬영 건너뛰기"
     )
 }
 
 // MARK: - Camera Capture View
 
-/// 옷/택 촬영을 위한 카메라 화면.
+/// 옷/세탁 라벨 촬영을 위한 카메라 화면.
 ///
 /// 사용 예시는 파일 하단의 `LaundryCaptureFlow` 참고.
 struct CameraCaptureView: View {
@@ -255,10 +255,10 @@ struct LaundryCaptureFlow: View {
             CameraCaptureView(
                 config: .tag,
                 onLeadingAction: { step = .clothing },        // ← 옷 촬영으로 복귀
-                onHelperAction: { step = .result },           // 택 촬영 건너뛰기 → 상품 검색
+                onHelperAction: { step = .result },           // 세탁 라벨 촬영 건너뛰기 → 상품 검색
                 onCapture: { image in
                     tagImage = image
-                    step = .result                            // 택 촬영 후에도 상품 검색
+                    step = .result                            // 세탁 라벨 촬영 후에도 상품 검색
                 }
             )
 
@@ -275,6 +275,6 @@ struct LaundryCaptureFlow: View {
     CameraCaptureView(config: .clothing)
 }
 
-#Preview("택 촬영") {
+#Preview("세탁 라벨 촬영") {
     CameraCaptureView(config: .tag, revealHelperAfter: nil)
 }
