@@ -10,6 +10,8 @@ import SwiftUI
 struct RegisterCategoryView: View {
     let onBack: () -> Void
 
+    private let categories = RegisterCategoryItem.allCases
+
     init(onBack: @escaping () -> Void = {}) {
         self.onBack = onBack
     }
@@ -32,6 +34,7 @@ extension RegisterCategoryView {
         VStack(alignment: .leading, spacing: 32) {
             RegisterStepIndicatorView(currentStep: 1, totalSteps: 3)
             titleSection
+            categoryGrid
         }
         .padding(.horizontal, 16)
         .padding(.top, 36)
@@ -77,6 +80,58 @@ extension RegisterCategoryView {
         }
         .accessibilityElement(children: .combine)
     }
+
+    private var categoryGrid: some View {
+        LazyVGrid(
+            columns: [
+                GridItem(.flexible(), spacing: 20),
+                GridItem(.flexible(), spacing: 20)
+            ],
+            spacing: 24
+        ) {
+            ForEach(categories) { category in
+                RegisterCategoryCardView(
+                    title: category.title,
+                    imageName: category.imageName,
+                    imageSize: category.imageSize
+                )
+            }
+        }
+    }
+}
+
+private struct RegisterCategoryItem: Identifiable {
+    let id: String
+    let title: String
+    let imageName: String
+    let imageSize: CGSize
+
+    static let allCases: [RegisterCategoryItem] = [
+        RegisterCategoryItem(
+            id: "tops",
+            title: "Tops",
+            imageName: "RegisterTops",
+            imageSize: CGSize(width: 94, height: 73)
+        ),
+        RegisterCategoryItem(
+            id: "bottoms",
+            title: "Bottoms",
+            imageName: "RegisterBottoms",
+            imageSize: CGSize(width: 71, height: 73)
+        ),
+        RegisterCategoryItem(
+            id: "outers",
+            title: "Outers",
+            imageName: "RegisterOuters",
+            imageSize: CGSize(width: 96, height: 73)
+        ),
+        RegisterCategoryItem(
+            id: "etc",
+            title: "Etc",
+            imageName: "RegisterEtc",
+            imageSize: CGSize(width: 146, height: 59)
+        )
+    ]
 }
 
 #Preview {
