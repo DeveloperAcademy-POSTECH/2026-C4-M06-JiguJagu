@@ -12,13 +12,13 @@ import SwiftUI
 /// 촬영 화면 하나의 문구·버튼 구성을 정의합니다.
 /// 옷 촬영 / 택 촬영처럼 화면별로 다른 값을 주입해 재사용합니다.
 struct CameraCaptureConfig {
-
+    
     /// 좌상단 버튼 종류
     enum LeadingAction {
         case close  // X (플로우 종료)
         case back   // ← (이전 단계로)
     }
-
+    
     var leadingAction: LeadingAction
     /// 기본 안내 문구 (예: "세탁할 옷을 촬영해 주세요.")
     var instruction: String
@@ -26,7 +26,7 @@ struct CameraCaptureConfig {
     var helperPrompt: String?
     /// 보조 액션 텍스트 (예: "옷 검색하기")
     var helperActionTitle: String?
-
+    
     /// 옷 촬영 화면
     static let clothing = CameraCaptureConfig(
         leadingAction: .close,
@@ -34,7 +34,7 @@ struct CameraCaptureConfig {
         helperPrompt: "옷이 잘 인식되지 않나요?",
         helperActionTitle: "옷 검색하기"
     )
-
+    
     /// 세탁 라벨 촬영 화면
     static let tag = CameraCaptureConfig(
         leadingAction: .back,
@@ -50,36 +50,36 @@ struct CameraCaptureConfig {
 ///
 /// 사용 예시는 파일 하단의 `LaundryCaptureFlow` 참고.
 struct CameraCaptureView: View {
-
+    
     let config: CameraCaptureConfig
-
+    
     /// 이 시간(초)이 지나면 보조 안내(helperPrompt)를 노출합니다.
     /// nil이면 항상 기본 안내만 표시합니다.
     var revealHelperAfter: TimeInterval? = 5
-
+    
     var onLeadingAction: () -> Void = {}
     var onHelperAction: () -> Void = {}
     var onCapture: (UIImage) -> Void = { _ in }
-
+    
     @StateObject private var camera = CameraModel()
     @State private var showHelper = false
     @State private var shutterOpacity: Double = 0
     @State private var isCapturing = false
-
+    
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
-
+            
             if camera.isConfigured {
                 CameraPreview(session: camera.session)
                     .ignoresSafeArea()
             }
-
+            
             // 촬영 순간의 흰 플래시 효과
             Color.white
                 .ignoresSafeArea()
                 .opacity(shutterOpacity)
-
+            
             if camera.permissionDenied {
                 permissionDeniedView
             } else {
@@ -91,36 +91,41 @@ struct CameraCaptureView: View {
         .onDisappear { camera.stop() }
         .task {
             guard let delay = revealHelperAfter, config.helperPrompt != nil else { return }
-            try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+            do {
+                try await Task.sleep(for: .seconds(delay))
+            } catch {
+                return
+            }
+            guard !Task.isCancelled else { return }
             withAnimation { showHelper = true }
         }
     }
-
+    
     // MARK: Overlay Layout
-
+    
     private var overlay: some View {
         GeometryReader { geo in
             VStack(spacing: 0) {
                 topBar
                     .padding(.horizontal, 20)
                     .padding(.top, 8)
-
+                
                 Spacer()
-
+                
                 CornerBracketsView()
                     .frame(height: geo.size.height * 0.45)
                     .padding(.horizontal, 24)
-
+                
                 Spacer()
-
+                
                 bottomArea
                     .padding(.bottom, 24)
             }
         }
     }
-
+    
     // MARK: Top Bar
-
+    
     private var topBar: some View {
         ZStack {
             // 가운데: 플래시 토글
@@ -128,7 +133,7 @@ struct CameraCaptureView: View {
                 Image(systemName: camera.flashIconName)
                     .font(.system(size: 20, weight: .medium))
             }
-
+            
             // 왼쪽: 닫기 / 뒤로
             HStack {
                 Button(action: onLeadingAction) {
@@ -140,16 +145,16 @@ struct CameraCaptureView: View {
         }
         .frame(height: 44)
     }
-
+    
     // MARK: Bottom Area
-
+    
     private var bottomArea: some View {
         VStack(spacing: 28) {
             captionRow
             captureButton
         }
     }
-
+    
     @ViewBuilder
     private var captionRow: some View {
         if showHelper,
@@ -168,7 +173,7 @@ struct CameraCaptureView: View {
                 .font(.system(size: 15))
         }
     }
-
+    
     private var captureButton: some View {
         Button {
             capture()
@@ -184,9 +189,9 @@ struct CameraCaptureView: View {
         }
         .disabled(!camera.isConfigured || isCapturing)
     }
-
+    
     // MARK: Permission Denied
-
+    
     private var permissionDeniedView: some View {
         VStack(spacing: 16) {
             Image(systemName: "camera.fill")
@@ -206,17 +211,17 @@ struct CameraCaptureView: View {
         }
         .padding(32)
     }
-
+    
     // MARK: Actions
-
+    
     private func capture() {
         guard !isCapturing else { return }
         isCapturing = true
-
+        
         // 셔터 플래시
         withAnimation(.easeOut(duration: 0.08)) { shutterOpacity = 0.9 }
         withAnimation(.easeIn(duration: 0.25).delay(0.08)) { shutterOpacity = 0 }
-
+        
         Task {
             let image = await camera.capturePhoto()
             isCapturing = false
@@ -230,14 +235,14 @@ struct CameraCaptureView: View {
 /// 옷을 먼저 촬영하고, 택을 촬영하거나 "택 촬영 건너뛰기"를 누르면
 /// 앞서 찍은 옷 사진으로 상품을 검색(식별)하는 플로우.
 struct LaundryCaptureFlow: View {
-
+    
     enum Step { case clothing, tag, result }
-
+    
     @Environment(\.dismiss) private var dismiss
     @State private var step: Step = .clothing
     @State private var clothingImage: UIImage?
     @State private var tagImage: UIImage?
-
+    
     var body: some View {
         switch step {
         case .clothing:
@@ -250,7 +255,7 @@ struct LaundryCaptureFlow: View {
                     step = .tag                               // 다음 단계로
                 }
             )
-
+            
         case .tag:
             CameraCaptureView(
                 config: .tag,
@@ -261,7 +266,7 @@ struct LaundryCaptureFlow: View {
                     step = .result                            // 세탁 라벨 촬영 후에도 상품 검색
                 }
             )
-
+            
         case .result:
             ProductResultView(
                 image: clothingImage,                         // 앞서 찍은 옷 사진으로 분석
