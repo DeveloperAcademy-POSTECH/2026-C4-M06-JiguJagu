@@ -23,6 +23,7 @@ struct RegisterDetailSelectionView: View {
                 RegisterStepIndicatorView(currentStep: 2, totalSteps: 3)
                 titleSection
                 subcategorySelector
+                colorSelector
             }
             .padding(.horizontal, Layout.horizontalPadding)
             .padding(.top, Layout.contentTopPadding)
@@ -80,27 +81,45 @@ extension RegisterDetailSelectionView {
     }
 
     private var subcategorySelector: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            RegisterChipFlowLayout(
-                horizontalSpacing: Layout.chipHorizontalSpacing,
-                verticalSpacing: Layout.chipVerticalSpacing
-            ) {
-                ForEach(category.subcategories) { subcategory in
-                    RegisterSelectionChip(
-                        title: subcategory.title,
-                        isSelected: selectedSubcategory == subcategory
-                    ) {
-                        selectedSubcategory = subcategory
-                    }
+        RegisterChipFlowLayout(
+            horizontalSpacing: Layout.chipHorizontalSpacing,
+            verticalSpacing: Layout.chipVerticalSpacing
+        ) {
+            ForEach(category.subcategories) { subcategory in
+                RegisterSelectionChip(
+                    title: subcategory.title,
+                    isSelected: selectedSubcategory == subcategory
+                ) {
+                    selectedSubcategory = subcategory
                 }
             }
-
-            Color.clear
-                .frame(height: Layout.colorSectionReservedHeight)
-                .accessibilityHidden(true)
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel("\(category.displayName) 하위 카테고리 선택")
+    }
+
+    private var colorSelector: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("색상을 선택해주세요")
+                .font(.pretendard.head1)
+                .foregroundStyle(Color.grayScale900)
+
+            RegisterChipFlowLayout(
+                horizontalSpacing: Layout.chipHorizontalSpacing,
+                verticalSpacing: Layout.colorChipVerticalSpacing
+            ) {
+                ForEach(RegisterColorOption.allCases) { color in
+                    RegisterColorChip(
+                        option: color,
+                        isSelected: selectedColor == color
+                    ) {
+                        selectedColor = color
+                    }
+                }
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("색상 선택")
     }
 
     private var nextButton: some View {
@@ -138,7 +157,7 @@ private enum Layout {
     static let contentTopPadding: CGFloat = 36
     static let chipHorizontalSpacing: CGFloat = 8
     static let chipVerticalSpacing: CGFloat = 16
-    static let colorSectionReservedHeight: CGFloat = 260
+    static let colorChipVerticalSpacing: CGFloat = 12
     static let nextButtonHeight: CGFloat = 52
     static let nextButtonBottomPadding: CGFloat = 52
 }
