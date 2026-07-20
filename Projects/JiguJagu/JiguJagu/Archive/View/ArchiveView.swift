@@ -51,7 +51,7 @@ private extension ArchiveView {
                         hasActiveFilter: controller.hasActiveFilter,
                         onResetButtonTap: controller.resetFilters
                     )
-                    .padding(.top, 50)
+                    .padding(.top, 28)
                 } else {
                     receiptCards(screenWidth: geometry.size.width)
                 }

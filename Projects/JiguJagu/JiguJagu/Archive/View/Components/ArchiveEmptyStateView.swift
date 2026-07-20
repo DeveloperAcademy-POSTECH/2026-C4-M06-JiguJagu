@@ -19,17 +19,14 @@ struct ArchiveEmptyStateView: View {
 
             VStack(spacing: 0) {
                 titleGroup
-                    .padding(.top, 50)
-
-                Spacer()
+                    .padding(.top, 48)
 
                 Image("ArchiveEmptyHanger")
                     .resizable()
                     .scaledToFit()
                     .opacity(0.5)
                     .frame(width: 117, height: 117)
-
-                Spacer()
+                    .padding(.top, 112)
 
                 Button(action: onResetButtonTap) {
                     Text(buttonTitle)
@@ -39,9 +36,9 @@ struct ArchiveEmptyStateView: View {
                         .background(Color.black)
                         .clipShape(Capsule())
                 }
-                .padding(.bottom, 32)
+                .padding(.top, 104)
             }
-            .frame(width: 266, height: 468)
+            .frame(width: 266, height: 488, alignment: .top)
             .background(Color.BG)
 
             EmptyReceiptEdge()
@@ -59,7 +56,7 @@ private extension ArchiveEmptyStateView {
             Text(title)
             Text(message)
         }
-        .font(.casquare.body1)
+        .font(.custom("CasquareCode35-Regular", size: 16).weight(.semibold))
         .foregroundStyle(Color.black)
         .multilineTextAlignment(.center)
     }
