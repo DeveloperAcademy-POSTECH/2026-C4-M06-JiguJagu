@@ -2,7 +2,6 @@
 //  RegisterDetailSelectionView.swift
 //  JiguJagu
 //
-//  Created by Codex on 7/21/26.
 //
 
 import SwiftUI
