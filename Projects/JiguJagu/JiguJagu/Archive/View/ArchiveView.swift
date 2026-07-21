@@ -12,9 +12,15 @@ struct ArchiveView: View {
 
     init(
         receipts: [ArchiveReceipt] = ArchiveReceipt.previewItems,
+        initialCategory: ArchiveCategory = .all,
         onBackButtonTap: @escaping () -> Void = {}
     ) {
-        _controller = State(initialValue: ArchiveController(receipts: receipts))
+        _controller = State(
+            initialValue: ArchiveController(
+                receipts: receipts,
+                initialCategory: initialCategory
+            )
+        )
         self.onBackButtonTap = onBackButtonTap
     }
 
@@ -67,7 +73,7 @@ private extension ArchiveView {
                     .scaledToFill()
                     .frame(width: geometry.size.width, height: geometry.size.height)
                     .clipped()
-                    .opacity(0.8)                
+                    .opacity(0.8)
             }
         }
     }
@@ -319,4 +325,8 @@ private extension ArchiveReceipt {
             ]
         )
     ]
+}
+
+#Preview {
+    ArchiveView()
 }

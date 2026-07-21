@@ -9,21 +9,32 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var showCamera = false
-    
+    @State private var selectedTicket: ArchiveCategory.HomeTicket?
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            titleSection
-            ticketGrid
-            Spacer()
-            addButton
-        }
-        .padding(.horizontal)
-        .background {
-            Image("MainBG")
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(width: 532, height: 912)
-                .clipped()
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 24) {
+                titleSection
+                ticketGrid
+                Spacer()
+                addButton
+            }
+            .padding(.horizontal)
+            .background {
+                Image("MainBG")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 532, height: 912)
+                    .clipped()
+            }
+            .navigationDestination(item: $selectedTicket) { ticket in
+                ArchiveView(
+                    initialCategory: ticket.archiveCategory,
+                    onBackButtonTap: { selectedTicket = nil }
+                )
+                .navigationBarBackButtonHidden(true)
+                .toolbar(.hidden, for: .navigationBar)
+            }
         }
     }
 }
@@ -52,19 +63,19 @@ extension HomeView {
         HStack(alignment: .top, spacing: 26) {
             VStack(spacing: 21) {
                 CategoryTicketButton(title: "TOP", imageName: "TopButton") {
-                    // TODO
+                    selectedTicket = .top
                 }
                 CategoryTicketButton(title: "OUTER", imageName: "OuterButton") {
-                    // TODO
+                    selectedTicket = .outer
                 }
             }
             
             VStack(spacing: 21) {
                 CategoryTicketButton(title: "BOTTOM", imageName: "BottomButton") {
-                    // TODO
+                    selectedTicket = .bottom
                 }
                 CategoryTicketButton(title: "ALL", imageName: "AllButton") {
-                    // TODO
+                    selectedTicket = .all
                 }
             }
             .padding(.top, 64)
