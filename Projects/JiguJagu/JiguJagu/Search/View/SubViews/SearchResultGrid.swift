@@ -10,6 +10,7 @@ import SwiftUI
 struct SearchResultGrid: View {
     
     let items: [Clothing]
+    let onSelect: (Clothing) -> Void
     
     private let columns = [
         GridItem(.fixed(180), spacing: 10),
@@ -23,6 +24,11 @@ struct SearchResultGrid: View {
         ) {
             ForEach(items) { item in
                 ClothingCard(item: item)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        print("상품 선택:", item.productName)
+                        onSelect(item)
+                    }
             }
         }
     }
