@@ -22,7 +22,12 @@ struct SearchResultGrid: View {
             spacing: 21
         ) {
             ForEach(items) { item in
-                ClothingCard(item: item)
+                NavigationLink {
+                    ReceiptView(clothing: item)
+                } label: {
+                    ClothingCard(item: item)
+                }
+                .buttonStyle(.plain)
             }
         }
     }
