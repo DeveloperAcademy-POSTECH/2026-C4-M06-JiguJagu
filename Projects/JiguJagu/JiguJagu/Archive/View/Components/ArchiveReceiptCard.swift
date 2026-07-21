@@ -7,6 +7,12 @@
 
 import SwiftUI
 
+enum ArchiveReceiptCardLayout {
+    static let width: CGFloat = 266
+    static let edgeHeight: CGFloat = 18
+    static let bodyHeight: CGFloat = 488
+}
+
 struct ArchiveReceiptCard: View {
     let receipt: ArchiveReceipt
 
@@ -18,7 +24,7 @@ struct ArchiveReceiptCard: View {
         VStack(spacing: 0) {
             ReceiptTornEdge()
                 .fill(Color.BG)
-                .frame(height: 18)
+                .frame(height: ArchiveReceiptCardLayout.edgeHeight)
 
             VStack(spacing: 14) {
                 receiptHeader
@@ -35,14 +41,19 @@ struct ArchiveReceiptCard: View {
             }
             .padding(.horizontal, 24)
             .padding(.vertical, 18)
+            .frame(
+                width: ArchiveReceiptCardLayout.width,
+                height: ArchiveReceiptCardLayout.bodyHeight,
+                alignment: .top
+            )
             .background(Color.BG)
 
             ReceiptTornEdge()
                 .fill(Color.BG)
-                .frame(height: 18)
+                .frame(height: ArchiveReceiptCardLayout.edgeHeight)
                 .rotationEffect(.degrees(180))
         }
-        .frame(width: 266)
+        .frame(width: ArchiveReceiptCardLayout.width)
     }
 }
 

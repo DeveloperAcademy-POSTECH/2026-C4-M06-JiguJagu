@@ -25,7 +25,7 @@ struct ArchiveCategoryFilterView: View {
 
             subcategoryChips
         }
-        .frame(height: 116)
+        .frame(height: 108)
         .background(Color.white)
         .zIndex(1)
     }
@@ -47,7 +47,7 @@ private extension ArchiveCategoryFilterView {
                         .tracking(0.32)
                         .foregroundStyle(categoryTextColor(category))
                         .frame(maxWidth: .infinity)
-                        .frame(height: 45)
+                        .frame(height: 37)
                         .overlay(alignment: .bottom) {
                             if selectedCategory == category {
                                 Rectangle()

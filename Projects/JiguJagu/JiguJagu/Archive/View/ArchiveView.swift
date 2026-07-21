@@ -56,7 +56,7 @@ private extension ArchiveView {
                         hasActiveFilter: controller.hasActiveFilter,
                         onResetButtonTap: controller.resetFilters
                     )
-                    .padding(.top, 28)
+                    .padding(.top, emptyReceiptTopPadding(availableHeight: geometry.size.height))
                 } else {
                     receiptCards(screenWidth: geometry.size.width)
                 }
@@ -110,6 +110,15 @@ private extension ArchiveView {
                 }
             }
         }
+    }
+
+    func emptyReceiptTopPadding(availableHeight: CGFloat) -> CGFloat {
+        let preferredTopPadding: CGFloat = 49
+        let minimumBottomPadding: CGFloat = 30
+        let receiptHeight = ArchiveReceiptCardLayout.bodyHeight + ArchiveReceiptCardLayout.edgeHeight * 2
+        let maximumTopPadding = availableHeight - receiptHeight - minimumBottomPadding
+
+        return min(preferredTopPadding, max(0, maximumTopPadding))
     }
 
     func receiptCardItem(_ receipt: ArchiveReceipt) -> some View {

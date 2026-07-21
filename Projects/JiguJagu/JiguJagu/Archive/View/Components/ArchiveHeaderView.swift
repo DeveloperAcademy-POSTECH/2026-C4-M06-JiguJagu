@@ -38,6 +38,6 @@ struct ArchiveHeaderView: View {
         }
         .padding(.horizontal, 22)
         .padding(.top, 18)
-        .padding(.bottom, 16)
+        .padding(.bottom, 8)
     }
 }

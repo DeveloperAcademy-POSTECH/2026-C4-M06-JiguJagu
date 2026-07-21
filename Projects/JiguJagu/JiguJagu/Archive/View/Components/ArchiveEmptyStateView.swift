@@ -15,7 +15,7 @@ struct ArchiveEmptyStateView: View {
         VStack(spacing: 0) {
             EmptyReceiptEdge()
                 .fill(Color.BG)
-                .frame(height: 18)
+                .frame(height: ArchiveReceiptCardLayout.edgeHeight)
 
             VStack(spacing: 0) {
                 titleGroup
@@ -38,15 +38,19 @@ struct ArchiveEmptyStateView: View {
                 }
                 .padding(.top, 104)
             }
-            .frame(width: 266, height: 488, alignment: .top)
+            .frame(
+                width: ArchiveReceiptCardLayout.width,
+                height: ArchiveReceiptCardLayout.bodyHeight,
+                alignment: .top
+            )
             .background(Color.BG)
 
             EmptyReceiptEdge()
                 .fill(Color.BG)
-                .frame(height: 18)
+                .frame(height: ArchiveReceiptCardLayout.edgeHeight)
                 .rotationEffect(.degrees(180))
         }
-        .frame(width: 266)
+        .frame(width: ArchiveReceiptCardLayout.width)
     }
 }
 
