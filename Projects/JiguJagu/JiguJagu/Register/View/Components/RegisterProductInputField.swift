@@ -29,6 +29,10 @@ struct RegisterProductInputField: View {
             .font(.pretendard.body4)
             .foregroundStyle(Color.grayScale900)
             .lineLimit(1)
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled(true)
+            .textContentType(.none)
+            .submitLabel(.done)
 
             Button {
                 text.removeAll()
