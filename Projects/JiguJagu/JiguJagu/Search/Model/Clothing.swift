@@ -9,15 +9,6 @@
 import Foundation
 
 
-/// 네이버 쇼핑 API 응답 모델
-struct NaverShoppingItem: Decodable {
-    let title: String
-    let image: URL?
-    let brand: String
-    let category3: String
-    let category4: String
-}
-
 /// 앱에서 사용하는 의류 모델
 struct Clothing: Identifiable {
     let id = UUID()
@@ -37,15 +28,19 @@ struct Clothing: Identifiable {
 }
 
 extension Clothing {
-    init(from item: NaverShoppingItem,
-         mockImageName: String? = nil,
-         howToCare: [String] = [],
-         washingGuides: [WashingGuide] = [],
-         materials: [Material] = []) {
+
+    init(
+        from item: NaverShoppingItem,
+        mockImageName: String? = nil,
+        howToCare: [String] = [],
+        washingGuides: [WashingGuide] = [],
+        materials: [Material] = []
+
+    ) {
         self.brand = item.brand
-        self.productName = item.title
+        self.productName = item.title.strippingHTML()
         self.mockImageName = mockImageName
-        self.productImageURL = item.image
+        self.productImageURL = URL(string: item.image)
         self.category3 = item.category3
         self.category4 = item.category4
         self.howToCare = howToCare

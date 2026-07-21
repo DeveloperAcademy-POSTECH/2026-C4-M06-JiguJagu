@@ -29,11 +29,13 @@ struct ClothingCard: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(item.brand)
                     .font(Font.pretendard.body2)
+                    .foregroundStyle(Color.grayScale900)
                     .lineLimit(1)
                     .truncationMode(.tail)
                 
                 Text(item.productName)
                     .font(Font.pretendard.body3)
+                    .foregroundStyle(Color.grayScale900)
                     .lineLimit(2)
                     .truncationMode(.tail)
             }
@@ -41,8 +43,6 @@ struct ClothingCard: View {
         .frame(width: 180, height: 239)
     }
 }
-
-// MARK: - Image
 
 private extension ClothingCard {
     
