@@ -12,7 +12,7 @@ struct ArchiveView: View {
     private let onBackButtonTap: () -> Void
 
     init(
-        receipts: [ArchiveReceipt] = [],
+        receipts: [ArchiveReceipt] = ArchiveReceipt.previewItems,
         onBackButtonTap: @escaping () -> Void = {}
     ) {
         _controller = State(initialValue: ArchiveController(receipts: receipts))
@@ -20,6 +20,8 @@ struct ArchiveView: View {
     }
 
     var body: some View {
+        @Bindable var controller = controller
+
         VStack(spacing: 0) {
             ArchiveHeaderView(
                 searchText: $controller.searchText,
@@ -31,11 +33,14 @@ struct ArchiveView: View {
                 selectedCategory: controller.selectedCategory,
                 subcategories: controller.availableSubcategories,
                 selectedSubcategory: controller.selectedSubcategory,
-                onCategoryTap: controller.selectCategory,
-                onSubcategoryTap: controller.selectSubcategory
+                onCategoryTap: { controller.selectCategory($0) },
+                onAllSubcategoryTap: { controller.selectAllSubcategories() },
+                onSubcategoryTap: { controller.selectSubcategory($0) }
             )
+            .zIndex(1)
 
             receiptArchiveContent
+                .zIndex(0)
         }
         .background(Color.white)
         .ignoresSafeArea(edges: .bottom)
@@ -63,6 +68,7 @@ private extension ArchiveView {
                     .scaledToFill()
                     .frame(width: geometry.size.width, height: geometry.size.height)
                     .clipped()
+                    .opacity(0.8)                
             }
         }
     }
@@ -94,6 +100,15 @@ private extension ArchiveView {
 
                 proxy.scrollTo(focusedReceiptID, anchor: .center)
             }
+            .onChange(of: filteredReceiptIDs) { _, _ in
+                guard let focusedReceiptID else {
+                    return
+                }
+
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    proxy.scrollTo(focusedReceiptID, anchor: .center)
+                }
+            }
         }
     }
 
@@ -118,6 +133,10 @@ private extension ArchiveView {
 
     var sortedReceiptIDs: [String] {
         sortedReceipts.map(\.id)
+    }
+
+    var filteredReceiptIDs: [String] {
+        controller.filteredReceipts.map(\.id)
     }
 
     var displayReceiptItems: [ArchiveReceiptDisplayItem] {
@@ -203,6 +222,24 @@ private extension ArchiveReceipt {
             ]
         ),
         ArchiveReceipt(
+            id: "preview-outers-padding",
+            brandName: "파르티멘토",
+            productName: "라이트 다운\n패딩",
+            category: .outers,
+            subcategory: ArchiveSubcategory.outers[2],
+            productImageName: "MockProduct",
+            registeredDate: Calendar.current.date(
+                byAdding: .day,
+                value: -168,
+                to: Date()
+            ) ?? Date(),
+            materials: [
+                Material(name: "Nylon", percentage: 55),
+                Material(name: "Polyester", percentage: 35),
+                Material(name: "Duck Down", percentage: 10)
+            ]
+        ),
+        ArchiveReceipt(
             id: "preview-tops",
             brandName: "칙스",
             productName: "더블 스트라이프\n카라 니트",
@@ -222,6 +259,23 @@ private extension ArchiveReceipt {
             ]
         ),
         ArchiveReceipt(
+            id: "preview-tops-hoodie",
+            brandName: "예일",
+            productName: "아치 로고\n후드",
+            category: .tops,
+            subcategory: ArchiveSubcategory.tops[2],
+            productImageName: "MockProduct",
+            registeredDate: Calendar.current.date(
+                byAdding: .day,
+                value: -109,
+                to: Date()
+            ) ?? Date(),
+            materials: [
+                Material(name: "Cotton", percentage: 80),
+                Material(name: "Polyester", percentage: 20)
+            ]
+        ),
+        ArchiveReceipt(
             id: "preview-bottoms",
             brandName: "어반드레스",
             productName: "와이드 코튼\n카고 팬츠",
@@ -237,6 +291,23 @@ private extension ArchiveReceipt {
                 Material(name: "Cotton", percentage: 70),
                 Material(name: "Polyester", percentage: 25),
                 Material(name: "Span", percentage: 5)
+            ]
+        ),
+        ArchiveReceipt(
+            id: "preview-bottoms-jeans",
+            brandName: "무신사 스탠다드",
+            productName: "릴렉스드 데님\n팬츠",
+            category: .bottoms,
+            subcategory: ArchiveSubcategory.bottoms[0],
+            productImageName: "MockProduct",
+            registeredDate: Calendar.current.date(
+                byAdding: .day,
+                value: -46,
+                to: Date()
+            ) ?? Date(),
+            materials: [
+                Material(name: "Cotton", percentage: 98),
+                Material(name: "Span", percentage: 2)
             ]
         )
     ]

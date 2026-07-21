@@ -59,6 +59,10 @@ final class ArchiveController {
         selectedSubcategory = subcategory
     }
 
+    func selectAllSubcategories() {
+        selectedSubcategory = nil
+    }
+
     func clearSearchText() {
         searchText = ""
     }
