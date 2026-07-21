@@ -53,6 +53,7 @@ struct RegisterConfirmView: View {
             productName: editableProductName,
             mockImageName: clothing.mockImageName,
             productImageURL: clothing.productImageURL,
+            receiptCategory: "\(selectedMainCategory) > \(selectedSubCategory?.title ?? "")",
             category3: selectedMainCategory,
             category4: selectedSubCategory?.title ?? "그 외",
             howToCare: clothing.howToCare,
@@ -222,7 +223,7 @@ struct RegisterConfirmView: View {
             
             ReceiptView(
                 
-                clothing: Clothing.randomReceiptData(for: clothing)
+                clothing: Clothing.randomReceiptData(for: updatedClothing)
                 
             )
             

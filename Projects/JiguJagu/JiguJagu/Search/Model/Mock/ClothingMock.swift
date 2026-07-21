@@ -14,12 +14,13 @@ extension Clothing {
         guard let mock = Clothing.mocks.randomElement() else {
             return clothing
         }
-
+        
         return Clothing(
             brand: clothing.brand,
             productName: clothing.productName,
             mockImageName: clothing.mockImageName,
             productImageURL: clothing.productImageURL,
+            receiptCategory: clothing.receiptCategory,
             category3: clothing.category3,
             category4: clothing.category4,
             howToCare: mock.howToCare,
@@ -35,6 +36,7 @@ extension Clothing {
             productName: "더블 스트라이프 카라 니트",
             mockImageName: "P1",
             productImageURL: nil,
+            receiptCategory: "상의 > 니트",
             category3: "상의",
             category4: "니트",
             howToCare: [
@@ -59,6 +61,7 @@ extension Clothing {
             productName: "윈드러너 후드 자켓",
             mockImageName: "P2",
             productImageURL: nil,
+            receiptCategory: "아우터 > 재킷",
             category3: "아우터",
             category4: "재킷",
             howToCare: [
@@ -79,6 +82,7 @@ extension Clothing {
             productName: "오버핏 코튼 셔츠",
             mockImageName: "P3",
             productImageURL: nil,
+            receiptCategory: "상의 > 셔츠",
             category3: "상의",
             category4: "셔츠",
             howToCare: [
@@ -99,6 +103,7 @@ extension Clothing {
             productName: "울 블렌드 터틀넥 니트",
             mockImageName: "P4",
             productImageURL: nil,
+            receiptCategory: "상의 > 니트",
             category3: "상의",
             category4: "니트",
             howToCare: [
@@ -119,6 +124,7 @@ extension Clothing {
             productName: "브라운 스트라이프 긴팔 티셔츠",
             mockImageName: "P5",
             productImageURL: nil,
+            receiptCategory: "상의 > 티셔츠",
             category3: "상의",
             category4: "티셔츠",
             howToCare: [
@@ -138,6 +144,7 @@ extension Clothing {
             productName: "배색 카라 가디건",
             mockImageName: "P6",
             productImageURL: nil,
+            receiptCategory: "상의 > 가디건",
             category3: "상의",
             category4: "가디건",
             howToCare: [
@@ -158,6 +165,7 @@ extension Clothing {
             productName: "트랙 팬츠",
             mockImageName: "P1",
             productImageURL: nil,
+            receiptCategory: "하의 > 팬츠",
             category3: "하의",
             category4: "팬츠",
             howToCare: [
@@ -178,6 +186,7 @@ extension Clothing {
             productName: "501 데님 청바지",
             mockImageName: "P2",
             productImageURL: nil,
+            receiptCategory: "하의 > 데님",
             category3: "하의",
             category4: "데님",
             howToCare: [
@@ -196,6 +205,7 @@ extension Clothing {
             productName: "눕시 패딩 자켓",
             mockImageName: "P3",
             productImageURL: nil,
+            receiptCategory: "아우터 > 패딩",
             category3: "아우터",
             category4: "패딩",
             howToCare: [
@@ -214,6 +224,7 @@ extension Clothing {
             productName: "플리스 집업 자켓",
             mockImageName: "P4",
             productImageURL: nil,
+            receiptCategory: "아우터 > 플리스",
             category3: "아우터",
             category4: "플리스",
             howToCare: [
@@ -231,4 +242,3 @@ extension Clothing {
 }
 
 #endif
-
