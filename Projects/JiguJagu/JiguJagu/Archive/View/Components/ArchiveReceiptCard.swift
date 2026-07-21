@@ -105,7 +105,7 @@ private extension ArchiveReceiptCard {
 
             Spacer()
 
-            Text(formattedDate)
+            Text(receipt.archiveDateText)
                 .font(.pretendard.head2)
                 .foregroundStyle(Color.brown300)
         }
@@ -119,12 +119,6 @@ private extension ArchiveReceiptCard {
             .minimumScaleFactor(0.6)
     }
 
-    var formattedDate: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy.MM.dd"
-        return formatter.string(from: receipt.registeredDate)
-    }
-
     func materialRow(_ material: Material) -> some View {
         HStack {
             Text(material.name)
@@ -136,15 +130,11 @@ private extension ArchiveReceiptCard {
     }
 
     func materialFont(for material: Material) -> Font {
-        let fontName = material.percentage == maxMaterialPercentage
+        let fontName = material.percentage == receipt.maxMaterialPercentage
         ? "Pretendard-SemiBold"
         : "Pretendard-Regular"
 
         return .custom(fontName, size: 14)
-    }
-
-    var maxMaterialPercentage: Int {
-        receipt.materials.map(\.percentage).max() ?? 0
     }
 }
 

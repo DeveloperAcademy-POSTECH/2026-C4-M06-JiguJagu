@@ -68,6 +68,16 @@ struct ArchiveReceipt: Identifiable {
         return formatter.string(from: registeredDate)
     }
 
+    var archiveDateText: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy.MM.dd"
+        return formatter.string(from: registeredDate)
+    }
+
+    var maxMaterialPercentage: Int {
+        materials.map(\.percentage).max() ?? 0
+    }
+
     var searchKeywords: [String] {
         [brandName, productName, category.title, subcategory.title] + materials.map(\.name) + tagNames
     }
