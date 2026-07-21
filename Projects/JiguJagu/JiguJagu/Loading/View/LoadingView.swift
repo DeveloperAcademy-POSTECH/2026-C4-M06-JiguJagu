@@ -59,7 +59,7 @@ private extension LoadingView {
 
             LoadingProgressBar(progress: controller.progressState.progress)
                 .frame(width: LoadingLayout.progressWidth, height: LoadingLayout.progressHeight)
-                .accessibilityLabel("의류 탐색 진행률")
+                .accessibilityLabel(controller.progressState.accessibilityProgressLabel)
                 .accessibilityValue(controller.progressState.accessibilityProgressValue)
         }
         .frame(width: LoadingLayout.contentWidth, height: LoadingLayout.contentHeight)

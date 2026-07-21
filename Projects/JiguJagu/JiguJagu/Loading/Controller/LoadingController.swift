@@ -10,8 +10,18 @@ import Observation
 
 @Observable
 final class LoadingController {
-    private(set) var progressState = LoadingProgressState()
+    private(set) var progressState: LoadingProgressState
+    private let configuration: LoadingProgressConfiguration
     @ObservationIgnored private var progressTask: Task<Void, Never>?
+
+    init(configuration: LoadingProgressConfiguration = .clothingSearch) {
+        self.configuration = configuration
+        self.progressState = LoadingProgressState(
+            progress: configuration.initialProgress,
+            message: configuration.message,
+            accessibilityProgressLabel: configuration.accessibilityProgressLabel
+        )
+    }
 
     deinit {
         progressTask?.cancel()
@@ -38,17 +48,17 @@ private extension LoadingController {
         var progress = progressState.progress
 
         while !Task.isCancelled {
-            progress += 0.006
+            progress += configuration.progressIncrement
 
-            if progress > 0.96 {
-                progress = 0.16
+            if progress > configuration.maximumLoopProgress {
+                progress = configuration.resetProgress
             }
 
             await MainActor.run {
                 progressState.updateProgress(progress)
             }
 
-            try? await Task.sleep(for: .milliseconds(45))
+            try? await Task.sleep(for: .milliseconds(configuration.tickMilliseconds))
         }
     }
 }

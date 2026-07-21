@@ -10,7 +10,7 @@ import SwiftUI
 struct ReceiptLoadingView: View {
     @State private var controller: LoadingController
 
-    init(controller: LoadingController = LoadingController()) {
+    init(controller: LoadingController = LoadingController(configuration: .receiptIssuing)) {
         _controller = State(initialValue: controller)
     }
 
@@ -50,16 +50,16 @@ private extension ReceiptLoadingView {
             VStack(spacing: 24) {
                 ReceiptLoadingIllustrationView()
 
-                Text(ReceiptLoadingLayout.message)
+                Text(controller.progressState.message)
                     .font(.pretendard.head5)
                     .foregroundStyle(Color.grayScale900)
                     .multilineTextAlignment(.center)
-                    .accessibilityLabel(ReceiptLoadingLayout.message)
+                    .accessibilityLabel(controller.progressState.message)
             }
 
             LoadingProgressBar(progress: controller.progressState.progress)
                 .frame(width: ReceiptLoadingLayout.progressWidth, height: ReceiptLoadingLayout.progressHeight)
-                .accessibilityLabel("영수증 발급 진행률")
+                .accessibilityLabel(controller.progressState.accessibilityProgressLabel)
                 .accessibilityValue(controller.progressState.accessibilityProgressValue)
         }
         .frame(width: ReceiptLoadingLayout.contentWidth, height: ReceiptLoadingLayout.contentHeight)
@@ -86,7 +86,6 @@ private enum ReceiptLoadingLayout {
     static let contentTop: CGFloat = 279
     static let progressWidth: CGFloat = 241
     static let progressHeight: CGFloat = 10
-    static let message = "영수증을 발급하고있어요..."
 
     static var contentCenterY: CGFloat {
         contentTop + contentHeight / 2

@@ -8,8 +8,19 @@
 import Foundation
 
 struct LoadingProgressState: Equatable {
-    var progress: Double = 0.2
-    let message: String = "비슷한 의류를 찾고 있어요..."
+    var progress: Double
+    let message: String
+    let accessibilityProgressLabel: String
+
+    init(
+        progress: Double = 0.2,
+        message: String = "비슷한 의류를 찾고 있어요...",
+        accessibilityProgressLabel: String = "의류 탐색 진행률"
+    ) {
+        self.progress = progress
+        self.message = message
+        self.accessibilityProgressLabel = accessibilityProgressLabel
+    }
 
     var accessibilityProgressValue: String {
         let percent = Int((progress * 100).rounded())
