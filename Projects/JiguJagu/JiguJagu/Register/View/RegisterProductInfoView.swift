@@ -11,6 +11,9 @@ struct RegisterProductInfoView: View {
     let draft: RegisterDraft
     let onBack: () -> Void
 
+    @State private var productName = ""
+    @State private var brandName = ""
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
@@ -57,17 +60,8 @@ extension RegisterProductInfoView {
         VStack(alignment: .leading, spacing: 24) {
             stepSection
 
-            VStack(alignment: .leading, spacing: 8) {
-                Text("제품 이름을 입력해주세요")
-                    .font(.pretendard.head0)
-                    .foregroundStyle(Color.grayScale900)
-
-                Text("정확하지 않아도 괜찮아요! \"검정 니트\"처럼\n나만 알아볼 수 있는 이름이면 충분해요.")
-                    .font(.pretendard.body4)
-                    .foregroundStyle(Color.grayScale900)
-                    .lineLimit(2)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
+            titleSection
+            inputSection
         }
         .padding(.horizontal, Layout.horizontalPadding)
         .padding(.top, Layout.contentTopPadding)
@@ -75,6 +69,36 @@ extension RegisterProductInfoView {
 
     private var stepSection: some View {
         RegisterStepIndicatorView(currentStep: 3, totalSteps: 3)
+    }
+
+    private var titleSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("제품 이름을 입력해주세요")
+                .font(.pretendard.head0)
+                .foregroundStyle(Color.grayScale900)
+
+            Text("정확하지 않아도 괜찮아요! \"검정 니트\"처럼\n나만 알아볼 수 있는 이름이면 충분해요.")
+                .font(.pretendard.body4)
+                .foregroundStyle(Color.grayScale900)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var inputSection: some View {
+        VStack(spacing: 12) {
+            RegisterProductInputField(
+                label: "제품명",
+                placeholder: "제품명이나 옷 이름을 등록해주세요",
+                text: $productName
+            )
+
+            RegisterProductInputField(
+                label: "브랜드",
+                placeholder: "브랜드명을 입력해주세요",
+                text: $brandName
+            )
+        }
     }
 }
 
