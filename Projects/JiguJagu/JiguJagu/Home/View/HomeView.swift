@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct HomeView: View {
+    @State private var showCamera = false
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
             titleSection
@@ -28,15 +30,15 @@ struct HomeView: View {
 
 // MARK: - Subviews
 extension HomeView {
-
+    
     private var titleSection: some View {
         VStack(alignment: .leading, spacing: 6) {
             Image("WhiteLogo")
-
+            
             Text("Good for Earth, Good for Environment")
                 .font(.arial.sub1)
                 .foregroundStyle(.white)
-
+            
             Text("오래 입는 습관의 시작, 지속가능한 미래와 가까워지다")
                 .font(.pretendard.body5)
                 .foregroundStyle(.white)
@@ -45,7 +47,7 @@ extension HomeView {
         .padding(.leading, 16)
         .ignoresSafeArea()
     }
-
+    
     private var ticketGrid: some View {
         HStack(alignment: .top, spacing: 26) {
             VStack(spacing: 21) {
@@ -56,7 +58,7 @@ extension HomeView {
                     // TODO
                 }
             }
-
+            
             VStack(spacing: 21) {
                 CategoryTicketButton(title: "BOTTOM", imageName: "BottomButton") {
                     // TODO
@@ -69,10 +71,10 @@ extension HomeView {
         }
         .frame(maxWidth: .infinity)
     }
-
+    
     private var addButton: some View {
         Button {
-            // TODO: add action
+            showCamera = true
         } label: {
             Text("옷 등록")
                 .font(.pretendard.head3)
@@ -83,6 +85,9 @@ extension HomeView {
                 .clipShape(Capsule())
         }
         .padding(.bottom, 40)
+        .fullScreenCover(isPresented: $showCamera) {
+            LaundryCaptureFlow()
+        }
     }
 }
 
