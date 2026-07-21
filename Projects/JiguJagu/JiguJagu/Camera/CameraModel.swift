@@ -140,7 +140,7 @@ final class CameraModel: NSObject, ObservableObject {
                     continuation.resume(returning: nil)
                     return
                 }
-                self.captureContinuation = continuation
+                captureContinuation = continuation
 
                 // settings는 백그라운드 큐 안에서 생성 (non-Sendable 캡처 방지)
                 let settings = AVCapturePhotoSettings()
