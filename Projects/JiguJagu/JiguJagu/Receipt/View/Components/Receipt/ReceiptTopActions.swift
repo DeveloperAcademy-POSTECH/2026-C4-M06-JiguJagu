@@ -33,7 +33,7 @@ struct ReceiptTopActions: View {
                 .frame(width: 24, height: 24)
                 
                 Button {
-                    // TODO: 보관함 이동
+                    NotificationCenter.default.post(name: .goArchive, object: nil)
                 } label: {
                     Image(systemName: "folder")
                         .font(.system(size: 18, weight: .bold))

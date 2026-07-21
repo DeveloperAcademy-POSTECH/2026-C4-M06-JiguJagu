@@ -126,12 +126,20 @@ struct ReceiptView: View {
             .scrollBounceBehavior(.basedOnSize)
             .background {
                 
-                Image("MainBG")
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 532, height: 912)
-                    .clipped()
-                    .opacity(0.6)
+                ZStack {
+                    Image("MainBG")
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 532, height: 912)
+                        .clipped()
+                        .opacity(0.6)
+                    
+                    VStack(spacing: 0) {
+                        TopGradientOverlay()
+                            .blendMode(.multiply)
+                        Spacer(minLength: 0)
+                    }
+                }
             }
             .onAppear {
                 UIScrollView.appearance().bounces = false

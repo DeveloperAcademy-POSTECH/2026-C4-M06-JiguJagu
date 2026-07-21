@@ -113,6 +113,13 @@ extension HomeView {
                 .onReceive(NotificationCenter.default.publisher(for: .goHome)) { _ in
                     showCamera = false
                 }
+                .onReceive(NotificationCenter.default.publisher(for: .goArchive)) { _ in
+                    // 커버를 먼저 닫고, 전환이 끝난 뒤 보관함(전체)을 엽니다.
+                    showCamera = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                        selectedTicket = .all
+                    }
+                }
         }
     }
 }

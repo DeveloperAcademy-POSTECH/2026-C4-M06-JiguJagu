@@ -9,4 +9,5 @@ import Foundation
 
 extension Notification.Name {
     static let goHome = Notification.Name("goHome")
+    static let goArchive = Notification.Name("goArchive")
 }
