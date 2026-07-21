@@ -30,6 +30,7 @@ struct ReceiptLoadingIllustrationView: View {
         .frame(width: 180, height: 180)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("영수증이 출력되는 로딩 일러스트")
+        .accessibilityIdentifier(LoadingAccessibilityIdentifier.receiptIssuingIllustration)
         .task {
             await startIssuingAnimationLoop()
         }

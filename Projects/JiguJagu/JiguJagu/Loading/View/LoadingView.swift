@@ -35,6 +35,7 @@ struct LoadingView: View {
         }
         .background(Color.white)
         .ignoresSafeArea()
+        .accessibilityIdentifier(LoadingAccessibilityIdentifier.clothingSearchScreen)
         .onAppear {
             controller.startProgressLoop()
         }
@@ -55,15 +56,18 @@ private extension LoadingView {
                     .foregroundStyle(Color.grayScale900)
                     .multilineTextAlignment(.center)
                     .accessibilityLabel(controller.progressState.message)
+                    .accessibilityIdentifier(LoadingAccessibilityIdentifier.clothingSearchMessage)
             }
 
             LoadingProgressBar(progress: controller.progressState.progress)
                 .frame(width: LoadingLayout.progressWidth, height: LoadingLayout.progressHeight)
                 .accessibilityLabel(controller.progressState.accessibilityProgressLabel)
                 .accessibilityValue(controller.progressState.accessibilityProgressValue)
+                .accessibilityIdentifier(LoadingAccessibilityIdentifier.clothingSearchProgressBar)
         }
         .frame(width: LoadingLayout.contentWidth, height: LoadingLayout.contentHeight)
         .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(LoadingAccessibilityIdentifier.clothingSearchContent)
     }
 
     func layoutScale(for size: CGSize) -> CGFloat {

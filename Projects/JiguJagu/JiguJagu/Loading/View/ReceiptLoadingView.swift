@@ -35,6 +35,7 @@ struct ReceiptLoadingView: View {
         }
         .background(Color.white)
         .ignoresSafeArea()
+        .accessibilityIdentifier(LoadingAccessibilityIdentifier.receiptIssuingScreen)
         .onAppear {
             controller.startProgressLoop()
         }
@@ -55,15 +56,18 @@ private extension ReceiptLoadingView {
                     .foregroundStyle(Color.grayScale900)
                     .multilineTextAlignment(.center)
                     .accessibilityLabel(controller.progressState.message)
+                    .accessibilityIdentifier(LoadingAccessibilityIdentifier.receiptIssuingMessage)
             }
 
             LoadingProgressBar(progress: controller.progressState.progress)
                 .frame(width: ReceiptLoadingLayout.progressWidth, height: ReceiptLoadingLayout.progressHeight)
                 .accessibilityLabel(controller.progressState.accessibilityProgressLabel)
                 .accessibilityValue(controller.progressState.accessibilityProgressValue)
+                .accessibilityIdentifier(LoadingAccessibilityIdentifier.receiptIssuingProgressBar)
         }
         .frame(width: ReceiptLoadingLayout.contentWidth, height: ReceiptLoadingLayout.contentHeight)
         .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(LoadingAccessibilityIdentifier.receiptIssuingContent)
     }
 
     func layoutScale(for size: CGSize) -> CGFloat {
