@@ -15,7 +15,77 @@ struct LoadingView: View {
     }
 
     var body: some View {
-        EmptyView()
+        GeometryReader { geometry in
+            ZStack(alignment: .topLeading) {
+                Image("MainBG")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: geometry.size.width, height: geometry.size.height)
+                    .clipped()
+                    .opacity(0.3)
+                    .ignoresSafeArea()
+
+                loadingContent
+                    .scaleEffect(layoutScale(for: geometry.size), anchor: .top)
+                    .position(
+                        x: geometry.size.width / 2 - scaledHorizontalOffset(for: geometry.size),
+                        y: scaledContentCenterY(for: geometry.size)
+                    )
+            }
+        }
+        .background(Color.white)
+        .ignoresSafeArea()
+    }
+}
+
+private extension LoadingView {
+    var loadingContent: some View {
+        VStack(spacing: 11) {
+            VStack(spacing: 10) {
+                LoadingIllustrationView()
+
+                Text(controller.progressState.message)
+                    .font(.pretendard.head5)
+                    .foregroundStyle(Color.grayScale900)
+                    .multilineTextAlignment(.center)
+                    .accessibilityLabel(controller.progressState.message)
+            }
+
+            LoadingProgressBar(progress: controller.progressState.progress)
+                .frame(width: LoadingLayout.progressWidth, height: LoadingLayout.progressHeight)
+                .accessibilityLabel(controller.progressState.accessibilityProgressText)
+        }
+        .frame(width: LoadingLayout.contentWidth, height: LoadingLayout.contentHeight)
+    }
+
+    func layoutScale(for size: CGSize) -> CGFloat {
+        min(size.width / LoadingLayout.designWidth, size.height / LoadingLayout.designHeight)
+    }
+
+    func scaledHorizontalOffset(for size: CGSize) -> CGFloat {
+        LoadingLayout.contentHorizontalOffset * layoutScale(for: size)
+    }
+
+    func scaledContentCenterY(for size: CGSize) -> CGFloat {
+        let scale = layoutScale(for: size)
+        let topInset = (size.height - LoadingLayout.designHeight * scale) / 2
+
+        return topInset + LoadingLayout.contentCenterY * scale
+    }
+}
+
+private enum LoadingLayout {
+    static let designWidth: CGFloat = 393
+    static let designHeight: CGFloat = 852
+    static let contentWidth: CGFloat = 247
+    static let contentHeight: CGFloat = 255
+    static let contentTop: CGFloat = 268
+    static let contentHorizontalOffset: CGFloat = 3
+    static let progressWidth: CGFloat = 247
+    static let progressHeight: CGFloat = 10
+
+    static var contentCenterY: CGFloat {
+        contentTop + contentHeight / 2
     }
 }
 
