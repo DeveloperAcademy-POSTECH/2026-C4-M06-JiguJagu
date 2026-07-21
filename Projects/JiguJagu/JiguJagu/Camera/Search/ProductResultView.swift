@@ -27,6 +27,11 @@ struct ProductResultView: View {
     /// 값이 설정되면 네이버 검색 결과 화면으로 push 된다.
     @State private var searchAnalysis: ClothingAnalysis?
 
+    /// true가 되면 옷 등록 확인 화면으로 push 된다.
+    @State private var showRegister = false
+    /// 등록 화면으로 넘길 변환된 옷 데이터.
+    @State private var registerClothing: Clothing?
+
 
     var body: some View {
         NavigationStack {
@@ -44,6 +49,14 @@ struct ProductResultView: View {
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(item: $searchAnalysis) { analysis in
                 ProductSearchResultView(analysis: analysis)
+            }
+            .navigationDestination(isPresented: $showRegister) {
+                if let registerClothing {
+                    RegisterConfirmView(
+                        clothing: registerClothing,
+                        localImage: cutoutImage ?? image
+                    )
+                }
             }
             .safeAreaInset(edge: .bottom) {
                 if result != nil {
@@ -91,8 +104,14 @@ struct ProductResultView: View {
                     )
             }
 
-            // 등록하기 (주요 · Primary) — 기능은 이후 연결
-            Button(action: onRegister) {
+            // 등록하기 (주요 · Primary) — 분석 데이터로 등록 확인 화면 진입
+            Button {
+                if let result {
+                    registerClothing = Clothing(from: result)
+                    showRegister = true
+                }
+                onRegister()
+            } label: {
                 Text("등록하기")
                     .font(.pretendard.head3)
                     .foregroundStyle(.white)

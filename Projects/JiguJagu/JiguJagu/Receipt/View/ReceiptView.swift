@@ -11,6 +11,7 @@ import UIKit
 struct ReceiptView: View {
     
     let clothing: Clothing
+    var localImage: UIImage? = nil
     
     private var formatter: DateFormatter {
         let formatter = DateFormatter()
@@ -71,6 +72,7 @@ struct ReceiptView: View {
                                         productName: clothing.productName,
                                         productImageURL: clothing.productImageURL?.absoluteString,
                                         mockImageName: clothing.mockImageName,
+                                        localImage: localImage
                                     )
                                     
                                     HowToCareSection(
