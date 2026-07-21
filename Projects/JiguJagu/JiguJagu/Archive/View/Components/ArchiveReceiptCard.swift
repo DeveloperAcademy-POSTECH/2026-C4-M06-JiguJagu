@@ -50,14 +50,14 @@ private extension ArchiveReceiptCard {
     var receiptHeader: some View {
         HStack {
             Text("Product")
-                .font(.pretendard.head1)
-                .foregroundStyle(Color.grayScale900)
+                .font(.pretendard.body2)
+                .foregroundStyle(Color.brown900)
 
             Spacer()
 
             Text(receipt.categoryPath)
-                .font(.pretendard.head2)
-                .foregroundStyle(Color.brown300)
+                .font(.pretendard.body3)
+                .foregroundStyle(Color.brown200)
         }
     }
 
@@ -65,12 +65,13 @@ private extension ArchiveReceiptCard {
         VStack(spacing: 14) {
             VStack(spacing: 4) {
                 Text(receipt.brandName)
-                    .font(.pretendard.head0)
-                    .foregroundStyle(Color.grayScale900)
+                    .font(.pretendard.head1)
+                    .tracking(0.4)
+                    .foregroundStyle(Color.brown900)
 
                 Text(receipt.productName)
-                    .font(.pretendard.head1)
-                    .foregroundStyle(Color.grayScale900)
+                    .font(.pretendard.body2)
+                    .foregroundStyle(Color.brown900)
                     .multilineTextAlignment(.center)
             }
 
@@ -100,14 +101,14 @@ private extension ArchiveReceiptCard {
     var dateInfo: some View {
         HStack {
             Text("Date")
-                .font(.pretendard.head2)
-                .foregroundStyle(Color.grayScale900)
+                .font(.pretendard.body3)
+                .foregroundStyle(Color.brown900)
 
             Spacer()
 
             Text(receipt.archiveDateText)
-                .font(.pretendard.head2)
-                .foregroundStyle(Color.brown300)
+                .font(.pretendard.body3)
+                .foregroundStyle(Color.brown200)
         }
     }
 
@@ -122,19 +123,20 @@ private extension ArchiveReceiptCard {
     func materialRow(_ material: Material) -> some View {
         HStack {
             Text(material.name)
+                .foregroundStyle(materialNameColor(for: material))
             Spacer()
             Text("\(material.percentage)%")
+                .foregroundStyle(Color.black)
         }
         .font(materialFont(for: material))
-        .foregroundStyle(Color.grayScale900)
     }
 
     func materialFont(for material: Material) -> Font {
-        let fontName = material.percentage == receipt.maxMaterialPercentage
-        ? "Pretendard-SemiBold"
-        : "Pretendard-Regular"
+        material.percentage == receipt.maxMaterialPercentage ? .pretendard.body1 : .pretendard.body3
+    }
 
-        return .custom(fontName, size: 14)
+    func materialNameColor(for material: Material) -> Color {
+        material.percentage == receipt.maxMaterialPercentage ? .primary800 : .brown900
     }
 }
 

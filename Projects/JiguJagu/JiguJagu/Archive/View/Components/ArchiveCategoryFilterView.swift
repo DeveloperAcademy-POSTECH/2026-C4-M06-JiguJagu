@@ -35,7 +35,8 @@ private extension ArchiveCategoryFilterView {
                     onCategoryTap(category)
                 } label: {
                     Text(category.title)
-                        .font(.pretendard.head1)
+                        .font(.pretendard.head4)
+                        .tracking(0.32)
                         .foregroundStyle(categoryTextColor(category))
                         .frame(maxWidth: .infinity)
                         .frame(height: 45)
@@ -60,9 +61,9 @@ private extension ArchiveCategoryFilterView {
                         onSubcategoryTap(subcategory)
                     } label: {
                         Text(subcategory.title)
-                            .font(.pretendard.head3)
+                            .font(.pretendard.body3)
                             .foregroundStyle(chipTextColor(subcategory))
-                            .padding(.horizontal, 18)
+                            .padding(.horizontal, 10)
                             .frame(height: 34)
                             .background(chipBackgroundColor(subcategory))
                             .clipShape(Capsule())
@@ -80,7 +81,7 @@ private extension ArchiveCategoryFilterView {
     }
 
     func chipTextColor(_ subcategory: ArchiveSubcategory) -> Color {
-        selectedSubcategory == subcategory ? .white : .grayScale600
+        selectedSubcategory == subcategory ? .white : .grayScale500
     }
 
     func chipBackgroundColor(_ subcategory: ArchiveSubcategory) -> Color {
