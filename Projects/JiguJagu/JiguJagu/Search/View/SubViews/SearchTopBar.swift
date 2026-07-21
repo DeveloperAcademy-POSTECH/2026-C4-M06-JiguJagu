@@ -18,7 +18,7 @@ struct SearchTopBar: View {
                 print("뒤로가기")
             } label: {
                 Image(systemName: "arrow.backward")
-                    .foregroundColor(.black)
+                    .foregroundColor(Color.grayScale900)
             }
             
             SearchBar(
