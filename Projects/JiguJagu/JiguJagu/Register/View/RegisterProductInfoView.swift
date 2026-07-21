@@ -10,6 +10,7 @@ import SwiftUI
 struct RegisterProductInfoView: View {
     let draft: RegisterDraft
     let onBack: () -> Void
+    let onNext: (RegisterProductInputState) -> Void
 
     @State private var inputState = RegisterProductInputState()
     @FocusState private var focusedField: RegisterProductInputFocus?
@@ -32,6 +33,8 @@ struct RegisterProductInfoView: View {
                     .onTapGesture {
                         dismissKeyboard()
                     }
+
+                nextButton
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
@@ -117,6 +120,53 @@ extension RegisterProductInfoView {
             )
         }
     }
+
+    private var nextButton: some View {
+        Button {
+            guard isNextButtonEnabled else { return }
+            dismissKeyboard()
+            onNext(inputState)
+        } label: {
+            Text("다음")
+                .font(.pretendard.head3)
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: RegisterActionButtonLayout.nextButtonHeight)
+                .background(nextButtonBackgroundColor)
+                .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .disabled(!isNextButtonEnabled)
+        .padding(.horizontal, Layout.horizontalPadding)
+        .padding(.bottom, RegisterActionButtonLayout.nextButtonBottomPadding)
+        .accessibilityLabel(nextButtonAccessibilityLabel)
+        .accessibilityHint(nextButtonAccessibilityHint)
+        .animation(.easeInOut(duration: 0.15), value: isNextButtonEnabled)
+    }
+
+    private var isNextButtonEnabled: Bool {
+        inputState.hasProductName
+    }
+
+    private var nextButtonBackgroundColor: Color {
+        isNextButtonEnabled ? Color.primary500 : Color.grayScale300
+    }
+
+    private var nextButtonAccessibilityLabel: String {
+        if isNextButtonEnabled {
+            return "\(inputState.trimmedProductName) 입력 후 다음"
+        }
+
+        return "제품명 입력 후 다음"
+    }
+
+    private var nextButtonAccessibilityHint: String {
+        if isNextButtonEnabled {
+            return "입력한 제품 정보로 옷 등록을 이어갑니다"
+        }
+
+        return "제품명을 입력해야 다음 단계로 이동할 수 있습니다"
+    }
 }
 
 // MARK: - Actions
@@ -140,6 +190,7 @@ private enum Layout {
             subcategory: nil,
             color: nil
         ),
-        onBack: {}
+        onBack: {},
+        onNext: { _ in }
     )
 }

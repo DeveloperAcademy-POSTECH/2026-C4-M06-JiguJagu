@@ -11,6 +11,7 @@ import Foundation
 @MainActor
 final class RegisterFlowController: ObservableObject {
     @Published private(set) var route: RegisterFlowRoute = .category
+    @Published private(set) var completedProductInput: RegisterProductInputState?
 
     func moveBack() {
         switch route {
@@ -46,6 +47,11 @@ final class RegisterFlowController: ObservableObject {
                 color: selection.color
             )
         )
+    }
+
+    func completeProductInput(_ inputState: RegisterProductInputState) {
+        guard inputState.hasProductName else { return }
+        completedProductInput = inputState
     }
 }
 
