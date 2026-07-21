@@ -11,7 +11,7 @@ import Observation
 @Observable
 final class ReceiptAnimationController {
     
-    var receiptOffset: CGFloat = -1500
+    var receiptOffset: CGFloat = -1200
     var hasScrolled = false
     var shouldSkipPrinting = false
     var isSkipping = false
@@ -21,41 +21,34 @@ final class ReceiptAnimationController {
         Task {
 
             while receiptOffset < 0 && !shouldSkipPrinting {
-                
-                try? await Task.sleep(
-                    for: .milliseconds(Int.random(in: 40...70))
-                )
-                
+                try? await Task.sleep(for: .milliseconds(50))
+
                 await MainActor.run {
                     let nextOffset = min(
-                        receiptOffset + CGFloat.random(in: 5...10),
+                        receiptOffset + CGFloat.random(in: 18...25),
                         0
                     )
-                    
+
                     withAnimation(.linear(duration: 0.03)) {
                         receiptOffset = nextOffset
                     }
                 }
-                
-                if receiptOffset > -700 && !hasScrolled {
-                    hasScrolled = true
-                    
-                    await MainActor.run {
-                        withAnimation(.easeInOut(duration: 1.0)) {
-                            proxy.scrollTo(
-                                "receiptBottom",
-                                anchor: .bottom
-                            )
-                        }
-                    }
-                }
             }
-            
+
             await MainActor.run {
                 guard !isSkipping else { return }
                 withAnimation(.easeOut(duration: 0.2)) {
                     receiptOffset = 0
                 }
+            }
+
+            try? await Task.sleep(for: .milliseconds(200))
+
+            await MainActor.run {
+                proxy.scrollTo(
+                    "receiptBottom",
+                    anchor: .bottom
+                )
             }
         }
     }
@@ -71,12 +64,10 @@ final class ReceiptAnimationController {
         }
         
         DispatchQueue.main.async {
-            withAnimation(.easeInOut(duration: 1.25)) {
-                proxy.scrollTo(
-                    "receiptBottom",
-                    anchor: .bottom
-                )
-            }
+            proxy.scrollTo(
+                "receiptBottom",
+                anchor: .bottom
+            )
         }
     }
 }
