@@ -8,7 +8,6 @@
 import SwiftUI
 import AVFoundation
 
-/// `AVCaptureSession`의 실시간 영상을 SwiftUI에 표시하는 프리뷰 뷰.
 struct CameraPreview: UIViewRepresentable {
     let session: AVCaptureSession
 
