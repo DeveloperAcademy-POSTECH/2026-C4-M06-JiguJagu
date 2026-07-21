@@ -17,6 +17,9 @@ struct ProductResultView: View {
     @State private var errorMessage: String?
     @State private var isLoading = true
 
+    /// 값이 설정되면 네이버 검색 결과 화면으로 push 된다.
+    @State private var searchAnalysis: ClothingAnalysis?
+
     private let service = ProductSearchService(apiKey: APIConfig.openAIKey)
 
     var body: some View {
@@ -33,9 +36,16 @@ struct ProductResultView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationTitle("상품 검색 결과")
             .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(item: $searchAnalysis) { analysis in
+                ProductSearchResultView(analysis: analysis)
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("완료", action: onDone)
+                    Button("완료") {
+                        if let result {
+                            searchAnalysis = ClothingAnalysis(from: result)
+                        }
+                    }
                 }
             }
         }

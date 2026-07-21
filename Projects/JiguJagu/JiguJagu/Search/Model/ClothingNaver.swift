@@ -66,7 +66,7 @@ extension Clothing {
 // MARK: - 분석 결과 → 검색 쿼리
 
 /// 두 번째 화면(상품 분석 결과)에서 뽑아낸 값들
-struct ClothingAnalysis {
+struct ClothingAnalysis: Hashable {
     let brand: String?         // 예: "칼하트"
     let category: String?      // 예: "재킷"
     let keywords: [String]     // 예: ["칼하트 디트로이트 재킷", "칼하트 브라운 워크 재킷", ...]
