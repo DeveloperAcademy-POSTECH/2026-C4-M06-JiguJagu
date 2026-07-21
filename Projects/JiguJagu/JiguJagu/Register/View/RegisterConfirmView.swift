@@ -17,6 +17,7 @@ struct RegisterConfirmView: View {
     @State private var selectedColor: RegisterColorOption? = .colored
     @State private var editableBrand: String = ""
     @State private var editableProductName: String = ""
+    @State private var showReceipt = false
     
     private func convertMainCategory(
         _ category: String
@@ -32,7 +33,7 @@ struct RegisterConfirmView: View {
             return "그 외"
         }
     }
-
+    
     private var availableSubcategories: [ArchiveSubcategory] {
         switch selectedMainCategory {
         case "상의":
@@ -44,6 +45,20 @@ struct RegisterConfirmView: View {
         default:
             return []
         }
+    }
+    
+    private var updatedClothing: Clothing {
+        Clothing(
+            brand: editableBrand,
+            productName: editableProductName,
+            mockImageName: clothing.mockImageName,
+            productImageURL: clothing.productImageURL,
+            category3: selectedMainCategory,
+            category4: selectedSubCategory?.title ?? "그 외",
+            howToCare: clothing.howToCare,
+            washingGuides: clothing.washingGuides,
+            materials: clothing.materials
+        )
     }
     
     init(
@@ -142,7 +157,7 @@ struct RegisterConfirmView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("세부 카테고리")
                             .font(Font.pretendard.head4)
-
+                        
                         RegisterChipFlowLayout {
                             ForEach(availableSubcategories) { category in
                                 RegisterSelectionChip(
@@ -185,7 +200,11 @@ struct RegisterConfirmView: View {
                     }
                     .buttonStyle(.plain)
                     
-                    Button(action: {}) {
+                    Button {
+                        
+                        showReceipt = true
+                        
+                    } label: {
                         Text("의류영수증 발급")
                             .font(Font.pretendard.head3)
                             .foregroundStyle(Color.white)
@@ -198,6 +217,15 @@ struct RegisterConfirmView: View {
                 .padding(.top, 8)
             }
             .padding()
+        }.navigationDestination(isPresented: $showReceipt)
+        {
+            
+            ReceiptView(
+                
+                clothing: Clothing.randomReceiptData(for: clothing)
+                
+            )
+            
         }.navigationBarBackButtonHidden(true)
     }
 }

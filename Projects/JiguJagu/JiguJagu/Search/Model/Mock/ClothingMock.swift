@@ -10,6 +10,23 @@
 import Foundation
 
 extension Clothing {
+    static func randomReceiptData(for clothing: Clothing) -> Clothing {
+        guard let mock = Clothing.mocks.randomElement() else {
+            return clothing
+        }
+
+        return Clothing(
+            brand: clothing.brand,
+            productName: clothing.productName,
+            mockImageName: clothing.mockImageName,
+            productImageURL: clothing.productImageURL,
+            category3: clothing.category3,
+            category4: clothing.category4,
+            howToCare: mock.howToCare,
+            washingGuides: mock.washingGuides,
+            materials: mock.materials
+        )
+    }
     
     static let mocks: [Clothing] = [
         
@@ -213,5 +230,5 @@ extension Clothing {
     ]
 }
 
-
 #endif
+

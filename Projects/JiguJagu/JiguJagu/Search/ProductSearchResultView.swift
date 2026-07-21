@@ -8,9 +8,9 @@
 import SwiftUI
 
 struct ProductSearchResultView: View {
-
+    
     let analysis: ClothingAnalysis
-
+    
     var body: some View {
         SearchView(
             items: [],
