@@ -9,11 +9,15 @@ import Foundation
 
 struct LoadingProgressState: Equatable {
     var progress: Double = 0.2
-    var message: String = "비슷한 의류를 찾고 있어요..."
+    let message: String = "비슷한 의류를 찾고 있어요..."
 
-    var accessibilityProgressText: String {
+    var accessibilityProgressValue: String {
         let percent = Int((progress * 100).rounded())
 
-        return "진행률 \(percent)퍼센트"
+        return "\(percent)퍼센트"
+    }
+
+    mutating func updateProgress(_ progress: Double) {
+        self.progress = min(max(progress, 0), 1)
     }
 }

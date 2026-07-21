@@ -38,14 +38,14 @@ private extension LoadingController {
         var progress = progressState.progress
 
         while !Task.isCancelled {
-            progress += 0.012
+            progress += 0.006
 
-            if progress > 0.92 {
+            if progress > 0.96 {
                 progress = 0.16
             }
 
             await MainActor.run {
-                progressState.progress = progress
+                progressState.updateProgress(progress)
             }
 
             try? await Task.sleep(for: .milliseconds(45))
