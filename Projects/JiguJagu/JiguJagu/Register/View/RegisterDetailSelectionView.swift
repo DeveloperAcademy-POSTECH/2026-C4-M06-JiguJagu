@@ -72,10 +72,14 @@ extension RegisterDetailSelectionView {
             Text(category.detailTitle)
                 .font(.pretendard.head0)
                 .foregroundStyle(Color.grayScale900)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
 
             Text("해당되는 카테고리를 골라주세요")
                 .font(.pretendard.body4)
                 .foregroundStyle(Color.grayScale900)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .accessibilityElement(children: .combine)
     }
@@ -96,6 +100,7 @@ extension RegisterDetailSelectionView {
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel("\(category.displayName) 하위 카테고리 선택")
+        .accessibilityValue(selectedSubcategory?.title ?? "선택 안 됨")
     }
 
     private var colorSelector: some View {
@@ -103,6 +108,8 @@ extension RegisterDetailSelectionView {
             Text("색상을 선택해주세요")
                 .font(.pretendard.head1)
                 .foregroundStyle(Color.grayScale900)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
 
             RegisterChipFlowLayout(
                 horizontalSpacing: Layout.chipHorizontalSpacing,
@@ -120,6 +127,7 @@ extension RegisterDetailSelectionView {
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel("색상 선택")
+        .accessibilityValue(selectedColor?.title ?? "선택 안 됨")
     }
 
     private var nextButton: some View {
@@ -132,16 +140,16 @@ extension RegisterDetailSelectionView {
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: Layout.nextButtonHeight)
-                .background(Color.primary500)
+                .background(nextButtonBackgroundColor)
                 .clipShape(Capsule())
         }
         .buttonStyle(.plain)
         .disabled(!isNextButtonEnabled)
-        .opacity(isNextButtonEnabled ? 1 : 0.45)
         .padding(.horizontal, Layout.horizontalPadding)
         .padding(.bottom, Layout.nextButtonBottomPadding)
         .accessibilityLabel(nextButtonAccessibilityLabel)
         .accessibilityHint(nextButtonAccessibilityHint)
+        .animation(.easeInOut(duration: 0.15), value: isNextButtonEnabled)
     }
 
     private var selectedDetailSelection: RegisterDetailSelection? {
@@ -158,6 +166,10 @@ extension RegisterDetailSelectionView {
 
     private var isNextButtonEnabled: Bool {
         selectedDetailSelection != nil
+    }
+
+    private var nextButtonBackgroundColor: Color {
+        isNextButtonEnabled ? Color.primary500 : Color.grayScale300
     }
 
     private var nextButtonAccessibilityLabel: String {
