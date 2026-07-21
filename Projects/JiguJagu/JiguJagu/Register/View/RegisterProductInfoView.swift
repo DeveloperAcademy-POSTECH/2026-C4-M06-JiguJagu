@@ -11,8 +11,7 @@ struct RegisterProductInfoView: View {
     let draft: RegisterDraft
     let onBack: () -> Void
 
-    @State private var productName = ""
-    @State private var brandName = ""
+    @State private var inputState = RegisterProductInputState()
     @FocusState private var focusedField: RegisterProductInputFocus?
 
     var body: some View {
@@ -106,7 +105,7 @@ extension RegisterProductInfoView {
                 placeholder: "제품명이나 옷 이름을 등록해주세요",
                 focus: .productName,
                 focusedField: $focusedField,
-                text: $productName
+                text: $inputState.productName
             )
 
             RegisterProductInputField(
@@ -114,7 +113,7 @@ extension RegisterProductInfoView {
                 placeholder: "브랜드명을 입력해주세요",
                 focus: .brandName,
                 focusedField: $focusedField,
-                text: $brandName
+                text: $inputState.brandName
             )
         }
     }
