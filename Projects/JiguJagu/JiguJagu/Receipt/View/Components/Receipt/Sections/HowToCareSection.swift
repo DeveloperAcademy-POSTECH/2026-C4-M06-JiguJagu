@@ -10,11 +10,13 @@ import SwiftUI
 struct HowToCareSection: View {
     
     let careTips: [String]
+    
     var body: some View {
-        
         VStack(spacing: 14) {
+            
             Text("How to care")
                 .font(Font.arrayFont.h0)
+                .frame(maxWidth: .infinity, alignment: .center)
             
             ForEach(Array(careTips.enumerated()), id: \.offset) { index, tip in
                 HStack(alignment: .top, spacing: 8) {
@@ -27,10 +29,13 @@ struct HowToCareSection: View {
                         .font(Font.pretendard.body3)
                         .foregroundStyle(Color.brown700)
                         .lineSpacing(4)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
+                .frame(width: 280, alignment: .leading)
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity)
     }
 }
 

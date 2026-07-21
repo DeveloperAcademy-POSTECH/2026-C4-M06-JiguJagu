@@ -13,6 +13,25 @@ struct InfoSection: View {
     let brandName: String
     let productName: String
     let productImageURL: String?
+    let mockImageName: String? // TODO: Mock 이미지 로드를 위한 변수 (추후 삭제)
+    
+    @ViewBuilder
+    private var mockImage: some View {
+        if let mockImageName {
+            Image(mockImageName)
+                .resizable()
+                .scaledToFit()
+                .overlay {
+                    Gradient.Clothes
+                }
+                .frame(height: 220)
+        } else {
+            Text("이미지를\n로드할 수 없습니다")
+                .multilineTextAlignment(.center)
+                .foregroundStyle(.gray)
+                .frame(height: 220)
+        }
+    }
     
     var body: some View {
         
@@ -42,31 +61,15 @@ struct InfoSection: View {
                                 Gradient.Clothes
                             }
                     case .failure:
-                        Image("MockProduct")
-                            .resizable()
-                            .scaledToFit()
-                            .overlay {
-                                Gradient.Clothes
-                            }
+                        mockImage
                     @unknown default:
-                        Image("MockProduct")
-                            .resizable()
-                            .scaledToFit()
-                            .overlay {
-                                Gradient.Clothes
-                            }
+                        mockImage
                         
                     }
                 }
                 .frame(height: 220)
             } else {
-                Image("MockProduct")
-                    .resizable()
-                    .scaledToFit()
-                    .overlay {
-                        Gradient.Clothes
-                    }
-                    .frame(height: 220)
+                mockImage
             }
         }
     }
@@ -86,6 +89,7 @@ extension Gradient {
                 )
             ],
             startPoint: UnitPoint(x: 0.5, y: 0.5),
+            
             endPoint: UnitPoint(x: 0.5, y: 0.84)
         )
     }
@@ -96,6 +100,7 @@ extension Gradient {
         category: "[ 상의 > 니트 ]",
         brandName: "CHICKS",
         productName: "더블 스트라이프 카라 니트",
-        productImageURL: nil
+        productImageURL: nil,
+        mockImageName: "P1"
     )
 }
