@@ -26,21 +26,36 @@ struct RegisterProductInfoView: View {
 extension RegisterProductInfoView {
 
     private var header: some View {
-        Button(action: onBack) {
-            Image(systemName: "arrow.backward")
-                .font(.system(size: 22, weight: .regular))
-                .foregroundStyle(Color.grayScale900)
+        HStack {
+            Button(action: onBack) {
+                Image(systemName: "arrow.backward")
+                    .font(.system(size: 22, weight: .regular))
+                    .foregroundStyle(Color.grayScale900)
+                    .frame(width: 44, height: 44)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("뒤로가기")
+
+            Spacer()
+
+            Image("BrownLogo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 108, height: 28)
+                .accessibilityLabel("오래입자구")
+
+            Spacer()
+
+            Color.clear
                 .frame(width: 44, height: 44)
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel("뒤로가기")
         .padding(.horizontal, Layout.horizontalPadding)
         .padding(.top, Layout.headerTopPadding)
     }
 
     private var content: some View {
         VStack(alignment: .leading, spacing: 24) {
-            RegisterStepIndicatorView(currentStep: 3, totalSteps: 3)
+            stepSection
 
             VStack(alignment: .leading, spacing: 8) {
                 Text("제품명을 입력해주세요")
@@ -54,6 +69,10 @@ extension RegisterProductInfoView {
         }
         .padding(.horizontal, Layout.horizontalPadding)
         .padding(.top, Layout.contentTopPadding)
+    }
+
+    private var stepSection: some View {
+        RegisterStepIndicatorView(currentStep: 3, totalSteps: 3)
     }
 
     private var summaryText: String {
@@ -73,8 +92,8 @@ extension RegisterProductInfoView {
 
 private enum Layout {
     static let horizontalPadding: CGFloat = 16
-    static let headerTopPadding: CGFloat = 73
-    static let contentTopPadding: CGFloat = 24
+    static let headerTopPadding: CGFloat = 14
+    static let contentTopPadding: CGFloat = 36
 }
 
 #Preview {
