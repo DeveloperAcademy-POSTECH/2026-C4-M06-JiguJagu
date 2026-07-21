@@ -11,7 +11,7 @@ struct ReceiptTopActions: View {
     var body: some View {
         HStack {
             Button {
-                // TODO: 홈 이동
+                NotificationCenter.default.post(name: .goHome, object: nil)
             } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 18, weight: .bold))
