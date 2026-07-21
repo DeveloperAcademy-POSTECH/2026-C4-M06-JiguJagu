@@ -11,6 +11,8 @@ struct SearchTopBar: View {
     
     @Binding var searchText: String
     
+    var onSearch: () -> Void = {}
+    
     var body: some View {
         HStack(spacing: 12) {
             
@@ -22,7 +24,8 @@ struct SearchTopBar: View {
             }
             
             SearchBar(
-                text: $searchText
+                text: $searchText,
+                onSearch: onSearch
             )
         }
     }

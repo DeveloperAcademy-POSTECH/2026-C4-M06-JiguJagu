@@ -10,36 +10,6 @@
 
 import Foundation
 
-// MARK: - Response DTO
-
-/// 네이버 쇼핑 검색 API 최상위 응답
-struct NaverShoppingResponse: Decodable {
-    let lastBuildDate: String
-    let total: Int
-    let start: Int
-    let display: Int
-    let items: [NaverShoppingItem]
-}
-
-/// 검색 결과 상품 1건
-/// - 주의: brand / maker 는 판매자가 채우는 값이라 빈 문자열("")로 오는 경우가 많음
-/// - 주의: title 에는 <b> 하이라이트 태그와 HTML 엔티티가 포함됨
-struct NaverShoppingItem: Decodable {
-    let title: String        // 상품명 (HTML 태그 포함)
-    let link: String         // 상품 페이지 URL
-    let image: String        // 상품 이미지 URL
-    let lprice: String       // 최저가 (문자열)
-    let hprice: String       // 최고가 (문자열, 없으면 "")
-    let mallName: String     // 판매 쇼핑몰
-    let productId: String
-    let productType: String
-    let brand: String        // 브랜드 (예: 나이키) — 비어있을 수 있음
-    let maker: String        // 제조사 — 비어있을 수 있음
-    let category1: String
-    let category2: String
-    let category3: String    // 예: 아우터
-    let category4: String    // 예: 재킷
-}
 
 // MARK: - Error
 
@@ -130,7 +100,7 @@ final class NaverShoppingService {
         }
 
         do {
-            let decoded = try JSONDecoder().decode(NaverShoppingResponse.self, from: data)
+            let decoded = try JSONDecoder().decode(NaverShoppingResponseDTO.self, from: data)
             return decoded.items
         } catch {
             throw NaverShoppingError.decodingFailed(error)

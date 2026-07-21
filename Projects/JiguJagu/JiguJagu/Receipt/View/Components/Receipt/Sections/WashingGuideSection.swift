@@ -43,22 +43,22 @@ struct WashingGuideSection: View {
         guides: [
             WashingGuide(
                 id: "handwash",
-                washingIcon: "wash",
+                washingIcon: "HandwashOnly",
                 washingDescription: "30°C 이하 손세탁"
             ),
             WashingGuide(
                 id: "bleach",
-                washingIcon: "bleach",
+                washingIcon: "DoNotBleach",
                 washingDescription: "표백제 사용 금지"
             ),
             WashingGuide(
                 id: "iron",
-                washingIcon: "iron",
+                washingIcon: "Iron",
                 washingDescription: "저온 다림질"
             ),
             WashingGuide(
                 id: "dry",
-                washingIcon: "dry",
+                washingIcon: "DryInShade",
                 washingDescription: "자연 건조"
             )
         ]

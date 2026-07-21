@@ -9,86 +9,143 @@ import SwiftUI
 
 struct SearchView: View {
     
-    @State private var searchText = ""
+    @State private var searchText: String
+    @State private var submittedSearchText: String
+    @State private var items: [Clothing]
+    @State private var isSearching = false
+    @State private var selectedItem: Clothing?
     
-    let items: [Clothing]
+    private let initialQuery: String?
+    
+    init(items: [Clothing] = [], initialQuery: String? = nil) {
+        _items = State(initialValue: items)
+        _searchText = State(initialValue: initialQuery ?? "")
+        _submittedSearchText = State(initialValue: initialQuery ?? "")
+        self.initialQuery = initialQuery
+    }
     
     private var filteredItems: [Clothing] {
-        guard !searchText.isEmpty else {
+        guard !submittedSearchText.isEmpty else {
             return items
         }
         
         return items.filter {
-            $0.brand.localizedCaseInsensitiveContains(searchText) ||
-            $0.productName.localizedCaseInsensitiveContains(searchText)
+            $0.brand.localizedCaseInsensitiveContains(submittedSearchText) ||
+            $0.productName.localizedCaseInsensitiveContains(submittedSearchText)
         }
     }
     
     var body: some View {
-        ScrollViewReader { proxy in
-            ZStack(alignment: .bottomTrailing) {
-                if filteredItems.isEmpty {
-                    VStack(spacing: 20) {
-                        Color.clear
-                            .frame(height: 0)
-                        
-                        SearchTopBar(searchText: $searchText)
-                        
-                        SearchResultSummary(
-                            count: 0,
-                            action: {}
-                        )
-                        
-                        GeometryReader { geometry in
-                            Text("검색 결과가 없습니다")
-                                .font(Font.pretendard.head3)
-                                .foregroundStyle(Color.grayScale600)
-                                .frame(width: geometry.size.width, height: geometry.size.height, alignment: .center)
-                        }
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 20)
-                } else {
+        NavigationStack {
+            ScrollViewReader { proxy in
+                ZStack(alignment: .bottomTrailing) {
                     ScrollView {
                         VStack(spacing: 20) {
                             Color.clear
                                 .frame(height: 0)
                                 .id("top")
                             
-                            SearchTopBar(
-                                searchText: $searchText
-                            )
+                            searchBar()
                             
                             SearchResultSummary(
                                 count: filteredItems.count,
                                 action: {}
                             )
                             
-                            SearchResultGrid(
-                                items: filteredItems
-                            )
+                            if filteredItems.isEmpty {
+                                Text("검색 결과가 없습니다.")
+                                    .font(Font.pretendard.head3)
+                                    .foregroundStyle(Color.grayScale600)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.top, 280)
+                            } else {
+                                SearchResultGrid(
+                                    items: filteredItems,
+                                    onSelect: { item in
+                                        selectedItem = item
+                                    }
+                                )
+                            }
                         }
                         .padding(.horizontal, 16)
                         .padding(.bottom, 20)
                     }
+                    
+                    if !filteredItems.isEmpty {
+                        BottomGradientOverlay()
+                    }
+                    
+                    FloatingUpButton {
+                        scrollToTop(proxy)
+                    }
+                    .padding(.trailing, 35.5)
+                    .padding(.bottom, 33)
                 }
-                
-                if !filteredItems.isEmpty {
-                    BottomGradientOverlay()
+                .ignoresSafeArea(edges: .bottom)
+                .navigationDestination(isPresented: Binding(
+                    get: { selectedItem != nil },
+                    set: { if !$0 { selectedItem = nil } }
+                )) {
+                    if let item = selectedItem {
+                        RegisterConfirmView(
+                            clothing: item
+                        )
+                    }
                 }
-                
-                FloatingUpButton {
-                    scrollToTop(proxy)
-                }
-                .padding(.trailing, 35.5)
-                .padding(.bottom, 33)
             }
-            .ignoresSafeArea(edges: .bottom)
+            .navigationBarBackButtonHidden(true)
+            .task {
+                if let initialQuery, !initialQuery.isEmpty {
+                    await searchNaver(query: initialQuery)
+                }
+            }
         }
     }
 }
 
 private extension SearchView {
+    
+    @ViewBuilder
+    func searchBar() -> some View {
+        SearchTopBar(
+            searchText: $searchText,
+            onSearch: {
+                submittedSearchText = searchText
+                Task {
+                    await searchNaver(query: searchText)
+                }
+            }
+        )
+    }
+    
+    func searchNaver(query: String) async {
+        let query = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        submittedSearchText = query
+        
+        guard !query.isEmpty else {
+            return
+        }
+        
+        isSearching = true
+        
+        do {
+            let service = NaverShoppingService(
+                clientID: try APIConfig.naverClientID,
+                clientSecret: try APIConfig.naverClientSecret
+            )
+            
+            let results = try await service.search(
+                query: query,
+                display: 10
+            )
+            
+            items = results.map(Clothing.init(from:))
+        } catch {
+            print("네이버 검색 실패:", error.localizedDescription)
+        }
+        
+        isSearching = false
+    }
     
     func scrollToTop(_ proxy: ScrollViewProxy) {
         withAnimation(.easeInOut(duration: 0.25)) {
@@ -102,6 +159,7 @@ private extension SearchView {
 
 #Preview {
     SearchView(
-        items: Clothing.mocks
+        items: [],
+        initialQuery: "버버리"
     )
 }
