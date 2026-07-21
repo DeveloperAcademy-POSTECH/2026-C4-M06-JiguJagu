@@ -124,15 +124,8 @@ extension RegisterDetailSelectionView {
 
     private var nextButton: some View {
         Button {
-            guard let selectedSubcategory, let selectedColor else { return }
-
-            onNext(
-                RegisterDetailSelection(
-                    mainCategory: category,
-                    subcategory: selectedSubcategory,
-                    color: selectedColor
-                )
-            )
+            guard let selectedDetailSelection else { return }
+            onNext(selectedDetailSelection)
         } label: {
             Text("다음")
                 .font(.pretendard.head3)
@@ -143,11 +136,49 @@ extension RegisterDetailSelectionView {
                 .clipShape(Capsule())
         }
         .buttonStyle(.plain)
-        .disabled(selectedSubcategory == nil || selectedColor == nil)
-        .opacity(selectedSubcategory == nil || selectedColor == nil ? 0.45 : 1)
+        .disabled(!isNextButtonEnabled)
+        .opacity(isNextButtonEnabled ? 1 : 0.45)
         .padding(.horizontal, Layout.horizontalPadding)
         .padding(.bottom, Layout.nextButtonBottomPadding)
-        .accessibilityLabel("하위 카테고리와 색상 선택 후 다음")
+        .accessibilityLabel(nextButtonAccessibilityLabel)
+        .accessibilityHint(nextButtonAccessibilityHint)
+    }
+
+    private var selectedDetailSelection: RegisterDetailSelection? {
+        guard let selectedSubcategory, let selectedColor else {
+            return nil
+        }
+
+        return RegisterDetailSelection(
+            mainCategory: category,
+            subcategory: selectedSubcategory,
+            color: selectedColor
+        )
+    }
+
+    private var isNextButtonEnabled: Bool {
+        selectedDetailSelection != nil
+    }
+
+    private var nextButtonAccessibilityLabel: String {
+        switch (selectedSubcategory, selectedColor) {
+        case (.some(let subcategory), .some(let color)):
+            return "\(subcategory.title), \(color.title) 선택 후 다음"
+        case (.some(let subcategory), .none):
+            return "\(subcategory.title), 색상 선택 후 다음"
+        case (.none, .some(let color)):
+            return "\(color.title), 하위 카테고리 선택 후 다음"
+        case (.none, .none):
+            return "하위 카테고리와 색상 선택 후 다음"
+        }
+    }
+
+    private var nextButtonAccessibilityHint: String {
+        if isNextButtonEnabled {
+            return "선택한 상세 정보로 옷 등록을 이어갑니다"
+        }
+
+        return "하위 카테고리와 색상을 모두 선택해야 다음 단계로 이동할 수 있습니다"
     }
 }
 
