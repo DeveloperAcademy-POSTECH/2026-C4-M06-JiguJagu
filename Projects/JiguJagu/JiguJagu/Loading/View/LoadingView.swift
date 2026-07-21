@@ -35,6 +35,12 @@ struct LoadingView: View {
         }
         .background(Color.white)
         .ignoresSafeArea()
+        .onAppear {
+            controller.startProgressLoop()
+        }
+        .onDisappear {
+            controller.stopProgressLoop()
+        }
     }
 }
 
@@ -42,7 +48,7 @@ private extension LoadingView {
     var loadingContent: some View {
         VStack(spacing: 11) {
             VStack(spacing: 10) {
-                LoadingIllustrationView()
+                LoadingAnimationView()
 
                 Text(controller.progressState.message)
                     .font(.pretendard.head5)
