@@ -131,7 +131,7 @@ struct CaptureConfirmView: View {
             // 재촬영 (보조 · 밝은 배경)
             Button(action: onRetake) {
                 Text("재촬영")
-                    .font(.pretendard.body6)
+                    .font(.pretendard.head3)
                     .foregroundStyle(Color.grayScale900)
                     .frame(width: 108)
                     .frame(height: 52)
@@ -142,7 +142,7 @@ struct CaptureConfirmView: View {
             // 확인 (주요 · Primary)
             Button(action: onConfirm) {
                 Text("확인")
-                    .font(.pretendard.body6)
+                    .font(.pretendard.head3)
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .frame(height: 52)
