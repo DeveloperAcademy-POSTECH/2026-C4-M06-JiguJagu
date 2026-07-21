@@ -52,7 +52,7 @@ struct ReceiptView: View {
                                         .scaledToFit()
                                         .frame(width: 291.78, height: 3.66)
                                     
-                                    Text("GOOD FOR EARTH • GOOD FOR ENVIRONMENT")
+                                    Text("GOOD FOR EARTH * GOOD FOR ENVIRONMENT")
                                         .font(Font.arrayFont.sub2)
                                     
                                     Image("StarDevider")
