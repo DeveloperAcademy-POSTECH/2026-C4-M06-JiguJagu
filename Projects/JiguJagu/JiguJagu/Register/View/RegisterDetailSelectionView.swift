@@ -16,7 +16,7 @@ struct RegisterDetailSelectionView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            header
+            RegisterHeaderView(onBack: onBack)
 
             VStack(alignment: .leading, spacing: 32) {
                 RegisterStepIndicatorView(currentStep: 2, totalSteps: 3)
@@ -38,34 +38,6 @@ struct RegisterDetailSelectionView: View {
 
 // MARK: - Subviews
 extension RegisterDetailSelectionView {
-
-    private var header: some View {
-        HStack {
-            Button(action: onBack) {
-                Image(systemName: "arrow.backward")
-                    .font(.system(size: 22, weight: .regular))
-                    .foregroundStyle(Color.grayScale900)
-                    .frame(width: 44, height: 44)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("뒤로가기")
-
-            Spacer()
-
-            Image("BrownLogo")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 108, height: 28)
-                .accessibilityLabel("오래입자구")
-
-            Spacer()
-
-            Color.clear
-                .frame(width: 44, height: 44)
-        }
-        .padding(.horizontal, Layout.horizontalPadding)
-        .padding(.top, Layout.headerTopPadding)
-    }
 
     private var titleSection: some View {
         VStack(alignment: .leading, spacing: 8) {
