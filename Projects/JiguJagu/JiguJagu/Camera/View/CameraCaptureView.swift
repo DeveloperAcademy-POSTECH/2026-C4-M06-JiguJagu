@@ -234,9 +234,18 @@ struct CameraCaptureView: View {
 
 /// 옷을 먼저 촬영하고, 택을 촬영하거나 "택 촬영 건너뛰기"를 누르면
 /// 앞서 찍은 옷 사진으로 상품을 검색(식별)하는 플로우.
+///
+/// 각 촬영 뒤에는 확인 화면(`CaptureConfirmView`)을 거쳐,
+/// 재촬영하거나 확인 후 다음 단계로 진행합니다.
 struct LaundryCaptureFlow: View {
     
-    enum Step { case clothing, tag, result }
+    enum Step {
+        case clothing         // 옷 촬영
+        case clothingConfirm  // 옷 사진 확인
+        case tag              // 세탁 라벨 촬영
+        case tagConfirm       // 세탁 라벨 사진 확인
+        case result           // 분석(상품 검색)
+    }
     
     @Environment(\.dismiss) private var dismiss
     @State private var step: Step = .clothing
@@ -252,9 +261,19 @@ struct LaundryCaptureFlow: View {
                 onHelperAction: { /* 옷 검색 화면으로 이동 */ },
                 onCapture: { image in
                     clothingImage = image
-                    step = .tag                               // 다음 단계로
+                    step = .clothingConfirm                   // 촬영 → 확인 화면
                 }
             )
+            
+        case .clothingConfirm:
+            if let clothingImage {
+                CaptureConfirmView(
+                    image: clothingImage,
+                    onClose: { dismiss() },                   // X → 플로우 종료
+                    onRetake: { step = .clothing },           // 재촬영 → 옷 촬영으로
+                    onConfirm: { step = .tag }                // 확인 → 세탁 라벨 촬영으로
+                )
+            }
             
         case .tag:
             CameraCaptureView(
@@ -263,9 +282,19 @@ struct LaundryCaptureFlow: View {
                 onHelperAction: { step = .result },           // 세탁 라벨 촬영 건너뛰기 → 상품 검색
                 onCapture: { image in
                     tagImage = image
-                    step = .result                            // 세탁 라벨 촬영 후에도 상품 검색
+                    step = .tagConfirm                        // 촬영 → 확인 화면
                 }
             )
+            
+        case .tagConfirm:
+            if let tagImage {
+                CaptureConfirmView(
+                    image: tagImage,
+                    onClose: { dismiss() },                   // X → 플로우 종료
+                    onRetake: { step = .tag },                // 재촬영 → 세탁 라벨 촬영으로
+                    onConfirm: { step = .result }             // 확인 → 분석으로
+                )
+            }
             
         case .result:
             ProductResultView(
