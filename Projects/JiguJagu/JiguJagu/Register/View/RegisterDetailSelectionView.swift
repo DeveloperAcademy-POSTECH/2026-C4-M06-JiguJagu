@@ -24,6 +24,7 @@ struct RegisterDetailSelectionView: View {
                 titleSection
                 subcategorySelector
                 colorSelector
+                    .padding(.top, Layout.colorSectionAdditionalTopPadding)
             }
             .padding(.horizontal, Layout.horizontalPadding)
             .padding(.top, Layout.contentTopPadding)
@@ -104,12 +105,20 @@ extension RegisterDetailSelectionView {
     }
 
     private var colorSelector: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("색상을 선택해주세요")
-                .font(.pretendard.head1)
-                .foregroundStyle(Color.grayScale900)
-                .lineLimit(2)
-                .fixedSize(horizontal: false, vertical: true)
+        VStack(alignment: .leading, spacing: Layout.selectorTopSpacing) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("제품 색상을 골라주세요")
+                    .font(.pretendard.head1)
+                    .foregroundStyle(Color.grayScale900)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Text("제품 색상을 알아두면 세탁방법을\n더 잘 알려드릴수 있어요")
+                    .font(.pretendard.body4)
+                    .foregroundStyle(Color.grayScale900)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
 
             RegisterChipFlowLayout(
                 horizontalSpacing: Layout.chipHorizontalSpacing,
@@ -139,14 +148,14 @@ extension RegisterDetailSelectionView {
                 .font(.pretendard.head3)
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
-                .frame(height: Layout.nextButtonHeight)
+                .frame(height: RegisterActionButtonLayout.nextButtonHeight)
                 .background(nextButtonBackgroundColor)
                 .clipShape(Capsule())
         }
         .buttonStyle(.plain)
         .disabled(!isNextButtonEnabled)
         .padding(.horizontal, Layout.horizontalPadding)
-        .padding(.bottom, Layout.nextButtonBottomPadding)
+        .padding(.bottom, RegisterActionButtonLayout.nextButtonBottomPadding)
         .accessibilityLabel(nextButtonAccessibilityLabel)
         .accessibilityHint(nextButtonAccessibilityHint)
         .animation(.easeInOut(duration: 0.15), value: isNextButtonEnabled)
@@ -198,11 +207,11 @@ private enum Layout {
     static let horizontalPadding: CGFloat = 16
     static let headerTopPadding: CGFloat = 14
     static let contentTopPadding: CGFloat = 36
+    static let selectorTopSpacing: CGFloat = 32
     static let chipHorizontalSpacing: CGFloat = 8
     static let chipVerticalSpacing: CGFloat = 16
     static let colorChipVerticalSpacing: CGFloat = 12
-    static let nextButtonHeight: CGFloat = 52
-    static let nextButtonBottomPadding: CGFloat = 52
+    static let colorSectionAdditionalTopPadding: CGFloat = 84
 }
 
 #Preview {

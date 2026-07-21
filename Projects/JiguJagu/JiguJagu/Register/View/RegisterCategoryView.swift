@@ -121,7 +121,7 @@ extension RegisterCategoryView {
                 .font(.pretendard.head3)
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
-                .frame(height: Layout.nextButtonHeight)
+                .frame(height: RegisterActionButtonLayout.nextButtonHeight)
                 .background(Color.primary500)
                 .clipShape(Capsule())
         }
@@ -129,7 +129,7 @@ extension RegisterCategoryView {
         .disabled(selectedCategory == nil)
         .opacity(selectedCategory == nil ? 0.45 : 1)
         .padding(.horizontal, Layout.horizontalPadding)
-        .padding(.bottom, Layout.nextButtonBottomPadding)
+        .padding(.bottom, RegisterActionButtonLayout.nextButtonBottomPadding)
         .accessibilityLabel(nextButtonAccessibilityLabel)
         .accessibilityHint("선택한 카테고리로 옷 등록을 이어갑니다")
     }
@@ -149,8 +149,6 @@ private enum Layout {
     static let contentTopPadding: CGFloat = 36
     static let gridColumnSpacing: CGFloat = 20
     static let gridRowSpacing: CGFloat = 24
-    static let nextButtonHeight: CGFloat = 52
-    static let nextButtonBottomPadding: CGFloat = 52
 }
 
 private struct RegisterCategoryItem: Identifiable {
