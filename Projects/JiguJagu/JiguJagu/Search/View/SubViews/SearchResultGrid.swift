@@ -27,7 +27,6 @@ struct SearchResultGrid: View {
                 } label: {
                     ClothingCard(item: item)
                 }
-                .buttonStyle(.plain)
             }
         }
     }
