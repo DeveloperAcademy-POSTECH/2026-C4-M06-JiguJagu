@@ -58,13 +58,15 @@ extension RegisterProductInfoView {
             stepSection
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("제품명을 입력해주세요")
+                Text("제품 이름을 입력해주세요")
                     .font(.pretendard.head0)
                     .foregroundStyle(Color.grayScale900)
 
-                Text(summaryText)
+                Text("정확하지 않아도 괜찮아요! \"검정 니트\"처럼\n나만 알아볼 수 있는 이름이면 충분해요.")
                     .font(.pretendard.body4)
-                    .foregroundStyle(Color.grayScale600)
+                    .foregroundStyle(Color.grayScale900)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(.horizontal, Layout.horizontalPadding)
@@ -73,20 +75,6 @@ extension RegisterProductInfoView {
 
     private var stepSection: some View {
         RegisterStepIndicatorView(currentStep: 3, totalSteps: 3)
-    }
-
-    private var summaryText: String {
-        var values = [draft.mainCategory.displayName]
-
-        if let subcategory = draft.subcategory {
-            values.append(subcategory.title)
-        }
-
-        if let color = draft.color {
-            values.append(color.title)
-        }
-
-        return values.joined(separator: " · ")
     }
 }
 
