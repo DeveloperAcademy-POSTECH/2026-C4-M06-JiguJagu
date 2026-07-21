@@ -13,15 +13,29 @@ struct RegisterProductInfoView: View {
 
     @State private var productName = ""
     @State private var brandName = ""
+    @FocusState private var focusedField: RegisterProductInputFocus?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            header
-            content
+        ZStack {
+            Color.white
+                .ignoresSafeArea()
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    dismissKeyboard()
+                }
 
-            Spacer()
+            VStack(alignment: .leading, spacing: 0) {
+                header
+                content
+
+                Spacer()
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        dismissKeyboard()
+                    }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
-        .background(Color.white)
     }
 }
 
@@ -90,15 +104,27 @@ extension RegisterProductInfoView {
             RegisterProductInputField(
                 label: "제품명",
                 placeholder: "제품명이나 옷 이름을 등록해주세요",
+                focus: .productName,
+                focusedField: $focusedField,
                 text: $productName
             )
 
             RegisterProductInputField(
                 label: "브랜드",
                 placeholder: "브랜드명을 입력해주세요",
+                focus: .brandName,
+                focusedField: $focusedField,
                 text: $brandName
             )
         }
+    }
+}
+
+// MARK: - Actions
+extension RegisterProductInfoView {
+
+    private func dismissKeyboard() {
+        focusedField = nil
     }
 }
 

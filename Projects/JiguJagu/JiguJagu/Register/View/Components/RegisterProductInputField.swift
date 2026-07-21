@@ -7,9 +7,16 @@
 
 import SwiftUI
 
+enum RegisterProductInputFocus: Hashable {
+    case productName
+    case brandName
+}
+
 struct RegisterProductInputField: View {
     let label: String
     let placeholder: String
+    let focus: RegisterProductInputFocus
+    let focusedField: FocusState<RegisterProductInputFocus?>.Binding
     @Binding var text: String
 
     var body: some View {
@@ -33,6 +40,10 @@ struct RegisterProductInputField: View {
             .autocorrectionDisabled(true)
             .textContentType(.none)
             .submitLabel(.done)
+            .focused(focusedField, equals: focus)
+            .onSubmit {
+                focusedField.wrappedValue = nil
+            }
 
             Button {
                 text.removeAll()
@@ -62,18 +73,32 @@ private enum Layout {
 }
 
 #Preview {
-    VStack(spacing: 12) {
-        RegisterProductInputField(
-            label: "제품명",
-            placeholder: "제품명이나 옷 이름을 등록해주세요",
-            text: .constant("")
-        )
+    RegisterProductInputFieldPreview()
+}
 
-        RegisterProductInputField(
-            label: "브랜드",
-            placeholder: "브랜드명을 입력해주세요",
-            text: .constant("오래입자구")
-        )
+private struct RegisterProductInputFieldPreview: View {
+    @State private var productName = ""
+    @State private var brandName = "오래입자구"
+    @FocusState private var focusedField: RegisterProductInputFocus?
+
+    var body: some View {
+        VStack(spacing: 12) {
+            RegisterProductInputField(
+                label: "제품명",
+                placeholder: "제품명이나 옷 이름을 등록해주세요",
+                focus: .productName,
+                focusedField: $focusedField,
+                text: $productName
+            )
+
+            RegisterProductInputField(
+                label: "브랜드",
+                placeholder: "브랜드명을 입력해주세요",
+                focus: .brandName,
+                focusedField: $focusedField,
+                text: $brandName
+            )
+        }
+        .padding(16)
     }
-    .padding(16)
 }
