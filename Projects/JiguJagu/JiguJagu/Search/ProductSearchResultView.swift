@@ -4,10 +4,6 @@
 //
 //  Created by SIA on 7/21/26.
 //
-//  위치: Search/ProductSearchResultView.swift
-//  분석 결과(ClothingAnalysis)로 네이버 쇼핑을 검색해
-//  결과 그리드(SearchView)로 이어주는 화면.
-//
 
 import SwiftUI
 
@@ -18,11 +14,6 @@ struct ProductSearchResultView: View {
     @State private var items: [Clothing] = []
     @State private var isLoading = true
     @State private var errorMessage: String?
-
-    private let service = NaverShoppingService(
-        clientID: APIConfig.naverClientID,
-        clientSecret: APIConfig.naverClientSecret
-    )
 
     var body: some View {
         Group {
@@ -73,9 +64,10 @@ struct ProductSearchResultView: View {
         isLoading = true
         errorMessage = nil
         do {
+            let service = try makeService()          // 키 누락 시 APIConfigError throw
             let results = try await service.search(
                 query: analysis.makeSearchQuery(),
-                display: 10                     // 정확/유사 상품 10개
+                display: 10                            // 정확/유사 상품 10개
             )
             let mapped = results.map(Clothing.init(from:))
             items = mapped
@@ -83,8 +75,17 @@ struct ProductSearchResultView: View {
                 errorMessage = "검색 결과가 없어요. 다른 각도로 다시 촬영해 보세요."
             }
         } catch {
+            // APIConfigError(키 누락) 또는 네트워크/디코딩 에러가 여기로 전달됨
             errorMessage = error.localizedDescription
         }
         isLoading = false
+    }
+
+    /// 키가 설정돼 있지 않으면 APIConfigError 를 던진다.
+    private func makeService() throws -> NaverShoppingService {
+        NaverShoppingService(
+            clientID: try APIConfig.naverClientID,
+            clientSecret: try APIConfig.naverClientSecret
+        )
     }
 }
