@@ -131,14 +131,14 @@ struct CameraCaptureView: View {
             // 가운데: 플래시 토글
             Button(action: camera.toggleFlash) {
                 Image(systemName: camera.flashIconName)
-                    .font(.system(size: 20, weight: .medium))
+                    .font(.system(size: 24, weight: .medium))
             }
             
             // 왼쪽: 닫기 / 뒤로
             HStack {
                 Button(action: onLeadingAction) {
                     Image(systemName: config.leadingAction == .close ? "xmark" : "chevron.left")
-                        .font(.system(size: 20, weight: .medium))
+                        .font(.system(size: 24, weight: .medium))
                 }
                 Spacer()
             }
@@ -166,11 +166,11 @@ struct CameraCaptureView: View {
                     Text(action).underline()
                 }
             }
-            .font(.system(size: 15))
+            .font(.pretendard.body4)
             .transition(.opacity)
         } else {
             Text(config.instruction)
-                .font(.system(size: 15))
+                .font(.pretendard.body4)
         }
     }
     
