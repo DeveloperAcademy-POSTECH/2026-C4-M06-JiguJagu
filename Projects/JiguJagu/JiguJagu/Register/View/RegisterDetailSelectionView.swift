@@ -9,7 +9,7 @@ import SwiftUI
 struct RegisterDetailSelectionView: View {
     let category: RegisterMainCategory
     let onBack: () -> Void
-    let onNext: (RegisterDetailSelection) -> Void
+    let onNext: (RegisterDraft) -> Void
 
     @State private var selectedSubcategory: RegisterSubcategory?
     @State private var selectedColor: RegisterColorOption?
@@ -112,8 +112,8 @@ extension RegisterDetailSelectionView {
 
     private var nextButton: some View {
         Button {
-            guard let selectedDetailSelection else { return }
-            onNext(selectedDetailSelection)
+            guard let selectedDraft else { return }
+            onNext(selectedDraft)
         } label: {
             Text("다음")
                 .font(.pretendard.head3)
@@ -132,12 +132,12 @@ extension RegisterDetailSelectionView {
         .animation(.easeInOut(duration: 0.15), value: isNextButtonEnabled)
     }
 
-    private var selectedDetailSelection: RegisterDetailSelection? {
+    private var selectedDraft: RegisterDraft? {
         guard let selectedSubcategory, let selectedColor else {
             return nil
         }
 
-        return RegisterDetailSelection(
+        return RegisterDraft(
             mainCategory: category,
             subcategory: selectedSubcategory,
             color: selectedColor
@@ -145,7 +145,7 @@ extension RegisterDetailSelectionView {
     }
 
     private var isNextButtonEnabled: Bool {
-        selectedDetailSelection != nil
+        selectedDraft != nil
     }
 
     private var nextButtonBackgroundColor: Color {
@@ -187,7 +187,7 @@ private enum Layout {
 
 #Preview {
     RegisterDetailSelectionView(
-        category: .tops,
+        category: RegisterMainCategory.tops,
         onBack: {},
         onNext: { _ in }
     )

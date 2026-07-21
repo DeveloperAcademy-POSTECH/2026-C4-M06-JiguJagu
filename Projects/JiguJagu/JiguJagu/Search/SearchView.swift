@@ -13,6 +13,7 @@ struct SearchView: View {
     @State private var submittedSearchText: String
     @State private var items: [Clothing]
     @State private var isSearching = false
+    @State private var selectedItem: Clothing?
     
     private let initialQuery: String?
     
@@ -35,53 +36,68 @@ struct SearchView: View {
     }
     
     var body: some View {
-        ScrollViewReader { proxy in
-            ZStack(alignment: .bottomTrailing) {
-                ScrollView {
-                    VStack(spacing: 20) {
-                        Color.clear
-                            .frame(height: 0)
-                            .id("top")
-                        
-                        searchBar()
-                        
-                        SearchResultSummary(
-                            count: filteredItems.count,
-                            action: {}
-                        )
-                        
-                        if filteredItems.isEmpty {
-                            Text("검색 결과가 없습니다.")
-                                .font(Font.pretendard.head3)
-                                .foregroundStyle(Color.grayScale600)
-                                .frame(maxWidth: .infinity)
-                                .padding(.top, 280)
-                        } else {
-                            SearchResultGrid(
-                                items: filteredItems
+        NavigationStack {
+            ScrollViewReader { proxy in
+                ZStack(alignment: .bottomTrailing) {
+                    ScrollView {
+                        VStack(spacing: 20) {
+                            Color.clear
+                                .frame(height: 0)
+                                .id("top")
+                            
+                            searchBar()
+                            
+                            SearchResultSummary(
+                                count: filteredItems.count,
+                                action: {}
                             )
+                            
+                            if filteredItems.isEmpty {
+                                Text("검색 결과가 없습니다.")
+                                    .font(Font.pretendard.head3)
+                                    .foregroundStyle(Color.grayScale600)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.top, 280)
+                            } else {
+                                SearchResultGrid(
+                                    items: filteredItems,
+                                    onSelect: { item in
+                                        selectedItem = item
+                                    }
+                                )
+                            }
                         }
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 20)
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 20)
+                    
+                    if !filteredItems.isEmpty {
+                        BottomGradientOverlay()
+                    }
+                    
+                    FloatingUpButton {
+                        scrollToTop(proxy)
+                    }
+                    .padding(.trailing, 35.5)
+                    .padding(.bottom, 33)
                 }
-                
-                if !filteredItems.isEmpty {
-                    BottomGradientOverlay()
+                .ignoresSafeArea(edges: .bottom)
+                .navigationDestination(isPresented: Binding(
+                    get: { selectedItem != nil },
+                    set: { if !$0 { selectedItem = nil } }
+                )) {
+                    if let item = selectedItem {
+                        RegisterConfirmView(
+                            clothing: item
+                        )
+                    }
                 }
-                
-                FloatingUpButton {
-                    scrollToTop(proxy)
-                }
-                .padding(.trailing, 35.5)
-                .padding(.bottom, 33)
             }
-            .ignoresSafeArea(edges: .bottom)
-        }
-        .navigationBarBackButtonHidden(true)
-        .task {
-            if let initialQuery, !initialQuery.isEmpty {
-                await searchNaver(query: initialQuery)
+            .navigationBarBackButtonHidden(true)
+            .task {
+                if let initialQuery, !initialQuery.isEmpty {
+                    await searchNaver(query: initialQuery)
+                }
             }
         }
     }
@@ -144,6 +160,6 @@ private extension SearchView {
 #Preview {
     SearchView(
         items: [],
-        initialQuery: "칼하트 디트로이트 재킷"
+        initialQuery: "버버리"
     )
 }

@@ -8,17 +8,78 @@
 import SwiftUI
 
 struct RegisterConfirmView: View {
-    let image: UIImage?
-    let brand: String
-    let productName: String
+    
+    let clothing: Clothing
     var onBack: () -> Void = {}
-    @State private var selectedMainCategory = "상의"
-    @State private var selectedSubCategory = "니트"
+    @Environment(\.dismiss) private var dismiss
+    @State private var selectedMainCategory = ""
+    @State private var selectedSubCategory: ArchiveSubcategory?
     @State private var selectedColor: RegisterColorOption? = .colored
+    @State private var editableBrand: String = ""
+    @State private var editableProductName: String = ""
+    
+    private func convertMainCategory(
+        _ category: String
+    ) -> String {
+        switch category {
+        case let value where value.contains("상의") || value.contains("티셔츠") || value.contains("니트") || value.contains("셔츠"):
+            return "상의"
+        case let value where value.contains("하의") || value.contains("팬츠") || value.contains("바지"):
+            return "하의"
+        case let value where value.contains("아우터") || value.contains("자켓") || value.contains("코트") || value.contains("패딩"):
+            return "아우터"
+        default:
+            return "그 외"
+        }
+    }
+
+    private var availableSubcategories: [ArchiveSubcategory] {
+        switch selectedMainCategory {
+        case "상의":
+            return ArchiveSubcategory.tops
+        case "하의":
+            return ArchiveSubcategory.bottoms
+        case "아우터":
+            return ArchiveSubcategory.outers
+        default:
+            return []
+        }
+    }
+    
+    init(
+        clothing: Clothing,
+        onBack: @escaping () -> Void = {}
+    ) {
+        self.clothing = clothing
+        self.onBack = onBack
+        
+        _editableBrand = State(
+            initialValue: clothing.brand
+        )
+        
+        _editableProductName = State(
+            initialValue: clothing.productName
+        )
+        
+        _selectedMainCategory = State(
+            initialValue: convertMainCategory(clothing.category3)
+        )
+        
+        _selectedSubCategory = State(
+            initialValue: ArchiveSubcategory.all.first {
+                $0.title == clothing.category4
+            }
+        )
+    }
     
     var body: some View {
         ScrollView {
-            RegisterHeaderView(onBack: onBack)
+            RegisterHeaderView(
+                onBack: {
+                    onBack()
+                    dismiss()
+                }
+            )
             VStack(alignment: .leading, spacing: 24) {
                 
                 VStack(alignment: .leading, spacing: 4) {
@@ -32,13 +93,13 @@ struct RegisterConfirmView: View {
                 
                 HStack {
                     Spacer()
-                    ClothingImageCard(image: image)
+                    ClothingImageCard(url: clothing.productImageURL)
                     Spacer()
                 }
                 
                 RegisterInfoField(
                     title: "브랜드명",
-                    value: brand,
+                    value: $editableBrand,
                     titleFont: Font.pretendard.head4,
                     valueFont: Font.pretendard.head4,
                     titleColor: Color.grayScale900,
@@ -47,7 +108,7 @@ struct RegisterConfirmView: View {
                 
                 RegisterInfoField(
                     title: "제품명",
-                    value: productName,
+                    value: $editableProductName,
                     titleFont: Font.pretendard.head4,
                     valueFont: Font.pretendard.head4,
                     titleColor: Color.grayScale900,
@@ -60,43 +121,37 @@ struct RegisterConfirmView: View {
                     RegisterChipFlowLayout {
                         RegisterSelectionChip(title: "상의", isSelected: selectedMainCategory == "상의") {
                             selectedMainCategory = "상의"
+                            selectedSubCategory = nil
                         }
                         RegisterSelectionChip(title: "하의", isSelected: selectedMainCategory == "하의") {
                             selectedMainCategory = "하의"
+                            selectedSubCategory = nil
                         }
                         RegisterSelectionChip(title: "아우터", isSelected: selectedMainCategory == "아우터") {
                             selectedMainCategory = "아우터"
+                            selectedSubCategory = nil
                         }
                         RegisterSelectionChip(title: "그 외", isSelected: selectedMainCategory == "그 외") {
                             selectedMainCategory = "그 외"
+                            selectedSubCategory = nil
                         }
                     }
                 }
                 
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("세부 카테고리")
-                        .font(Font.pretendard.head4)
-                    RegisterChipFlowLayout {
-                        RegisterSelectionChip(title: "티셔츠", isSelected: selectedSubCategory == "티셔츠") {
-                            selectedSubCategory = "티셔츠"
-                        }
-                        RegisterSelectionChip(title: "니트", isSelected: selectedSubCategory == "니트") {
-                            selectedSubCategory = "니트"
-                        }
-                        RegisterSelectionChip(title: "후드", isSelected: selectedSubCategory == "후드") {
-                            selectedSubCategory = "후드"
-                        }
-                        RegisterSelectionChip(title: "피케/카라티", isSelected: selectedSubCategory == "피케/카라티") {
-                            selectedSubCategory = "피케/카라티"
-                        }
-                        RegisterSelectionChip(title: "맨투맨", isSelected: selectedSubCategory == "맨투맨") {
-                            selectedSubCategory = "맨투맨"
-                        }
-                        RegisterSelectionChip(title: "셔츠/블라우스", isSelected: selectedSubCategory == "셔츠/블라우스") {
-                            selectedSubCategory = "셔츠/블라우스"
-                        }
-                        RegisterSelectionChip(title: "그 외", isSelected: selectedSubCategory == "그 외") {
-                            selectedSubCategory = "그 외"
+                if selectedMainCategory != "그 외" {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("세부 카테고리")
+                            .font(Font.pretendard.head4)
+
+                        RegisterChipFlowLayout {
+                            ForEach(availableSubcategories) { category in
+                                RegisterSelectionChip(
+                                    title: category.title,
+                                    isSelected: selectedSubCategory?.id == category.id
+                                ) {
+                                    selectedSubCategory = category
+                                }
+                            }
                         }
                     }
                 }
@@ -143,13 +198,13 @@ struct RegisterConfirmView: View {
                 .padding(.top, 8)
             }
             .padding()
-        }
+        }.navigationBarBackButtonHidden(true)
     }
 }
 
 private struct RegisterInfoField: View {
     let title: String
-    let value: String
+    @Binding var value: String
     let titleFont: Font
     let valueFont: Font
     var titleColor: Color = Color.grayScale900
@@ -166,10 +221,20 @@ private struct RegisterInfoField: View {
                 .frame(height: 48)
                 .overlay {
                     HStack {
-                        Text(value)
+                        TextField("", text: $value)
                             .font(valueFont)
                             .foregroundStyle(valueColor)
-                        Spacer()
+                            .textFieldStyle(.plain)
+                        
+                        if !value.isEmpty {
+                            Button {
+                                value = ""
+                            } label: {
+                                Image(systemName: "xmark")
+                                    .foregroundStyle(Color.grayScale400)
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
                     .padding(.horizontal, 16)
                 }
@@ -178,7 +243,7 @@ private struct RegisterInfoField: View {
 }
 
 private struct ClothingImageCard: View {
-    let image: UIImage?
+    let url: URL?
     
     var body: some View {
         ZStack {
@@ -190,35 +255,48 @@ private struct ClothingImageCard: View {
                 }
                 .frame(width: 180, height: 182)
             
-            if let image {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 122, height: 121)
-            } else {
-                Text("이미지를 로드할 수 없습니다")
-                    .font(.pretendard.body5)
-                    .foregroundStyle(Color.grayScale400)
-                    .multilineTextAlignment(.center)
-                    .frame(width: 122, height: 121)
+            if let url {
+                
+                AsyncImage(url: url) { phase in
+                    
+                    switch phase {
+                        
+                    case .success(let image):
+                        
+                        image
+                            .resizable()
+                            .scaledToFit()
+                            .frame(
+                                width: 122,
+                                height: 121
+                            )
+                        
+                    default:
+                        
+                        Text("이미지를 로드할 수 없습니다")
+                            .font(.pretendard.body5)
+                            .foregroundStyle(Color.grayScale400)
+                        
+                    }
+                }
+                
+                .frame(width: 180, height: 182)
             }
         }
-        .frame(width: 180, height: 182)
     }
 }
 
-#Preview("이미지 있음") {
+#Preview {
     RegisterConfirmView(
-        image: UIImage(systemName: "P1"),
-        brand: "CHICKS",
-        productName: "더블 스트라이프 카라 니트"
-    )
-}
-
-#Preview("이미지 없음") {
-    RegisterConfirmView(
-        image: nil,
-        brand: "CHICKS",
-        productName: "더블 스트라이프 카라 니트"
+        clothing: Clothing(
+            from: NaverShoppingItem(
+                title: "더블 스트라이프 카라 니트",
+                image: "https://shopping-phinf.pstatic.net/sample.jpg",
+                brand: "CHICKS",
+                maker: "CHICKS",
+                category3: "상의",
+                category4: "니트"
+            )
+        )
     )
 }

@@ -9,7 +9,7 @@ import SwiftUI
 struct RegisterProductInfoView: View {
     let draft: RegisterDraft
     let onBack: () -> Void
-    let onNext: (RegisterProductInputState) -> Void
+    let onNext: (RegisterDraft, RegisterProductInputState) -> Void
 
     @State private var inputState = RegisterProductInputState()
     @FocusState private var focusedField: RegisterProductInputFocus?
@@ -108,7 +108,14 @@ extension RegisterProductInfoView {
         Button {
             guard isNextButtonEnabled else { return }
             dismissKeyboard()
-            onNext(inputState)
+
+            let updatedDraft = RegisterDraft(
+                mainCategory: draft.mainCategory,
+                subcategory: draft.subcategory,
+                color: draft.color
+            )
+
+            onNext(updatedDraft, inputState)
         } label: {
             Text("다음")
                 .font(.pretendard.head3)
@@ -179,6 +186,6 @@ private enum Layout {
             color: nil
         ),
         onBack: {},
-        onNext: { _ in }
+        onNext: { _, _ in }
     )
 }
