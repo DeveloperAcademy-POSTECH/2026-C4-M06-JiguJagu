@@ -9,5 +9,5 @@ import SwiftUI
 
 enum RegisterActionButtonLayout {
     static let nextButtonHeight: CGFloat = 52
-    static let nextButtonBottomPadding: CGFloat = 20
+    static let nextButtonBottomPadding: CGFloat = 40
 }

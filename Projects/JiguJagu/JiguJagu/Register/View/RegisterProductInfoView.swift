@@ -34,10 +34,13 @@ struct RegisterProductInfoView: View {
                         dismissKeyboard()
                     }
 
-                nextButton
+                if !isKeyboardFocused {
+                    nextButton
+                }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
+        .ignoresSafeArea(.keyboard, edges: .bottom)
     }
 }
 
@@ -92,6 +95,8 @@ extension RegisterProductInfoView {
             Text("제품 이름을 입력해주세요")
                 .font(.pretendard.head0)
                 .foregroundStyle(Color.grayScale900)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
 
             Text("정확하지 않아도 괜찮아요! \"검정 니트\"처럼\n나만 알아볼 수 있는 이름이면 충분해요.")
                 .font(.pretendard.body4)
@@ -99,6 +104,7 @@ extension RegisterProductInfoView {
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
         }
+        .accessibilityElement(children: .combine)
     }
 
     private var inputSection: some View {
@@ -119,6 +125,7 @@ extension RegisterProductInfoView {
                 text: $inputState.brandName
             )
         }
+        .accessibilityElement(children: .contain)
     }
 
     private var nextButton: some View {
@@ -146,6 +153,10 @@ extension RegisterProductInfoView {
 
     private var isNextButtonEnabled: Bool {
         inputState.hasProductName
+    }
+
+    private var isKeyboardFocused: Bool {
+        focusedField != nil
     }
 
     private var nextButtonBackgroundColor: Color {

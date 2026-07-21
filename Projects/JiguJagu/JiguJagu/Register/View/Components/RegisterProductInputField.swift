@@ -39,11 +39,7 @@ struct RegisterProductInputField: View {
             .textInputAutocapitalization(.never)
             .autocorrectionDisabled(true)
             .textContentType(.none)
-            .submitLabel(.done)
             .focused(focusedField, equals: focus)
-            .onSubmit {
-                focusedField.wrappedValue = nil
-            }
 
             Button {
                 text.removeAll()
@@ -54,12 +50,20 @@ struct RegisterProductInputField: View {
                     .frame(width: Layout.clearButtonSize, height: Layout.clearButtonSize)
             }
             .buttonStyle(.plain)
+            .opacity(text.isEmpty ? 0 : 1)
+            .disabled(text.isEmpty)
             .accessibilityLabel("\(label) 입력값 지우기")
+            .accessibilityHidden(text.isEmpty)
         }
         .padding(.horizontal, Layout.horizontalPadding)
         .frame(height: Layout.height)
         .background(Color.grayScale50)
         .clipShape(RoundedRectangle(cornerRadius: Layout.cornerRadius))
+        .contentShape(RoundedRectangle(cornerRadius: Layout.cornerRadius))
+        .onTapGesture {
+            focusedField.wrappedValue = focus
+        }
+        .accessibilityElement(children: .contain)
     }
 }
 
