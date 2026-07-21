@@ -20,7 +20,6 @@ struct ProductResultView: View {
     /// 값이 설정되면 네이버 검색 결과 화면으로 push 된다.
     @State private var searchAnalysis: ClothingAnalysis?
 
-    private let service = ProductSearchService(apiKey: APIConfig.openAIKey)
 
     var body: some View {
         NavigationStack {
@@ -291,10 +290,16 @@ private extension ProductResultView {
             return
         }
         do {
+            let service = try makeService()          // 키 누락 시 APIConfigError throw
             result = try await service.identify(image: image)
         } catch {
             errorMessage = error.localizedDescription
         }
         isLoading = false
+    }
+
+    /// 키가 설정돼 있지 않으면 APIConfigError 를 던진다.
+    func makeService() throws -> ProductSearchService {
+        ProductSearchService(apiKey: try APIConfig.openAIKey)
     }
 }
