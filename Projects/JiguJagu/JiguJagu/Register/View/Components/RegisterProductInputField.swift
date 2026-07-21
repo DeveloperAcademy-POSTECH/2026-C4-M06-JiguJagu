@@ -83,25 +83,25 @@ private enum Layout {
 
 private struct RegisterProductInputFieldPreview: View {
     @State private var productName = ""
-    @State private var brandName = "오래입자구"
+    @State private var brandName = ""
     @FocusState private var focusedField: RegisterProductInputFocus?
 
     var body: some View {
         VStack(spacing: 12) {
-            RegisterProductInputField(
-                label: "제품명",
-                placeholder: "제품명이나 옷 이름을 등록해주세요",
-                focus: .productName,
-                focusedField: $focusedField,
-                text: $productName
-            )
-
             RegisterProductInputField(
                 label: "브랜드",
                 placeholder: "브랜드명을 입력해주세요",
                 focus: .brandName,
                 focusedField: $focusedField,
                 text: $brandName
+            )
+            
+            RegisterProductInputField(
+                label: "제품명",
+                placeholder: "제품명이나 옷 이름을 등록해주세요",
+                focus: .productName,
+                focusedField: $focusedField,
+                text: $productName
             )
         }
         .padding(16)
