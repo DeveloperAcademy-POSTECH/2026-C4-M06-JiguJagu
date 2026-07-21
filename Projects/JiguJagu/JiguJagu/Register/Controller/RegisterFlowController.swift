@@ -18,14 +18,14 @@ final class RegisterFlowController: ObservableObject {
             break
         case .detail:
             route = .category
-        case .productName(let draft):
+        case .productInfo(let draft):
             route = draft.mainCategory.skipsDetailSelection ? .category : .detail(draft.mainCategory)
         }
     }
 
     func selectMainCategory(_ category: RegisterMainCategory) {
         if category.skipsDetailSelection {
-            route = .productName(
+            route = .productInfo(
                 RegisterDraft(
                     mainCategory: category,
                     subcategory: nil,
@@ -39,7 +39,7 @@ final class RegisterFlowController: ObservableObject {
     }
 
     func completeDetailSelection(_ selection: RegisterDetailSelection) {
-        route = .productName(
+        route = .productInfo(
             RegisterDraft(
                 mainCategory: selection.mainCategory,
                 subcategory: selection.subcategory,
@@ -52,5 +52,5 @@ final class RegisterFlowController: ObservableObject {
 enum RegisterFlowRoute: Equatable {
     case category
     case detail(RegisterMainCategory)
-    case productName(RegisterDraft)
+    case productInfo(RegisterDraft)
 }
