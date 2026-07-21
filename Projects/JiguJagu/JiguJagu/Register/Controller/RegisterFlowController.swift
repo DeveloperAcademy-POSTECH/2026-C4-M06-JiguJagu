@@ -25,6 +25,7 @@ final class RegisterFlowController: ObservableObject {
     }
 
     func selectMainCategory(_ category: RegisterMainCategory) {
+        // 기타 카테고리는 상세 선택 없이 제품 정보 입력으로 이동합니다.
         if category.skipsDetailSelection {
             route = .productInfo(
                 RegisterDraft(

@@ -34,6 +34,7 @@ struct RegisterProductInfoView: View {
                         dismissKeyboard()
                     }
 
+                // 키보드가 활성화된 동안 하단 고정 버튼은 숨깁니다.
                 if !isKeyboardFocused {
                     nextButton
                 }
@@ -152,6 +153,7 @@ extension RegisterProductInfoView {
     }
 
     private var isNextButtonEnabled: Bool {
+        // 다음 단계로 이동하기 위한 최소 입력값은 제품명입니다.
         inputState.hasProductName
     }
 

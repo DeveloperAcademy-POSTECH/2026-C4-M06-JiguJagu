@@ -36,6 +36,7 @@ struct RegisterProductInputField: View {
             .font(.pretendard.body4)
             .foregroundStyle(Color.grayScale900)
             .lineLimit(1)
+            // 제품명은 사용자가 입력한 그대로 유지되도록 키보드 제안을 끕니다.
             .textInputAutocapitalization(.never)
             .autocorrectionDisabled(true)
             .textContentType(.none)
@@ -61,6 +62,7 @@ struct RegisterProductInputField: View {
         .clipShape(RoundedRectangle(cornerRadius: Layout.cornerRadius))
         .contentShape(RoundedRectangle(cornerRadius: Layout.cornerRadius))
         .onTapGesture {
+            // 라벨이나 배경을 탭해도 입력 필드에 포커스가 잡히도록 합니다.
             focusedField.wrappedValue = focus
         }
         .accessibilityElement(children: .contain)
