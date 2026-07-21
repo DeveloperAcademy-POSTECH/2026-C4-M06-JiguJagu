@@ -1,5 +1,5 @@
 //
-//  RegisterProductNamePlaceholderView.swift
+//  RegisterProductNameView.swift
 //  JiguJagu
 //
 //  Created by Codex on 7/21/26.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct RegisterProductNamePlaceholderView: View {
+struct RegisterProductNameView: View {
     let draft: RegisterDraft
     let onBack: () -> Void
 
@@ -57,7 +57,7 @@ struct RegisterProductNamePlaceholderView: View {
 }
 
 #Preview {
-    RegisterProductNamePlaceholderView(
+    RegisterProductNameView(
         draft: RegisterDraft(
             mainCategory: .etc,
             subcategory: nil,

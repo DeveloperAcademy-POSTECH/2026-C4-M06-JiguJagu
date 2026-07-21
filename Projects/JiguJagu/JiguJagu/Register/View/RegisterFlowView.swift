@@ -25,7 +25,7 @@ struct RegisterFlowView: View {
                     onNext: controller.completeDetailSelection
                 )
             case .productName(let draft):
-                RegisterProductNamePlaceholderView(
+                RegisterProductNameView(
                     draft: draft,
                     onBack: controller.moveBack
                 )
