@@ -12,11 +12,17 @@ import Observation
 @Observable
 final class SearchLoadingController {
     private static let minimumLoadingNanoseconds: UInt64 = 3_000_000_000
+    private static let initialLoadingProgress = 0.2
+    private static let maximumWaitingProgress = 0.92
+    private static let loadingProgressIncrement = 0.012
+    private static let loadingProgressTickNanoseconds: UInt64 = 80_000_000
+    private static let completionPauseNanoseconds: UInt64 = 180_000_000
 
     private(set) var items: [Clothing] = []
     private(set) var errorMessage: String?
     private(set) var isReady = false
     private(set) var isLoading = false
+    private(set) var progress = initialLoadingProgress
 
     let analysis: ClothingAnalysis
 
@@ -34,6 +40,10 @@ final class SearchLoadingController {
         }
 
         isLoading = true
+        progress = Self.initialLoadingProgress
+        let progressTask = Task {
+            await runSearchProgressLoop()
+        }
 
         async let minimumLoading: Void = waitMinimumLoadingDuration()
         async let searchResult: Result<[Clothing], Error> = fetchSearchResults()
@@ -41,7 +51,10 @@ final class SearchLoadingController {
         let result = await searchResult
         await minimumLoading
 
+        progressTask.cancel()
         applySearchResult(result)
+        progress = 1
+        try? await Task.sleep(nanoseconds: Self.completionPauseNanoseconds)
         isLoading = false
         isReady = true
     }
@@ -78,6 +91,22 @@ private extension SearchLoadingController {
         case .failure:
             self.items = []
             errorMessage = "상품 검색에 실패했어요."
+        }
+    }
+
+    func runSearchProgressLoop() async {
+        while !Task.isCancelled {
+            guard progress < Self.maximumWaitingProgress else {
+                try? await Task.sleep(nanoseconds: Self.loadingProgressTickNanoseconds)
+                continue
+            }
+
+            progress = min(
+                progress + Self.loadingProgressIncrement,
+                Self.maximumWaitingProgress
+            )
+
+            try? await Task.sleep(nanoseconds: Self.loadingProgressTickNanoseconds)
         }
     }
 }

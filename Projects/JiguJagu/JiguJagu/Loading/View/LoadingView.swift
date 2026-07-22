@@ -9,9 +9,14 @@ import SwiftUI
 
 struct LoadingView: View {
     @State private var controller: LoadingController
+    private let progress: Double?
 
-    init(controller: LoadingController = LoadingController()) {
+    init(
+        controller: LoadingController = LoadingController(),
+        progress: Double? = nil
+    ) {
         _controller = State(initialValue: controller)
+        self.progress = progress
     }
 
     var body: some View {
@@ -37,7 +42,9 @@ struct LoadingView: View {
         .ignoresSafeArea()
         .accessibilityIdentifier(LoadingAccessibilityIdentifier.clothingSearchScreen)
         .onAppear {
-            controller.startProgressLoop()
+            if progress == nil {
+                controller.startProgressLoop()
+            }
         }
         .onDisappear {
             controller.stopProgressLoop()
@@ -59,15 +66,25 @@ private extension LoadingView {
                     .accessibilityIdentifier(LoadingAccessibilityIdentifier.clothingSearchMessage)
             }
 
-            LoadingProgressBar(progress: controller.progressState.progress)
+            LoadingProgressBar(progress: displayedProgress)
                 .frame(width: LoadingLayout.progressWidth, height: LoadingLayout.progressHeight)
                 .accessibilityLabel(controller.progressState.accessibilityProgressLabel)
-                .accessibilityValue(controller.progressState.accessibilityProgressValue)
+                .accessibilityValue(displayedAccessibilityProgressValue)
                 .accessibilityIdentifier(LoadingAccessibilityIdentifier.clothingSearchProgressBar)
         }
         .frame(width: LoadingLayout.contentWidth, height: LoadingLayout.contentHeight)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(LoadingAccessibilityIdentifier.clothingSearchContent)
+    }
+
+    var displayedProgress: Double {
+        progress ?? controller.progressState.progress
+    }
+
+    var displayedAccessibilityProgressValue: String {
+        let percent = Int((displayedProgress * 100).rounded())
+
+        return "\(percent)퍼센트"
     }
 
     func layoutScale(for size: CGSize) -> CGFloat {

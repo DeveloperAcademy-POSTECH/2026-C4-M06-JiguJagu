@@ -25,7 +25,8 @@ struct SearchLoadingFlowView: View {
                 )
             } else {
                 LoadingView(
-                    controller: LoadingController(configuration: .clothingSearch)
+                    controller: LoadingController(configuration: .clothingSearch),
+                    progress: controller.progress
                 )
             }
         }

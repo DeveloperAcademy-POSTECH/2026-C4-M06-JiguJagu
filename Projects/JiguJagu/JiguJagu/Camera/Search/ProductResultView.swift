@@ -9,6 +9,11 @@ import SwiftUI
 
 /// 옷 사진을 분석해 상품 정보를 보여주는 화면.
 struct ProductResultView: View {
+    private static let initialLoadingProgress = 0.2
+    private static let maximumWaitingProgress = 0.92
+    private static let loadingProgressIncrement = 0.012
+    private static let loadingProgressTickNanoseconds: UInt64 = 80_000_000
+    private static let completionPauseNanoseconds: UInt64 = 180_000_000
 
     let image: UIImage?
     var onDone: () -> Void = {}
@@ -20,6 +25,7 @@ struct ProductResultView: View {
     @State private var result: ClothingIdentification?
     @State private var errorMessage: String?
     @State private var isLoading = true
+    @State private var loadingProgress = Self.initialLoadingProgress
 
     /// 배경을 제거(누끼)한 옷 이미지. 준비되면 원본 대신 이걸 보여준다.
     @State private var cutoutImage: UIImage?
@@ -65,22 +71,17 @@ struct ProductResultView: View {
             }
         }
         .task {
-            // 분석과 누끼 추출을 동시에 진행합니다.
-            async let identifying: Void = identify()
-            async let cutting: Void = extractCutout()
-            _ = await (identifying, cutting)
+            await loadProductResult()
         }
     }
 
     // MARK: - States
 
     private var loadingView: some View {
-        VStack(spacing: 16) {
-            ProgressView()
-            Text("옷을 분석하고 있어요…")
-                .font(.system(size: 15))
-                .foregroundStyle(.secondary)
-        }
+        LoadingView(
+            controller: LoadingController(configuration: .clothingSearch),
+            progress: loadingProgress
+        )
     }
     
     private var bottomButtons: some View {
@@ -204,7 +205,7 @@ struct ProductResultView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
             Button("다시 시도") {
-                Task { await identify() }
+                Task { await loadProductResult() }
             }
             .padding(.top, 8)
         }
@@ -340,6 +341,42 @@ private struct FlexibleWrap<Item: Hashable, Content: View>: View {
 // MARK: - Action
 
 private extension ProductResultView {
+    func loadProductResult() async {
+        isLoading = true
+        errorMessage = nil
+        result = nil
+        cutoutImage = nil
+        loadingProgress = Self.initialLoadingProgress
+
+        let progressTask = Task {
+            await runRecognitionProgressLoop()
+        }
+
+        async let identifying: Void = identify()
+        async let cutting: Void = extractCutout()
+        _ = await (identifying, cutting)
+
+        progressTask.cancel()
+        loadingProgress = 1
+        try? await Task.sleep(nanoseconds: Self.completionPauseNanoseconds)
+        isLoading = false
+    }
+
+    func runRecognitionProgressLoop() async {
+        while !Task.isCancelled {
+            guard loadingProgress < Self.maximumWaitingProgress else {
+                try? await Task.sleep(nanoseconds: Self.loadingProgressTickNanoseconds)
+                continue
+            }
+
+            loadingProgress = min(
+                loadingProgress + Self.loadingProgressIncrement,
+                Self.maximumWaitingProgress
+            )
+            try? await Task.sleep(nanoseconds: Self.loadingProgressTickNanoseconds)
+        }
+    }
+
     func startSearchLoading() {
         guard let result else {
             return
@@ -349,13 +386,8 @@ private extension ProductResultView {
     }
 
     func identify() async {
-        isLoading = true
-        errorMessage = nil
-        result = nil
-
         guard let image else {
             errorMessage = "분석할 사진이 없습니다."
-            isLoading = false
             return
         }
         do {
@@ -364,7 +396,6 @@ private extension ProductResultView {
         } catch {
             errorMessage = error.localizedDescription
         }
-        isLoading = false
     }
 
     /// 키가 설정돼 있지 않으면 APIConfigError 를 던진다.
@@ -374,7 +405,6 @@ private extension ProductResultView {
 
     /// 원본 사진에서 옷(피사체)만 분리해 배경을 제거합니다.
     func extractCutout() async {
-        cutoutImage = nil
         guard let image else { return }
 
         // 방향 정규화 후 누끼 추출 (Vision은 .up 기준이 안정적)
