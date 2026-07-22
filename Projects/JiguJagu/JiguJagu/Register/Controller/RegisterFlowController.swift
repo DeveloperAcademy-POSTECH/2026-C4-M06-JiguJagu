@@ -11,6 +11,8 @@ import Foundation
 final class RegisterFlowController: ObservableObject {
     @Published private(set) var route: RegisterFlowRoute = .category
     @Published private(set) var completedProductInput: RegisterProductInputState?
+    @Published private(set) var completedDraft: RegisterDraft?
+    @Published var showConfirm = false
     
     func moveBack() {
         switch route {
@@ -45,7 +47,14 @@ final class RegisterFlowController: ObservableObject {
     
     func completeProductInput(_ inputState: RegisterProductInputState) {
         guard inputState.hasProductName else { return }
+        
         completedProductInput = inputState
+        
+        if case .productInfo(let draft) = route {
+            completedDraft = draft
+        }
+        
+        showConfirm = true
     }
 }
 

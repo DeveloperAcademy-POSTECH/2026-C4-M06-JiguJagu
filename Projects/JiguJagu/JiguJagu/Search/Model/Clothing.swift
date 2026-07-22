@@ -28,6 +28,8 @@ struct Clothing: Identifiable {
     let howToCare: [String]
     let washingGuides: [WashingGuide]
     let materials: [Material]
+    
+    let color: String
 }
 
 extension Clothing {
@@ -53,5 +55,7 @@ extension Clothing {
         self.howToCare = howToCare
         self.washingGuides = washingGuides
         self.materials = materials
+        self.color = ""
+        
     }
 }

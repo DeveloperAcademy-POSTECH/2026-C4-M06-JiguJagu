@@ -41,4 +41,17 @@ enum ArchiveCategory: String, CaseIterable, Identifiable {
             return ArchiveSubcategory.outers
         }
     }
+    
+    var displayName: String {
+        switch self {
+        case .all:
+            return "전체"
+        case .tops:
+            return "상의"
+        case .bottoms:
+            return "하의"
+        case .outers:
+            return "아우터"
+        }
+    }
 }

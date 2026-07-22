@@ -20,12 +20,15 @@ extension Clothing {
             productName: clothing.productName,
             mockImageName: clothing.mockImageName,
             productImageURL: clothing.productImageURL,
-            receiptCategory: clothing.receiptCategory,
+            receiptCategory: clothing.receiptCategory.isEmpty
+            ? "\(clothing.category3) > \(clothing.category4)"
+            : clothing.receiptCategory,
             category3: clothing.category3,
             category4: clothing.category4,
             howToCare: mock.howToCare,
             washingGuides: mock.washingGuides,
-            materials: mock.materials
+            materials: mock.materials,
+            color: mock.color
         )
     }
     
@@ -53,7 +56,8 @@ extension Clothing {
                 Material(name: "Polyester", percentage: 20),
                 Material(name: "Wool", percentage: 15),
                 Material(name: "Nylon", percentage: 5)
-            ]
+            ],
+            color: "유색"
         ),
         
         Clothing(
@@ -74,7 +78,8 @@ extension Clothing {
             ],
             materials: [
                 Material(name: "Polyester", percentage: 100)
-            ]
+            ],
+            color: "유색"
         ),
         
         Clothing(
@@ -95,7 +100,8 @@ extension Clothing {
             ],
             materials: [
                 Material(name: "Polyester", percentage: 100)
-            ]
+            ],
+            color: "흰색"
         ),
         
         Clothing(
@@ -116,7 +122,8 @@ extension Clothing {
             materials: [
                 Material(name: "Wool", percentage: 70),
                 Material(name: "Nylon", percentage: 30)
-            ]
+            ],
+            color: "유색"
         ),
         
         Clothing(
@@ -136,7 +143,8 @@ extension Clothing {
             materials: [
                 Material(name: "Polyester", percentage: 95),
                 Material(name: "Nylon", percentage: 5)
-            ]
+            ],
+            color: "유색"
         ),
         
         Clothing(
@@ -157,7 +165,8 @@ extension Clothing {
             materials: [
                 Material(name: "Acrylic", percentage: 50),
                 Material(name: "Polyester", percentage: 50)
-            ]
+            ],
+            color: "유색"
         ),
         
         Clothing(
@@ -178,7 +187,8 @@ extension Clothing {
             materials: [
                 Material(name: "Polyester", percentage: 90),
                 Material(name: "Nylon", percentage: 10)
-            ]
+            ],
+            color: "검정색"
         ),
         
         Clothing(
@@ -197,7 +207,8 @@ extension Clothing {
             ],
             materials: [
                 Material(name: "Nylon", percentage: 100)
-            ]
+            ],
+            color: "유색"
         ),
         
         Clothing(
@@ -216,7 +227,8 @@ extension Clothing {
             ],
             materials: [
                 Material(name: "Nylon", percentage: 100)
-            ]
+            ],
+            color: "검정색"
         ),
         
         Clothing(
@@ -236,7 +248,8 @@ extension Clothing {
             ],
             materials: [
                 Material(name: "Polyester", percentage: 100)
-            ]
+            ],
+            color: "흰색"
         )
     ]
 }

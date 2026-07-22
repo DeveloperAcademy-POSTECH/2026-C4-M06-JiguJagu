@@ -19,13 +19,13 @@ enum RegisterMainCategory: String, CaseIterable, Identifiable {
     var displayName: String {
         switch self {
         case .tops:
-            return "Tops"
+            return "상의"
         case .bottoms:
-            return "Bottoms"
+            return "하의"
         case .outers:
-            return "Outers"
+            return "아우터"
         case .etc:
-            return "Etc"
+            return "그 외"
         }
     }
 
@@ -53,8 +53,10 @@ enum RegisterMainCategory: String, CaseIterable, Identifiable {
                 RegisterSubcategory(id: "t-shirt", title: "티셔츠"),
                 RegisterSubcategory(id: "pique-collar-shirt", title: "피케/카라티"),
                 RegisterSubcategory(id: "hoodie", title: "후드"),
-                RegisterSubcategory(id: "sweatshirt-blouse", title: "맨투맨/블라우스"),
-                RegisterSubcategory(id: "other-tops", title: "기타 상의")
+                RegisterSubcategory(id: "tops_mtm", title: "맨투맨"),
+                RegisterSubcategory(id: "tops_sweatshirt_blouse", title: "셔츠/블라우스"),
+                RegisterSubcategory(id: "tops_knit", title: "니트"),
+                RegisterSubcategory(id: "tops_other", title: "그 외")
             ]
         case .bottoms:
             return [
@@ -62,7 +64,7 @@ enum RegisterMainCategory: String, CaseIterable, Identifiable {
                 RegisterSubcategory(id: "training-pants", title: "트레이닝팬츠"),
                 RegisterSubcategory(id: "shorts", title: "숏팬츠"),
                 RegisterSubcategory(id: "skirt-one-piece", title: "스커트/원피스"),
-                RegisterSubcategory(id: "other-bottoms", title: "기타 하의")
+                RegisterSubcategory(id: "bottoms_other", title: "그 외"),
             ]
         case .outers:
             return [
@@ -70,7 +72,8 @@ enum RegisterMainCategory: String, CaseIterable, Identifiable {
                 RegisterSubcategory(id: "jacket", title: "재킷"),
                 RegisterSubcategory(id: "coat", title: "코트"),
                 RegisterSubcategory(id: "padded-jacket", title: "패딩"),
-                RegisterSubcategory(id: "other-outers", title: "기타 아우터")
+                RegisterSubcategory(id: "outers_cardigan", title: "가디건"),
+                RegisterSubcategory(id: "tops_other", title: "그 외")
             ]
         case .etc:
             return []

@@ -86,19 +86,19 @@ extension RegisterProductInfoView {
     private var inputSection: some View {
         VStack(spacing: 12) {
             RegisterProductInputField(
-                label: "제품명",
-                placeholder: "제품명이나 옷 이름을 등록해주세요",
-                focus: .productName,
-                focusedField: $focusedField,
-                text: $inputState.productName
-            )
-
-            RegisterProductInputField(
                 label: "브랜드",
                 placeholder: "브랜드명을 입력해주세요",
                 focus: .brandName,
                 focusedField: $focusedField,
                 text: $inputState.brandName
+            )
+            
+            RegisterProductInputField(
+                label: "제품명",
+                placeholder: "제품명이나 옷 이름을 등록해주세요",
+                focus: .productName,
+                focusedField: $focusedField,
+                text: $inputState.productName
             )
         }
         .accessibilityElement(children: .contain)
