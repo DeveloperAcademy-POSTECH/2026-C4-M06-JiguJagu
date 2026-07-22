@@ -15,7 +15,7 @@ struct ReceiptTopActions: View {
         NotificationCenter.default.post(name: .goHome, object: nil)
     }
     var onArchive: () -> Void = {}
-
+    
     @State private var showShare = false
     
     var body: some View {
@@ -24,23 +24,21 @@ struct ReceiptTopActions: View {
                 onClose()
             } label: {
                 Image(systemName: "xmark")
-                    .font(.system(size: 18, weight: .bold))
+                    .font(.system(size: 22, weight: .medium))
                     .foregroundStyle(.white)
             }
-            .frame(width: 44, height: 44)
-            .padding(.leading, -4)
+            .padding(.leading, 8)
             
             Spacer()
             
-            HStack(spacing: 10) {
+            HStack(spacing: 14) {
                 Button {
                     showShare = true
                 } label: {
                     Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: 20, weight: .bold))
+                        .font(.system(size: 24, weight: .medium))
                         .foregroundStyle(.white)
                 }
-                .frame(width: 24, height: 24)
                 .sheet(isPresented: $showShare) {
                     if let shareImage {
                         ActivityView(activityItems: [shareImage])
@@ -51,11 +49,12 @@ struct ReceiptTopActions: View {
                     onArchive()
                 } label: {
                     Image(systemName: "folder")
-                        .font(.system(size: 18, weight: .bold))
+                        .font(.system(size: 23, weight: .medium))
                         .foregroundStyle(.white)
+                        .offset(y: 3.5)
                 }
-                .frame(width: 24, height: 24)
             }
+            .offset(x: -5)
             .frame(width: 76, height: 44)
         }
         .frame(width: 370, height: 44)
