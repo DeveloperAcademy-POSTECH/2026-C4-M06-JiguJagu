@@ -10,6 +10,8 @@ import SwiftUI
 struct SearchBar: View {
     
     @Binding var text: String
+    var placeholder: String = "브랜드명, 상품명을 입력하세요!"
+    var width: CGFloat? = 328
     var onSearch: () -> Void = {}
     
     var body: some View {
@@ -22,8 +24,10 @@ struct SearchBar: View {
             }
             
             TextField(
-                "브랜드명, 상품명을 입력하세요!",
-                text: $text
+                "",
+                text: $text,
+                prompt: Text(placeholder)
+                    .foregroundStyle(Color.grayScale300)
             )
             .font(Font.pretendard.body5)
             .foregroundStyle(Color.grayScale500)
@@ -41,7 +45,8 @@ struct SearchBar: View {
             }
         }
         .padding(.horizontal, 14)
-        .frame(width: 328, height: 42)
+        .frame(width: width, height: 42)
+        .frame(maxWidth: width == nil ? .infinity : nil)
         .background(Color.grayScale100)
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }

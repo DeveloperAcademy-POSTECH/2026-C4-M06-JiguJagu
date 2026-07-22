@@ -10,6 +10,18 @@ enum ArchiveReceiptCardLayout {
     static let width: CGFloat = 266
     static let edgeHeight: CGFloat = 18
     static let bodyHeight: CGFloat = 488
+    static let horizontalPadding: CGFloat = 24
+    static let verticalPadding: CGFloat = 18
+    static let dividerTopSpacing: CGFloat = 14
+    static let productTopSpacing: CGFloat = 22
+    static let materialTopSpacing: CGFloat = 24
+    static let footerTopSpacing: CGFloat = 20
+    static let dateTopSpacing: CGFloat = 12
+    static let productImageHeight: CGFloat = 150
+    static let productImageTopSpacing: CGFloat = 16
+    static let materialBarcodeHeight: CGFloat = 20
+    static let materialListTopSpacing: CGFloat = 8
+    static let materialRowSpacing: CGFloat = 3
 }
 
 struct ArchiveReceiptCard: View {
@@ -25,24 +37,28 @@ struct ArchiveReceiptCard: View {
                 .fill(Color.BG)
                 .frame(height: ArchiveReceiptCardLayout.edgeHeight)
 
-            VStack(spacing: 14) {
-                receiptHeader
+            VStack(spacing: 0) {
+                keptDaysInfo
 
                 dottedDivider
+                    .padding(.top, ArchiveReceiptCardLayout.dividerTopSpacing)
 
                 productInfo
+                    .padding(.top, ArchiveReceiptCardLayout.productTopSpacing)
 
                 materialInfo
+                    .padding(.top, ArchiveReceiptCardLayout.materialTopSpacing)
 
                 dottedDivider
+                    .padding(.top, ArchiveReceiptCardLayout.footerTopSpacing)
 
                 dateInfo
+                    .padding(.top, ArchiveReceiptCardLayout.dateTopSpacing)
             }
-            .padding(.horizontal, 24)
-            .padding(.vertical, 18)
+            .padding(.horizontal, ArchiveReceiptCardLayout.horizontalPadding)
+            .padding(.vertical, ArchiveReceiptCardLayout.verticalPadding)
             .frame(
                 width: ArchiveReceiptCardLayout.width,
-                height: ArchiveReceiptCardLayout.bodyHeight,
                 alignment: .top
             )
             .background(Color.BG)
@@ -57,22 +73,15 @@ struct ArchiveReceiptCard: View {
 }
 
 private extension ArchiveReceiptCard {
-    var receiptHeader: some View {
-        HStack {
-            Text("Product")
-                .font(.pretendard.body2)
-                .foregroundStyle(Color.brown900)
-
-            Spacer()
-
-            Text(receipt.categoryPath)
-                .font(.pretendard.body3)
-                .foregroundStyle(Color.brown200)
-        }
+    var keptDaysInfo: some View {
+        Text(receipt.keptDaysText())
+            .font(.pretendard.body2)
+            .foregroundStyle(Color.brown900)
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     var productInfo: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 0) {
             VStack(spacing: 4) {
                 Text(receipt.brandName)
                     .font(.pretendard.head1)
@@ -119,23 +128,25 @@ private extension ArchiveReceiptCard {
                         .scaledToFit()
                 }
             }
-            .frame(height: 140)
+            .frame(height: ArchiveReceiptCardLayout.productImageHeight)
             .overlay {
                 Gradient.Clothes
             }
+            .padding(.top, ArchiveReceiptCardLayout.productImageTopSpacing)
         }
     }
 
     var materialInfo: some View {
-        VStack(spacing: 9) {
+        VStack(spacing: 0) {
             ArchiveMaterialBarcodeView(materials: receipt.materials)
-                .frame(height: 20)
+                .frame(height: ArchiveReceiptCardLayout.materialBarcodeHeight)
 
-            VStack(spacing: 4) {
+            VStack(spacing: ArchiveReceiptCardLayout.materialRowSpacing) {
                 ForEach(receipt.materials, id: \.name) { material in
                     materialRow(material)
                 }
             }
+            .padding(.top, ArchiveReceiptCardLayout.materialListTopSpacing)
         }
     }
 

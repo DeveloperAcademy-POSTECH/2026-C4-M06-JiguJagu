@@ -6,8 +6,18 @@
 
 import SwiftUI
 
+private enum ArchiveCarouselLayout {
+    static let cardTopPadding: CGFloat = 40
+    static let cardSpacing: CGFloat = 30
+    static let sideCardWidthScale: CGFloat = 0.9
+    static let sideCardHeightScale: CGFloat = 0.82
+    static let sideCardOpacity: CGFloat = 0.78
+    static let sideCardYOffset: CGFloat = 28
+}
+
 struct ArchiveView: View {
     @State private var controller: ArchiveController
+    @State private var focusedReceiptItemID: String?
     private let onBackButtonTap: () -> Void
 
     init(
@@ -79,42 +89,42 @@ private extension ArchiveView {
     }
 
     func receiptCards(screenWidth: CGFloat) -> some View {
-        ScrollViewReader { proxy in
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 30) {
-                    ForEach(displayReceiptItems) { item in
-                        receiptCardItem(item.receipt)
-                            .id(item.id)
-                            .scrollTransition(.interactive, axis: .horizontal) { content, phase in
-                                content
-                                    .scaleEffect(phase.isIdentity ? 1.0 : 0.86)
-                                    .opacity(phase.isIdentity ? 1.0 : 0.78)
-                                    .offset(y: phase.isIdentity ? 0 : 18)
-                            }
-                    }
-                }
-                .scrollTargetLayout()
-                .padding(.horizontal, max((screenWidth - 266) / 2, 24))
-            }
-            .scrollBounceBehavior(.basedOnSize)
-            .scrollTargetBehavior(.viewAligned)
-            .onAppear {
-                guard let focusedReceiptID else {
-                    return
-                }
-
-                proxy.scrollTo(focusedReceiptID, anchor: .center)
-            }
-            .onChange(of: filteredReceiptIDs) { _, _ in
-                guard let focusedReceiptID else {
-                    return
-                }
-
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    proxy.scrollTo(focusedReceiptID, anchor: .center)
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(alignment: .top, spacing: ArchiveCarouselLayout.cardSpacing) {
+                ForEach(displayReceiptItems) { item in
+                    receiptCardItem(item.receipt)
+                        .id(item.id)
+                        .scrollTransition(.interactive, axis: .horizontal) { content, phase in
+                            content
+                                .scaleEffect(
+                                    x: phase.isIdentity ? 1.0 : ArchiveCarouselLayout.sideCardWidthScale,
+                                    y: phase.isIdentity ? 1.0 : ArchiveCarouselLayout.sideCardHeightScale
+                                )
+                                .opacity(phase.isIdentity ? 1.0 : ArchiveCarouselLayout.sideCardOpacity)
+                                .offset(y: phase.isIdentity ? 0 : ArchiveCarouselLayout.sideCardYOffset)
+                        }
                 }
             }
+            .scrollTargetLayout()
         }
+        .contentMargins(
+            .horizontal,
+            carouselSideMargin(screenWidth: screenWidth),
+            for: .scrollContent
+        )
+        .scrollBounceBehavior(.basedOnSize)
+        .scrollTargetBehavior(.viewAligned)
+        .scrollPosition(id: $focusedReceiptItemID, anchor: .center)
+        .onAppear {
+            focusedReceiptItemID = focusedReceiptID
+        }
+        .onChange(of: filteredReceiptIDs) { _, _ in
+            focusedReceiptItemID = focusedReceiptID
+        }
+    }
+
+    func carouselSideMargin(screenWidth: CGFloat) -> CGFloat {
+        max((screenWidth - ArchiveReceiptCardLayout.width) / 2, 24)
     }
 
     func emptyReceiptTopPadding(availableHeight: CGFloat) -> CGFloat {
@@ -127,15 +137,8 @@ private extension ArchiveView {
     }
 
     func receiptCardItem(_ receipt: ArchiveReceipt) -> some View {
-        VStack(spacing: 8) {
-            Text(receipt.keptDaysText())
-                .font(.pretendard.head4)
-                .foregroundStyle(Color.white)
-                .frame(width: 266)
-                .padding(.top, 10)
-
-            ArchiveReceiptCard(receipt: receipt)
-        }
+        ArchiveReceiptCard(receipt: receipt)
+            .padding(.top, ArchiveCarouselLayout.cardTopPadding)
     }
 
     var sortedReceipts: [ArchiveReceipt] {
