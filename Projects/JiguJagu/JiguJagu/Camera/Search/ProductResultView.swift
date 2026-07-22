@@ -409,6 +409,9 @@ private extension ProductResultView {
 
         // 방향 정규화 후 누끼 추출 (Vision은 .up 기준이 안정적)
         let normalized = image.normalizedUp()
-        cutoutImage = await ForegroundCutout.extract(from: normalized)
+        let cutout = await ForegroundCutout.extract(from: normalized)
+        cutoutImage = cutout
+        // 등록 확인 화면에서 꺼내 쓸 수 있도록 전역 저장 (누끼 실패 시 원본)
+        CapturedImageStore.shared.store(cutout ?? image)
     }
 }

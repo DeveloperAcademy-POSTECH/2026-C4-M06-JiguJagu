@@ -31,7 +31,8 @@ struct RegisterConfirmView: View {
 
     /// 카드/영수증에 표시할 이미지. 재촬영 > 전달받은 사진 순.
     private var displayImage: UIImage? {
-        retakenImage ?? localImage
+        // 재촬영 > 전달받은 사진 > 최근 촬영(전역 저장소) 순
+        retakenImage ?? localImage ?? CapturedImageStore.shared.lastCutoutImage
     }
     
     private func convertMainCategory(
@@ -335,11 +336,12 @@ private struct ClothingImageCard: View {
                 .frame(width: 180, height: 182)
             
             if let localImage {
-                // 재촬영/전달받은 로컬 이미지 우선 표시
+                // 재촬영/전달받은 로컬 이미지 우선 표시 (박스 크기에 꽉 차게)
                 Image(uiImage: localImage)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 140, height: 142)
+                    .frame(width: 172, height: 174)
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
             } else if let url {
                 
                 AsyncImage(url: url) { phase in
