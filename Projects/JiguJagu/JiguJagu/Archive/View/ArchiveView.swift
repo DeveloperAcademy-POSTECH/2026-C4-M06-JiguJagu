@@ -85,7 +85,7 @@ private extension ArchiveView {
     func receiptCards(screenWidth: CGFloat) -> some View {
         ScrollViewReader { proxy in
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 30) {
+                HStack(alignment: .top, spacing: 30) {
                     ForEach(displayReceiptItems) { item in
                         receiptCardItem(item.receipt)
                             .id(item.id)
