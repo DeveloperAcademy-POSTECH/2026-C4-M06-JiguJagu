@@ -28,7 +28,10 @@ struct ReceiptView: View {
     var body: some View {
         ScrollViewReader { proxy in
             VStack(spacing: -50) {
+                
                 ZStack(alignment: .top) {
+                    
+                    
                     Image("ReceiptPrinter")
                         .resizable()
                         .scaledToFit()
@@ -57,15 +60,20 @@ struct ReceiptView: View {
                 }
                 .padding(.vertical)
             }
+            
             .scrollBounceBehavior(.basedOnSize)
             .background {
-                
-                Image("MainBG")
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 532, height: 912)
-                    .clipped()
-                    .opacity(0.6)
+                ZStack(alignment: .top) {
+                    Image("MainBG")
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 532, height: 912)
+                        .clipped()
+                        .opacity(0.6)
+                    
+                    TopGradientOverlay()
+                        .allowsHitTesting(false)
+                }
             }
             .onAppear {
                 UIScrollView.appearance().bounces = false
