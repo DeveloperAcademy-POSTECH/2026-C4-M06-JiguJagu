@@ -12,13 +12,25 @@ struct ProductResultView: View {
 
     let image: UIImage?
     var onDone: () -> Void = {}
+    
+    var onSearch: () -> Void = {}
+    
+    var onRegister: () -> Void = {}
 
     @State private var result: ClothingIdentification?
     @State private var errorMessage: String?
     @State private var isLoading = true
 
+    /// 배경을 제거(누끼)한 옷 이미지. 준비되면 원본 대신 이걸 보여준다.
+    @State private var cutoutImage: UIImage?
+
     /// 값이 설정되면 네이버 검색 결과 화면으로 push 된다.
     @State private var searchAnalysis: ClothingAnalysis?
+
+    /// true가 되면 옷 등록 확인 화면으로 push 된다.
+    @State private var showRegister = false
+    /// 등록 화면으로 넘길 변환된 옷 데이터.
+    @State private var registerClothing: Clothing?
 
 
     var body: some View {
@@ -38,17 +50,26 @@ struct ProductResultView: View {
             .navigationDestination(item: $searchAnalysis) { analysis in
                 ProductSearchResultView(analysis: analysis)
             }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("완료") {
-                        if let result {
-                            searchAnalysis = ClothingAnalysis(from: result)
-                        }
-                    }
+            .navigationDestination(isPresented: $showRegister) {
+                if let registerClothing {
+                    RegisterConfirmView(
+                        clothing: registerClothing,
+                        localImage: cutoutImage ?? image
+                    )
+                }
+            }
+            .safeAreaInset(edge: .bottom) {
+                if result != nil {
+                    bottomButtons
                 }
             }
         }
-        .task { await identify() }
+        .task {
+            // 분석과 누끼 추출을 동시에 진행합니다.
+            async let identifying: Void = identify()
+            async let cutting: Void = extractCutout()
+            _ = await (identifying, cutting)
+        }
     }
 
     // MARK: - States
@@ -61,17 +82,59 @@ struct ProductResultView: View {
                 .foregroundStyle(.secondary)
         }
     }
+    
+    private var bottomButtons: some View {
+        HStack(spacing: 12) {
+            // 검색하기 (보조 · 밝은 배경) — 기존 완료 로직 실행
+            Button {
+                if let result {
+                    searchAnalysis = ClothingAnalysis(from: result)
+                }
+                onSearch()
+            } label: {
+                Text("검색하기")
+                    .font(.pretendard.head3)
+                    .foregroundStyle(Color.grayScale900)
+                    .frame(width: 108)
+                    .frame(height: 52)
+                    .background(Color.white)
+                    .clipShape(Capsule())
+                    .overlay(
+                        Capsule().stroke(Color.grayScale300, lineWidth: 1)
+                    )
+            }
+
+            // 등록하기 (주요 · Primary) — 분석 데이터로 등록 확인 화면 진입
+            Button {
+                if let result {
+                    registerClothing = Clothing(from: result)
+                    showRegister = true
+                }
+                onRegister()
+            } label: {
+                Text("등록하기")
+                    .font(.pretendard.head3)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 52)
+                    .background(Color.primary500)
+                    .clipShape(Capsule())
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(.background)
+    }
 
     private func resultView(_ item: ClothingIdentification) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                if let image {
-                    Image(uiImage: image)
+                if let displayImage = cutoutImage ?? image {
+                    Image(uiImage: displayImage)
                         .resizable()
-                        .scaledToFill()
+                        .scaledToFit()
                         .frame(height: 240)
                         .frame(maxWidth: .infinity)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
@@ -301,5 +364,15 @@ private extension ProductResultView {
     /// 키가 설정돼 있지 않으면 APIConfigError 를 던진다.
     func makeService() throws -> ProductSearchService {
         ProductSearchService(apiKey: try APIConfig.openAIKey)
+    }
+
+    /// 원본 사진에서 옷(피사체)만 분리해 배경을 제거합니다.
+    func extractCutout() async {
+        cutoutImage = nil
+        guard let image else { return }
+
+        // 방향 정규화 후 누끼 추출 (Vision은 .up 기준이 안정적)
+        let normalized = image.normalizedUp()
+        cutoutImage = await ForegroundCutout.extract(from: normalized)
     }
 }

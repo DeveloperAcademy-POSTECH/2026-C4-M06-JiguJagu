@@ -85,13 +85,44 @@ private extension ArchiveReceiptCard {
                     .multilineTextAlignment(.center)
             }
 
-            Image(receipt.productImageName)
-                .resizable()
-                .scaledToFit()
-                .frame(height: 140)
-                .overlay {
-                    Gradient.Clothes
+            Group {
+                if let localImage = receipt.localImage {
+                    // 1순위: 누끼 딴 로컬 이미지
+                    Image(uiImage: localImage)
+                        .resizable()
+                        .scaledToFit()
+                } else if let urlString = receipt.productImageURL,
+                          let url = URL(string: urlString) {
+                    // 2순위: 쇼핑 API 상품 이미지 (URL)
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .scaledToFit()
+                        case .empty:
+                            ProgressView()
+                        case .failure:
+                            Image(receipt.productImageName)
+                                .resizable()
+                                .scaledToFit()
+                        @unknown default:
+                            Image(receipt.productImageName)
+                                .resizable()
+                                .scaledToFit()
+                        }
+                    }
+                } else {
+                    // 3순위: 에셋 이미지
+                    Image(receipt.productImageName)
+                        .resizable()
+                        .scaledToFit()
                 }
+            }
+            .frame(height: 140)
+            .overlay {
+                Gradient.Clothes
+            }
         }
     }
 

@@ -14,6 +14,7 @@ struct InfoSection: View {
     let productName: String
     let productImageURL: String?
     let mockImageName: String? // TODO: Mock 이미지 로드를 위한 변수 (추후 삭제)
+    var localImage: UIImage? = nil // 누끼 딴 로컬 이미지 (있으면 최우선 표시)
     
     @ViewBuilder
     private var mockImage: some View {
@@ -47,7 +48,16 @@ struct InfoSection: View {
             }
             .frame(maxWidth: .infinity)
             
-            if let productImageURL = productImageURL,
+            if let localImage {
+                // 누끼 딴 로컬 이미지 최우선 표시
+                Image(uiImage: localImage)
+                    .resizable()
+                    .scaledToFit()
+                    .overlay {
+                        Gradient.Clothes
+                    }
+                    .frame(height: 220)
+            } else if let productImageURL = productImageURL,
                let url = URL(string: productImageURL) {
                 AsyncImage(url: url) { phase in
                     switch phase {
