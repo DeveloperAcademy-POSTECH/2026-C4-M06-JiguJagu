@@ -24,5 +24,6 @@ extension Clothing {
         self.howToCare = []
         self.washingGuides = []
         self.materials = []
+        self.color = ""
     }
 }

@@ -23,6 +23,7 @@ extension Clothing {
         self.howToCare = []
         self.washingGuides = []
         self.materials = []
+        self.color = ""
     }
 
     /// 분석 대분류 코드(TOP/BOTTOM/OUTER/ETC)를 등록 화면이 이해하는 한글 대분류로 변환합니다.

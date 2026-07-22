@@ -10,12 +10,17 @@ import SwiftUI
 struct RegisterConfirmView: View {
     
     let clothing: Clothing
+    
+    private var categoryText: String {
+        clothing.receiptCategory
+    }
     var localImage: UIImage? = nil
+    
     var onBack: () -> Void = {}
     @Environment(\.dismiss) private var dismiss
     @State private var selectedMainCategory = ""
     @State private var selectedSubCategory: ArchiveSubcategory?
-    @State private var selectedColor: RegisterColorOption? = .colored
+    @State private var selectedColor: RegisterColorOption?
     @State private var editableBrand: String = ""
     @State private var editableProductName: String = ""
     @State private var showReceipt = false
@@ -28,7 +33,7 @@ struct RegisterConfirmView: View {
             return "상의"
         case let value where value.contains("하의") || value.contains("팬츠") || value.contains("바지"):
             return "하의"
-        case let value where value.contains("아우터") || value.contains("자켓") || value.contains("코트") || value.contains("패딩"):
+        case let value where value.contains("아우터") || value.contains("재킷") || value.contains("코트") || value.contains("패딩"):
             return "아우터"
         default:
             return "그 외"
@@ -54,12 +59,13 @@ struct RegisterConfirmView: View {
             productName: editableProductName,
             mockImageName: clothing.mockImageName,
             productImageURL: clothing.productImageURL,
-            receiptCategory: "\(selectedMainCategory) > \(selectedSubCategory?.title ?? "")",
-            category3: selectedMainCategory,
-            category4: selectedSubCategory?.title ?? "그 외",
+            receiptCategory: clothing.receiptCategory,
+            category3: clothing.category3,
+            category4: clothing.category4,
             howToCare: clothing.howToCare,
             washingGuides: clothing.washingGuides,
-            materials: clothing.materials
+            materials: clothing.materials,
+            color: clothing.color
         )
     }
     
@@ -81,12 +87,17 @@ struct RegisterConfirmView: View {
         )
         
         _selectedMainCategory = State(
-            initialValue: convertMainCategory(clothing.category3)
+            initialValue: clothing.category3
         )
         
         _selectedSubCategory = State(
             initialValue: ArchiveSubcategory.all.first {
                 $0.title == clothing.category4
+            }
+        )
+        _selectedColor = State(
+            initialValue: RegisterColorOption.allCases.first {
+                $0.title == clothing.color
             }
         )
     }
@@ -197,25 +208,17 @@ struct RegisterConfirmView: View {
                 Spacer(minLength: 24)
                 
                 HStack(alignment: .center, spacing: 8) {
-                    Button(action: {}) {
-                        Text("재등록")
-                            .font(Font.pretendard.head3)
-                            .foregroundStyle(Color.grayScale900)
-                            .frame(width: 118, height: 52, alignment: .center)
-                            .background(Color.grayScale200)
-                            .cornerRadius(83)
-                    }
-                    .buttonStyle(.plain)
+                    
                     
                     Button {
                         
                         showReceipt = true
                         
                     } label: {
-                        Text("의류영수증 발급")
+                        Text("영수증 발급")
                             .font(Font.pretendard.head3)
                             .foregroundStyle(Color.white)
-                            .frame(width: 236, height: 52, alignment: .center)
+                            .frame(width: 371, height: 52, alignment: .center)
                             .background(Color.primary500)
                             .cornerRadius(83)
                     }

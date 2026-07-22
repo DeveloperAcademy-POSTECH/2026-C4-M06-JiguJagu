@@ -12,8 +12,9 @@ struct SearchView: View {
     @State private var searchText: String
     @State private var submittedSearchText: String
     @State private var items: [Clothing]
-    @State private var isSearching = false
     @State private var selectedItem: Clothing?
+    @State private var isSearching = false
+    @State private var showRegisterFlow = false
     @State private var searchErrorMessage: String?
     
     private let initialQuery: String?
@@ -58,7 +59,9 @@ struct SearchView: View {
                             
                             SearchResultSummary(
                                 count: filteredItems.count,
-                                action: {}
+                                action: {
+                                    showRegisterFlow = true
+                                }
                             )
                             
                             if isSearching {
@@ -98,6 +101,8 @@ struct SearchView: View {
                             clothing: item
                         )
                     }
+                }.navigationDestination(isPresented: $showRegisterFlow) {
+                    RegisterFlowView()
                 }
             }
             .navigationBarBackButtonHidden(true)
