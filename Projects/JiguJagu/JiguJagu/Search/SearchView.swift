@@ -15,14 +15,23 @@ struct SearchView: View {
     @State private var selectedItem: Clothing?
     @State private var isSearching = false
     @State private var showRegisterFlow = false
+    @State private var searchErrorMessage: String?
     
     private let initialQuery: String?
+    private let shouldSearchInitialQuery: Bool
     
-    init(items: [Clothing] = [], initialQuery: String? = nil) {
+    init(
+        items: [Clothing] = [],
+        initialQuery: String? = nil,
+        searchErrorMessage: String? = nil,
+        shouldSearchInitialQuery: Bool? = nil
+    ) {
         _items = State(initialValue: items)
         _searchText = State(initialValue: initialQuery ?? "")
         _submittedSearchText = State(initialValue: initialQuery ?? "")
+        _searchErrorMessage = State(initialValue: searchErrorMessage)
         self.initialQuery = initialQuery
+        self.shouldSearchInitialQuery = shouldSearchInitialQuery ?? items.isEmpty
     }
     
     private var filteredItems: [Clothing] {
@@ -55,12 +64,10 @@ struct SearchView: View {
                                 }
                             )
                             
-                            if filteredItems.isEmpty {
-                                Text("검색 결과가 없습니다.")
-                                    .font(Font.pretendard.head3)
-                                    .foregroundStyle(Color.grayScale600)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.top, 280)
+                            if isSearching {
+                                searchProgressView
+                            } else if filteredItems.isEmpty {
+                                emptyStateView
                             } else {
                                 SearchResultGrid(
                                     items: filteredItems,
@@ -100,7 +107,9 @@ struct SearchView: View {
             }
             .navigationBarBackButtonHidden(true)
             .task {
-                if let initialQuery, !initialQuery.isEmpty {
+                if shouldSearchInitialQuery,
+                   let initialQuery,
+                   !initialQuery.isEmpty {
                     await searchNaver(query: initialQuery)
                 }
             }
@@ -122,6 +131,37 @@ private extension SearchView {
             }
         )
     }
+
+    var searchProgressView: some View {
+        VStack(spacing: 12) {
+            ProgressView()
+                .tint(Color.primary500)
+
+            Text("상품을 검색하고 있어요...")
+                .font(Font.pretendard.head3)
+                .foregroundStyle(Color.grayScale600)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.top, 260)
+    }
+
+    var emptyStateView: some View {
+        VStack(spacing: 10) {
+            Text(searchErrorMessage ?? "검색 결과가 없습니다.")
+                .font(Font.pretendard.head3)
+                .foregroundStyle(Color.grayScale600)
+                .multilineTextAlignment(.center)
+
+            if searchErrorMessage != nil {
+                Text("검색어를 수정해 다시 시도해 주세요.")
+                    .font(Font.pretendard.body5)
+                    .foregroundStyle(Color.grayScale500)
+                    .multilineTextAlignment(.center)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.top, 260)
+    }
     
     func searchNaver(query: String) async {
         let query = query.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -132,6 +172,7 @@ private extension SearchView {
         }
         
         isSearching = true
+        searchErrorMessage = nil
         
         do {
             let service = NaverShoppingService(
@@ -146,7 +187,8 @@ private extension SearchView {
             
             items = results.map(Clothing.init(from:))
         } catch {
-            print("네이버 검색 실패:", error.localizedDescription)
+            items = []
+            searchErrorMessage = "상품 검색에 실패했어요."
         }
         
         isSearching = false

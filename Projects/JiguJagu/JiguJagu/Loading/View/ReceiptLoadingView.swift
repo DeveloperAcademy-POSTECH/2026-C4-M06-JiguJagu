@@ -9,9 +9,14 @@ import SwiftUI
 
 struct ReceiptLoadingView: View {
     @State private var controller: LoadingController
+    private let progress: Double?
 
-    init(controller: LoadingController = LoadingController(configuration: .receiptIssuing)) {
+    init(
+        controller: LoadingController = LoadingController(configuration: .receiptIssuing),
+        progress: Double? = nil
+    ) {
         _controller = State(initialValue: controller)
+        self.progress = progress
     }
 
     var body: some View {
@@ -37,7 +42,9 @@ struct ReceiptLoadingView: View {
         .ignoresSafeArea()
         .accessibilityIdentifier(LoadingAccessibilityIdentifier.receiptIssuingScreen)
         .onAppear {
-            controller.startProgressLoop()
+            if progress == nil {
+                controller.startProgressLoop()
+            }
         }
         .onDisappear {
             controller.stopProgressLoop()
@@ -59,15 +66,25 @@ private extension ReceiptLoadingView {
                     .accessibilityIdentifier(LoadingAccessibilityIdentifier.receiptIssuingMessage)
             }
 
-            LoadingProgressBar(progress: controller.progressState.progress)
+            LoadingProgressBar(progress: displayedProgress)
                 .frame(width: ReceiptLoadingLayout.progressWidth, height: ReceiptLoadingLayout.progressHeight)
                 .accessibilityLabel(controller.progressState.accessibilityProgressLabel)
-                .accessibilityValue(controller.progressState.accessibilityProgressValue)
+                .accessibilityValue(displayedAccessibilityProgressValue)
                 .accessibilityIdentifier(LoadingAccessibilityIdentifier.receiptIssuingProgressBar)
         }
         .frame(width: ReceiptLoadingLayout.contentWidth, height: ReceiptLoadingLayout.contentHeight)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(LoadingAccessibilityIdentifier.receiptIssuingContent)
+    }
+
+    var displayedProgress: Double {
+        progress ?? controller.progressState.progress
+    }
+
+    var displayedAccessibilityProgressValue: String {
+        let percent = Int((displayedProgress * 100).rounded())
+
+        return "\(percent)퍼센트"
     }
 
     func layoutScale(for size: CGSize) -> CGFloat {

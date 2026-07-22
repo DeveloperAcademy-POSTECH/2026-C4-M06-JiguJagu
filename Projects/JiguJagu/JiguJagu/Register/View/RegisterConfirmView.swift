@@ -230,7 +230,7 @@ struct RegisterConfirmView: View {
         }.navigationDestination(isPresented: $showReceipt)
         {
             
-            ReceiptView(
+            ReceiptLoadingFlowView(
                 
                 clothing: Clothing.randomReceiptData(for: updatedClothing),
                 localImage: localImage
