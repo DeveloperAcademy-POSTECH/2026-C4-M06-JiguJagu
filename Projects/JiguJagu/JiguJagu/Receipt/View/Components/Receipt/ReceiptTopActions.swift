@@ -8,10 +8,15 @@
 import SwiftUI
 
 struct ReceiptTopActions: View {
+    var onClose: () -> Void = {
+        NotificationCenter.default.post(name: .goHome, object: nil)
+    }
+    var onArchive: () -> Void = {}
+
     var body: some View {
         HStack {
             Button {
-                NotificationCenter.default.post(name: .goHome, object: nil)
+                onClose()
             } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 18, weight: .bold))
@@ -33,7 +38,7 @@ struct ReceiptTopActions: View {
                 .frame(width: 24, height: 24)
                 
                 Button {
-                    NotificationCenter.default.post(name: .goArchive, object: nil)
+                    onArchive()
                 } label: {
                     Image(systemName: "folder")
                         .font(.system(size: 18, weight: .bold))
@@ -50,4 +55,3 @@ struct ReceiptTopActions: View {
 #Preview {
     ReceiptTopActions()
 }
-

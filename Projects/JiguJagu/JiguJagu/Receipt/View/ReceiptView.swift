@@ -21,6 +21,7 @@ struct ReceiptView: View {
     
     @State private var controller = ReceiptAnimationController()
     @State private var isPrinting = false
+    @State private var showArchive = false
     
     var body: some View {
         ScrollViewReader { proxy in
@@ -32,7 +33,9 @@ struct ReceiptView: View {
                         .frame(width: 355.72)
                         .padding(.top, 50)
                     
-                    ReceiptTopActions()
+                    ReceiptTopActions(
+                        onArchive: { showArchive = true }
+                    )
                 }
                 ScrollView(showsIndicators: false) {
                     
@@ -126,20 +129,12 @@ struct ReceiptView: View {
             .scrollBounceBehavior(.basedOnSize)
             .background {
                 
-                ZStack {
-                    Image("MainBG")
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 532, height: 912)
-                        .clipped()
-                        .opacity(0.6)
-                    
-                    VStack(spacing: 0) {
-                        TopGradientOverlay()
-                            .blendMode(.multiply)
-                        Spacer(minLength: 0)
-                    }
-                }
+                Image("MainBG")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 532, height: 912)
+                    .clipped()
+                    .opacity(0.6)
             }
             .onAppear {
                 UIScrollView.appearance().bounces = false
@@ -154,7 +149,17 @@ struct ReceiptView: View {
             .onTapGesture {
                 controller.skipPrinting(proxy: proxy)
             }
-        }.navigationBarBackButtonHidden(true)
+        }
+        .navigationBarBackButtonHidden(true)
+        .navigationDestination(isPresented: $showArchive) {
+            ArchiveView(
+                receipts: [ArchiveReceipt(from: clothing, localImage: localImage)],
+                initialCategory: .all,
+                onBackButtonTap: { showArchive = false }
+            )
+            .navigationBarBackButtonHidden(true)
+            .toolbar(.hidden, for: .navigationBar)
+        }
     }
 }
 

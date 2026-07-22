@@ -2,7 +2,7 @@
 //  Clothing+Identification.swift
 //  JiguJagu
 //
-//  Created by SIA on 7/22/26.
+//  옷 분석 결과(ClothingIdentification)를 등록 화면용 Clothing으로 변환합니다.
 //
 
 import Foundation

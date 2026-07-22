@@ -1,13 +1,12 @@
 //
-//  Notification_GoHome.swift
+//  Notification+GoHome.swift
 //  JiguJagu
 //
-//  Created by SIA on 7/22/26.
+//  홈/보관함으로 이동하는 신호. 영수증 화면 등 깊은 화면에서 사용합니다.
 //
 
 import Foundation
 
 extension Notification.Name {
     static let goHome = Notification.Name("goHome")
-    static let goArchive = Notification.Name("goArchive")
 }
