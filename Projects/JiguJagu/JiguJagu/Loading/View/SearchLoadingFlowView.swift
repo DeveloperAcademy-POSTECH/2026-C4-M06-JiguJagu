@@ -20,6 +20,7 @@ struct SearchLoadingFlowView: View {
                 ProductSearchResultView(
                     analysis: controller.analysis,
                     items: controller.items,
+                    searchErrorMessage: controller.errorMessage,
                     shouldSearchInitialQuery: false
                 )
             } else {

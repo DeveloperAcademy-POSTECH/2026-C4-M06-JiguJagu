@@ -24,8 +24,8 @@ struct ProductResultView: View {
     /// 배경을 제거(누끼)한 옷 이미지. 준비되면 원본 대신 이걸 보여준다.
     @State private var cutoutImage: UIImage?
 
-    /// 값이 설정되면 네이버 검색 결과 화면으로 push 된다.
-    @State private var searchAnalysis: ClothingAnalysis?
+    /// 값이 설정되면 검색 로딩 화면으로 push 된다.
+    @State private var loadingSearchAnalysis: ClothingAnalysis?
 
     /// true가 되면 옷 등록 확인 화면으로 push 된다.
     @State private var showRegister = false
@@ -87,9 +87,7 @@ struct ProductResultView: View {
         HStack(spacing: 12) {
             // 검색하기 (보조 · 밝은 배경) — 기존 완료 로직 실행
             Button {
-                if let result {
-                    searchAnalysis = ClothingAnalysis(from: result)
-                }
+                startSearchLoading()
                 onSearch()
             } label: {
                 Text("검색하기")

@@ -52,7 +52,7 @@ private extension SearchLoadingController {
         try? await Task.sleep(nanoseconds: Self.minimumLoadingNanoseconds)
     }
 
-    nonisolated func fetchSearchResults() async -> Result<[Clothing], Error> {
+    func fetchSearchResults() async -> Result<[Clothing], Error> {
         do {
             let service = NaverShoppingService(
                 clientID: try APIConfig.naverClientID,
@@ -75,9 +75,9 @@ private extension SearchLoadingController {
         case let .success(items):
             self.items = items
             errorMessage = nil
-        case let .failure(error):
+        case .failure:
             self.items = []
-            errorMessage = error.localizedDescription
+            errorMessage = "상품 검색에 실패했어요."
         }
     }
 }
