@@ -11,6 +11,8 @@ import Observation
 @MainActor
 @Observable
 final class SearchLoadingController {
+    private static let minimumLoadingNanoseconds: UInt64 = 3_000_000_000
+
     private(set) var items: [Clothing] = []
     private(set) var errorMessage: String?
     private(set) var isReady = false
@@ -32,11 +34,25 @@ final class SearchLoadingController {
         }
 
         isLoading = true
-        defer {
-            isLoading = false
-            isReady = true
-        }
 
+        async let minimumLoading: Void = waitMinimumLoadingDuration()
+        async let searchResult: Result<[Clothing], Error> = fetchSearchResults()
+
+        let result = await searchResult
+        await minimumLoading
+
+        applySearchResult(result)
+        isLoading = false
+        isReady = true
+    }
+}
+
+private extension SearchLoadingController {
+    nonisolated func waitMinimumLoadingDuration() async {
+        try? await Task.sleep(nanoseconds: Self.minimumLoadingNanoseconds)
+    }
+
+    nonisolated func fetchSearchResults() async -> Result<[Clothing], Error> {
         do {
             let service = NaverShoppingService(
                 clientID: try APIConfig.naverClientID,
@@ -48,10 +64,20 @@ final class SearchLoadingController {
                 display: 10
             )
 
-            items = results.map(Clothing.init(from:))
+            return .success(results.map(Clothing.init(from:)))
         } catch {
+            return .failure(error)
+        }
+    }
+
+    func applySearchResult(_ result: Result<[Clothing], Error>) {
+        switch result {
+        case let .success(items):
+            self.items = items
+            errorMessage = nil
+        case let .failure(error):
+            self.items = []
             errorMessage = error.localizedDescription
-            items = []
         }
     }
 }
