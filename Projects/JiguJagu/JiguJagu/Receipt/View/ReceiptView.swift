@@ -7,6 +7,7 @@
 
 import SwiftUI
 import UIKit
+import Combine
 
 struct ReceiptView: View {
     
@@ -15,18 +16,22 @@ struct ReceiptView: View {
     
     private var formatter: DateFormatter {
         let formatter = DateFormatter()
-        formatter.dateFormat = "dd-MMMM-yyyy"
+        formatter.dateFormat = "yyyy.MM.dd"
         return formatter
     }
     
     @State private var controller = ReceiptAnimationController()
     @State private var isPrinting = false
     @State private var showArchive = false
+    @StateObject private var shareController = ReceiptShareController()
     
     var body: some View {
         ScrollViewReader { proxy in
             VStack(spacing: -50) {
+                
                 ZStack(alignment: .top) {
+                    
+                    
                     Image("ReceiptPrinter")
                         .resizable()
                         .scaledToFit()
@@ -34,6 +39,7 @@ struct ReceiptView: View {
                         .padding(.top, 50)
                     
                     ReceiptTopActions(
+                        shareImage: shareController.shareImage,
                         onArchive: { showArchive = true }
                     )
                 }
@@ -41,83 +47,11 @@ struct ReceiptView: View {
                     
                     ZStack(alignment: .top) {
                         
-                        VStack(spacing: 0) {
-                            
-                            VStack(spacing: 24) {
-                                Image("BrownLogo")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 99.8, height: 18.85)
-                                    .padding(.top, 20)
-                                
-                                VStack(spacing: 10.66) {
-                                    Image("StarDevider")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 291.78, height: 3.66)
-                                    
-                                    Text("GOOD FOR EARTH * GOOD FOR ENVIRONMENT")
-                                        .font(Font.arrayFont.sub2)
-                                    
-                                    Image("StarDevider")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 291.78, height: 3.66)
-                                    
-                                    
-                                        .font(.caption)
-                                }
-                                
-                                VStack(spacing: 3) {
-                                    InfoSection(
-                                        category: "[ \(clothing.category3) > \(clothing.category4) ]",
-                                        brandName: clothing.brand,
-                                        productName: clothing.productName,
-                                        productImageURL: clothing.productImageURL?.absoluteString,
-                                        mockImageName: clothing.mockImageName,
-                                        localImage: localImage
-                                    )
-                                    
-                                    HowToCareSection(
-                                        careTips: clothing.howToCare
-                                    )
-                                }
-                                
-                                Divider().background(Color.brown700)
-                                
-                                WashingGuideSection(
-                                    guides: clothing.washingGuides
-                                )
-                                
-                                Divider().background(Color.brown700)
-                                
-                                MaterialCompositionSection(
-                                    materials: clothing.materials
-                                )
-                                
-                                Divider().background(Color.brown700)
-                                
-                                FooterSection(
-                                    date: formatter.string(from: Date()),
-                                    category: "\(clothing.category3) > \(clothing.category4)"
-                                )
-                            }
-                            .padding(
-                                EdgeInsets(
-                                    top: 12,
-                                    leading: 12,
-                                    bottom: 20,
-                                    trailing: 12
-                                )
-                            )
-                            .frame(width: 306)
-                            .background(Color(Color.BG))
-                            
-                            Image("ReceiptBottom")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 306)
-                        }
+                        ReceiptContentView(
+                            clothing: clothing,
+                            localImage: localImage,
+                            formatter: formatter
+                        )
                         .offset(y: controller.receiptOffset)
                     }
                     .clipped()
@@ -126,15 +60,20 @@ struct ReceiptView: View {
                 }
                 .padding(.vertical)
             }
+            
             .scrollBounceBehavior(.basedOnSize)
             .background {
-                
-                Image("MainBG")
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 532, height: 912)
-                    .clipped()
-                    .opacity(0.6)
+                ZStack(alignment: .top) {
+                    Image("MainBG")
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 532, height: 912)
+                        .clipped()
+                        .opacity(0.6)
+                    
+                    TopGradientOverlay()
+                        .allowsHitTesting(false)
+                }
             }
             .onAppear {
                 UIScrollView.appearance().bounces = false
@@ -145,6 +84,16 @@ struct ReceiptView: View {
             }
             .onAppear {
                 controller.startPrinting(proxy: proxy)
+                DispatchQueue.main.async {
+                    shareController.makeShareImage(
+                        from: ReceiptContentView(
+                            clothing: clothing,
+                            localImage: localImage,
+                            formatter: formatter
+                        ),
+                        size: CGSize(width: 306, height: 900)
+                    )
+                }
             }
             .onTapGesture {
                 controller.skipPrinting(proxy: proxy)
