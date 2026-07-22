@@ -16,12 +16,14 @@ struct SearchView: View {
     @State private var selectedItem: Clothing?
     
     private let initialQuery: String?
+    private let shouldSearchInitialQuery: Bool
     
     init(items: [Clothing] = [], initialQuery: String? = nil) {
         _items = State(initialValue: items)
         _searchText = State(initialValue: initialQuery ?? "")
         _submittedSearchText = State(initialValue: initialQuery ?? "")
         self.initialQuery = initialQuery
+        self.shouldSearchInitialQuery = items.isEmpty
     }
     
     private var filteredItems: [Clothing] {
@@ -95,7 +97,9 @@ struct SearchView: View {
             }
             .navigationBarBackButtonHidden(true)
             .task {
-                if let initialQuery, !initialQuery.isEmpty {
+                if shouldSearchInitialQuery,
+                   let initialQuery,
+                   !initialQuery.isEmpty {
                     await searchNaver(query: initialQuery)
                 }
             }

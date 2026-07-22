@@ -10,10 +10,16 @@ import SwiftUI
 struct ProductSearchResultView: View {
     
     let analysis: ClothingAnalysis
+    let items: [Clothing]
+    
+    init(analysis: ClothingAnalysis, items: [Clothing] = []) {
+        self.analysis = analysis
+        self.items = items
+    }
     
     var body: some View {
         SearchView(
-            items: [],
+            items: items,
             initialQuery: analysis.makeSearchQuery() // GPT 분석 결과만 넘김
         )
     }
