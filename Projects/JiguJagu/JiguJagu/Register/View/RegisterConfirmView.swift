@@ -24,6 +24,15 @@ struct RegisterConfirmView: View {
     @State private var editableBrand: String = ""
     @State private var editableProductName: String = ""
     @State private var showReceipt = false
+
+    /// 이미지 카드에서 재촬영한 사진(누끼 처리됨). 있으면 최우선 사용.
+    @State private var retakenImage: UIImage?
+    @State private var showCamera = false
+
+    /// 카드/영수증에 표시할 이미지. 재촬영 > 전달받은 사진 순.
+    private var displayImage: UIImage? {
+        retakenImage ?? localImage
+    }
     
     private func convertMainCategory(
         _ category: String
@@ -124,8 +133,9 @@ struct RegisterConfirmView: View {
                 HStack {
                     Spacer()
                     ClothingImageCard(
-                        localImage: localImage,
-                        url: clothing.productImageURL
+                        localImage: displayImage,
+                        url: clothing.productImageURL,
+                        onCameraTap: { showCamera = true }
                     )
                     Spacer()
                 }
@@ -227,17 +237,45 @@ struct RegisterConfirmView: View {
                 .padding(.top, 8)
             }
             .padding()
-        }.navigationDestination(isPresented: $showReceipt)
-        {
+        }
+        .navigationDestination(isPresented: $showReceipt) {
             
             ReceiptLoadingFlowView(
                 
                 clothing: Clothing.randomReceiptData(for: updatedClothing),
-                localImage: localImage
+                localImage: displayImage
                 
             )
             
-        }.navigationBarBackButtonHidden(true)
+        }
+        .fullScreenCover(isPresented: $showCamera) {
+            RetakeCameraView { captured in
+                showCamera = false
+                Task {
+                    // 재촬영 사진도 누끼 처리 후 사용
+                    let normalized = captured.normalizedUp()
+                    let cutout = await ForegroundCutout.extract(from: normalized)
+                    retakenImage = cutout ?? captured
+                }
+            }
+        }
+        .navigationBarBackButtonHidden(true)
+    }
+}
+
+/// 재촬영 전용 카메라 화면. 옷 촬영 설정으로 한 장 찍고 콜백으로 넘긴다.
+private struct RetakeCameraView: View {
+    @Environment(\.dismiss) private var dismiss
+    let onCapture: (UIImage) -> Void
+
+    var body: some View {
+        CameraCaptureView(
+            config: .clothing,
+            onLeadingAction: { dismiss() },
+            onCapture: { image in
+                onCapture(image)
+            }
+        )
     }
 }
 
@@ -284,6 +322,7 @@ private struct RegisterInfoField: View {
 private struct ClothingImageCard: View {
     var localImage: UIImage? = nil
     let url: URL?
+    var onCameraTap: () -> Void = {}
     
     var body: some View {
         ZStack {
@@ -296,7 +335,7 @@ private struct ClothingImageCard: View {
                 .frame(width: 180, height: 182)
             
             if let localImage {
-                // 누끼 딴 로컬 이미지 우선 표시
+                // 재촬영/전달받은 로컬 이미지 우선 표시
                 Image(uiImage: localImage)
                     .resizable()
                     .scaledToFit()
@@ -328,6 +367,25 @@ private struct ClothingImageCard: View {
                 
                 .frame(width: 180, height: 182)
             }
+
+            // 우측 상단 카메라 버튼 (재촬영)
+            VStack {
+                HStack {
+                    Spacer()
+                    Button(action: onCameraTap) {
+                        Image(systemName: "camera.fill")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(Color.grayScale600)
+                            .frame(width: 36, height: 36)
+                            .background(Color.grayScale200)
+                            .clipShape(Circle())
+                    }
+                    .buttonStyle(.plain)
+                }
+                Spacer()
+            }
+            .frame(width: 180, height: 182)
+            .padding(8)
         }
     }
 }
