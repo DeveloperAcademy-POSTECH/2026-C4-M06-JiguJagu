@@ -11,6 +11,7 @@ import UIKit
 struct ReceiptView: View {
     
     let clothing: Clothing
+    var localImage: UIImage? = nil
     
     private var formatter: DateFormatter {
         let formatter = DateFormatter()
@@ -20,6 +21,7 @@ struct ReceiptView: View {
     
     @State private var controller = ReceiptAnimationController()
     @State private var isPrinting = false
+    @State private var showArchive = false
     
     var body: some View {
         ScrollViewReader { proxy in
@@ -31,7 +33,9 @@ struct ReceiptView: View {
                         .frame(width: 355.72)
                         .padding(.top, 50)
                     
-                    ReceiptTopActions()
+                    ReceiptTopActions(
+                        onArchive: { showArchive = true }
+                    )
                 }
                 ScrollView(showsIndicators: false) {
                     
@@ -71,6 +75,7 @@ struct ReceiptView: View {
                                         productName: clothing.productName,
                                         productImageURL: clothing.productImageURL?.absoluteString,
                                         mockImageName: clothing.mockImageName,
+                                        localImage: localImage
                                     )
                                     
                                     HowToCareSection(
@@ -144,7 +149,17 @@ struct ReceiptView: View {
             .onTapGesture {
                 controller.skipPrinting(proxy: proxy)
             }
-        }.navigationBarBackButtonHidden(true)
+        }
+        .navigationBarBackButtonHidden(true)
+        .navigationDestination(isPresented: $showArchive) {
+            ArchiveView(
+                receipts: [ArchiveReceipt(from: clothing, localImage: localImage)],
+                initialCategory: .all,
+                onBackButtonTap: { showArchive = false }
+            )
+            .navigationBarBackButtonHidden(true)
+            .toolbar(.hidden, for: .navigationBar)
+        }
     }
 }
 

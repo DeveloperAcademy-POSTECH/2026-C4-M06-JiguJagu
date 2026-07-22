@@ -14,8 +14,12 @@ final class ArchiveController {
     var selectedSubcategory: ArchiveSubcategory?
     private(set) var receipts: [ArchiveReceipt]
 
-    init(receipts: [ArchiveReceipt] = []) {
+    init(
+        receipts: [ArchiveReceipt] = [],
+        initialCategory: ArchiveCategory = .all
+    ) {
         self.receipts = receipts
+        self.selectedCategory = initialCategory
     }
 
     var categories: [ArchiveCategory] {
