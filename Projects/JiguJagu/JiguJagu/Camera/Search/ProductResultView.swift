@@ -17,8 +17,8 @@ struct ProductResultView: View {
     @State private var errorMessage: String?
     @State private var isLoading = true
 
-    /// 값이 설정되면 네이버 검색 결과 화면으로 push 된다.
-    @State private var searchAnalysis: ClothingAnalysis?
+    /// 값이 설정되면 검색 로딩 화면으로 push 된다.
+    @State private var loadingSearchAnalysis: ClothingAnalysis?
 
 
     var body: some View {
@@ -35,16 +35,15 @@ struct ProductResultView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationTitle("상품 검색 결과")
             .navigationBarTitleDisplayMode(.inline)
-            .navigationDestination(item: $searchAnalysis) { analysis in
+            .navigationDestination(item: $loadingSearchAnalysis) { analysis in
                 SearchLoadingFlowView(analysis: analysis)
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("완료") {
-                        if let result {
-                            searchAnalysis = ClothingAnalysis(from: result)
-                        }
+                        startSearchLoading()
                     }
+                    .disabled(result == nil)
                 }
             }
         }
@@ -279,6 +278,14 @@ private struct FlexibleWrap<Item: Hashable, Content: View>: View {
 // MARK: - Action
 
 private extension ProductResultView {
+    func startSearchLoading() {
+        guard let result else {
+            return
+        }
+
+        loadingSearchAnalysis = ClothingAnalysis(from: result)
+    }
+
     func identify() async {
         isLoading = true
         errorMessage = nil
