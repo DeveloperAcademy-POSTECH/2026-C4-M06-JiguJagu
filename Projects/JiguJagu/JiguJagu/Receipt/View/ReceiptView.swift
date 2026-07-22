@@ -9,10 +9,33 @@ import SwiftUI
 import UIKit
 import Combine
 
+enum ReceiptDisplayMode {
+    case generated
+    case archived
+
+    var initialReceiptOffset: CGFloat {
+        switch self {
+        case .generated:
+            return -1200
+        case .archived:
+            return 0
+        }
+    }
+
+    var shouldStartPrinting: Bool {
+        self == .generated
+    }
+
+    var allowsPrintSkip: Bool {
+        self == .generated
+    }
+}
+
 struct ReceiptView: View {
     
     let clothing: Clothing
-    var localImage: UIImage? = nil
+    let localImage: UIImage?
+    let displayMode: ReceiptDisplayMode
     
     private var formatter: DateFormatter {
         let formatter = DateFormatter()
@@ -24,6 +47,21 @@ struct ReceiptView: View {
     @State private var isPrinting = false
     @State private var showArchive = false
     @StateObject private var shareController = ReceiptShareController()
+
+    init(
+        clothing: Clothing,
+        localImage: UIImage? = nil,
+        displayMode: ReceiptDisplayMode = .generated
+    ) {
+        self.clothing = clothing
+        self.localImage = localImage
+        self.displayMode = displayMode
+        _controller = State(
+            initialValue: ReceiptAnimationController(
+                receiptOffset: displayMode.initialReceiptOffset
+            )
+        )
+    }
     
     var body: some View {
         ScrollViewReader { proxy in
@@ -83,7 +121,7 @@ struct ReceiptView: View {
                 UIScrollView.appearance().bounces = true
             }
             .onAppear {
-                controller.startPrinting(proxy: proxy)
+                startReceiptPresentationIfNeeded(proxy: proxy)
                 DispatchQueue.main.async {
                     shareController.makeShareImage(
                         from: ReceiptContentView(
@@ -96,7 +134,7 @@ struct ReceiptView: View {
                 }
             }
             .onTapGesture {
-                controller.skipPrinting(proxy: proxy)
+                skipReceiptPresentationIfNeeded(proxy: proxy)
             }
         }
         .navigationBarBackButtonHidden(true)
@@ -109,6 +147,24 @@ struct ReceiptView: View {
             .navigationBarBackButtonHidden(true)
             .toolbar(.hidden, for: .navigationBar)
         }
+    }
+}
+
+private extension ReceiptView {
+    func startReceiptPresentationIfNeeded(proxy: ScrollViewProxy) {
+        guard displayMode.shouldStartPrinting else {
+            return
+        }
+
+        controller.startPrinting(proxy: proxy)
+    }
+
+    func skipReceiptPresentationIfNeeded(proxy: ScrollViewProxy) {
+        guard displayMode.allowsPrintSkip else {
+            return
+        }
+
+        controller.skipPrinting(proxy: proxy)
     }
 }
 

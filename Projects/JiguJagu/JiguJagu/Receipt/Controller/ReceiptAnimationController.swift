@@ -15,6 +15,10 @@ final class ReceiptAnimationController {
     var hasScrolled = false
     var shouldSkipPrinting = false
     var isSkipping = false
+
+    init(receiptOffset: CGFloat = -1200) {
+        self.receiptOffset = receiptOffset
+    }
     
     func startPrinting(proxy: ScrollViewProxy) {
         
