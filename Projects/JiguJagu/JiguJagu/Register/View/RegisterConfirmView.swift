@@ -15,7 +15,7 @@ struct RegisterConfirmView: View {
         clothing.receiptCategory
     }
     var localImage: UIImage? = nil
-
+    
     var onBack: () -> Void = {}
     @Environment(\.dismiss) private var dismiss
     @State private var selectedMainCategory = ""
@@ -208,25 +208,17 @@ struct RegisterConfirmView: View {
                 Spacer(minLength: 24)
                 
                 HStack(alignment: .center, spacing: 8) {
-                    Button(action: {}) {
-                        Text("재등록")
-                            .font(Font.pretendard.head3)
-                            .foregroundStyle(Color.grayScale900)
-                            .frame(width: 118, height: 52, alignment: .center)
-                            .background(Color.grayScale200)
-                            .cornerRadius(83)
-                    }
-                    .buttonStyle(.plain)
+                    
                     
                     Button {
                         
                         showReceipt = true
                         
                     } label: {
-                        Text("의류영수증 발급")
+                        Text("영수증 발급")
                             .font(Font.pretendard.head3)
                             .foregroundStyle(Color.white)
-                            .frame(width: 236, height: 52, alignment: .center)
+                            .frame(width: 371, height: 52, alignment: .center)
                             .background(Color.primary500)
                             .cornerRadius(83)
                     }
