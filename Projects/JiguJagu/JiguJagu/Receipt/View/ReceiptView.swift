@@ -29,13 +29,68 @@ enum ReceiptDisplayMode {
     var allowsPrintSkip: Bool {
         self == .generated
     }
+
+    var showsArchiveAction: Bool {
+        self == .generated
+    }
+
+    var showsPrinter: Bool {
+        self == .generated
+    }
+
+    var receiptStackSpacing: CGFloat {
+        switch self {
+        case .generated:
+            return -50
+        case .archived:
+            return 0
+        }
+    }
+
+    var ignoredSafeAreaEdges: Edge.Set {
+        switch self {
+        case .generated:
+            return []
+        case .archived:
+            return .top
+        }
+    }
+
+    var topActionsTopPadding: CGFloat {
+        switch self {
+        case .generated:
+            return 0
+        case .archived:
+            return 48
+        }
+    }
+
+    var topActionsBottomPadding: CGFloat {
+        switch self {
+        case .generated:
+            return 0
+        case .archived:
+            return 8
+        }
+    }
+
+    var receiptScrollVerticalPadding: CGFloat {
+        switch self {
+        case .generated:
+            return 16
+        case .archived:
+            return 0
+        }
+    }
 }
 
 struct ReceiptView: View {
     
     let clothing: Clothing
     let localImage: UIImage?
+    let registeredDate: Date
     let displayMode: ReceiptDisplayMode
+    let onClose: () -> Void
     
     private var formatter: DateFormatter {
         let formatter = DateFormatter()
@@ -51,11 +106,17 @@ struct ReceiptView: View {
     init(
         clothing: Clothing,
         localImage: UIImage? = nil,
-        displayMode: ReceiptDisplayMode = .generated
+        registeredDate: Date = Date(),
+        displayMode: ReceiptDisplayMode = .generated,
+        onClose: @escaping () -> Void = {
+            NotificationCenter.default.post(name: .goHome, object: nil)
+        }
     ) {
         self.clothing = clothing
         self.localImage = localImage
+        self.registeredDate = registeredDate
         self.displayMode = displayMode
+        self.onClose = onClose
         _controller = State(
             initialValue: ReceiptAnimationController(
                 receiptOffset: displayMode.initialReceiptOffset
@@ -65,40 +126,11 @@ struct ReceiptView: View {
     
     var body: some View {
         ScrollViewReader { proxy in
-            VStack(spacing: -50) {
-                
-                ZStack(alignment: .top) {
-                    
-                    
-                    Image("ReceiptPrinter")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 355.72)
-                        .padding(.top, 50)
-                    
-                    ReceiptTopActions(
-                        shareImage: shareController.shareImage,
-                        onArchive: { showArchive = true }
-                    )
-                }
-                ScrollView(showsIndicators: false) {
-                    
-                    ZStack(alignment: .top) {
-                        
-                        ReceiptContentView(
-                            clothing: clothing,
-                            localImage: localImage,
-                            formatter: formatter
-                        )
-                        .offset(y: controller.receiptOffset)
-                    }
-                    .clipped()
-                    .id("receiptBottom")
-                    
-                }
-                .padding(.vertical)
+            VStack(spacing: displayMode.receiptStackSpacing) {
+                receiptTopArea
+                receiptScrollView
             }
-            
+            .ignoresSafeArea(edges: displayMode.ignoredSafeAreaEdges)
             .scrollBounceBehavior(.basedOnSize)
             .background {
                 ZStack(alignment: .top) {
@@ -127,7 +159,8 @@ struct ReceiptView: View {
                         from: ReceiptContentView(
                             clothing: clothing,
                             localImage: localImage,
-                            formatter: formatter
+                            formatter: formatter,
+                            registeredDate: registeredDate
                         ),
                         size: CGSize(width: 306, height: 900)
                     )
@@ -151,6 +184,51 @@ struct ReceiptView: View {
 }
 
 private extension ReceiptView {
+    @ViewBuilder
+    var receiptTopArea: some View {
+        if displayMode.showsPrinter {
+            ZStack(alignment: .top) {
+                Image("ReceiptPrinter")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 355.72)
+                    .padding(.top, 50)
+
+                receiptTopActions
+            }
+        } else {
+            receiptTopActions
+                .padding(.top, displayMode.topActionsTopPadding)
+                .padding(.bottom, displayMode.topActionsBottomPadding)
+        }
+    }
+
+    var receiptTopActions: some View {
+        ReceiptTopActions(
+            shareImage: shareController.shareImage,
+            onClose: onClose,
+            onArchive: { showArchive = true },
+            showsArchiveButton: displayMode.showsArchiveAction
+        )
+    }
+
+    var receiptScrollView: some View {
+        ScrollView(showsIndicators: false) {
+            ZStack(alignment: .top) {
+                ReceiptContentView(
+                    clothing: clothing,
+                    localImage: localImage,
+                    formatter: formatter,
+                    registeredDate: registeredDate
+                )
+                .offset(y: controller.receiptOffset)
+            }
+            .clipped()
+            .id("receiptBottom")
+        }
+        .padding(.vertical, displayMode.receiptScrollVerticalPadding)
+    }
+
     func startReceiptPresentationIfNeeded(proxy: ScrollViewProxy) {
         guard displayMode.shouldStartPrinting else {
             return

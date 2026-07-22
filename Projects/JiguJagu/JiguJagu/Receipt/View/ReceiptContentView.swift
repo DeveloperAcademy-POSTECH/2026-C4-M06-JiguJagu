@@ -12,6 +12,7 @@ struct ReceiptContentView: View {
     let clothing: Clothing
     let localImage: UIImage?
     let formatter: DateFormatter
+    let registeredDate: Date
     
     var body: some View {
         VStack(spacing: 0) {
@@ -71,7 +72,7 @@ struct ReceiptContentView: View {
                     .background(Color.brown700)
                 
                 FooterSection(
-                    date: formatter.string(from: Date()),
+                    date: formatter.string(from: registeredDate),
                     category: "\(clothing.category3) > \(clothing.category4)"
                 )
             }

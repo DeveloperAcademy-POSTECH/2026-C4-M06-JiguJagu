@@ -12,7 +12,7 @@ struct JiguJaguApp: App {
     var body: some Scene {
         WindowGroup {
             //ContentView()
-            ArchiveView()
+            HomeView()
         }
     }
 }

@@ -7,17 +7,18 @@
 import SwiftUI
 
 private enum ArchiveCarouselLayout {
-    static let cardTopPadding: CGFloat = 40
-    static let cardSpacing: CGFloat = 30
-    static let sideCardWidthScale: CGFloat = 0.9
-    static let sideCardHeightScale: CGFloat = 0.82
-    static let sideCardOpacity: CGFloat = 0.78
-    static let sideCardYOffset: CGFloat = 28
+    nonisolated static let cardTopPadding: CGFloat = 40
+    nonisolated static let cardSpacing: CGFloat = 30
+    nonisolated static let sideCardWidthScale: CGFloat = 0.9
+    nonisolated static let sideCardHeightScale: CGFloat = 0.82
+    nonisolated static let sideCardOpacity: CGFloat = 0.78
+    nonisolated static let sideCardYOffset: CGFloat = 28
 }
 
 struct ArchiveView: View {
     @State private var controller: ArchiveController
     @State private var focusedReceiptItemID: String?
+    @State private var selectedReceipt: ArchiveReceipt?
     private let onBackButtonTap: () -> Void
 
     init(
@@ -59,10 +60,37 @@ struct ArchiveView: View {
         }
         .background(Color.white)
         .ignoresSafeArea(edges: .bottom)
+        .navigationDestination(isPresented: isShowingReceiptDetail) {
+            receiptDetailView
+        }
     }
 }
 
 private extension ArchiveView {
+    var isShowingReceiptDetail: Binding<Bool> {
+        Binding(
+            get: { selectedReceipt != nil },
+            set: { isPresented in
+                if !isPresented {
+                    selectedReceipt = nil
+                }
+            }
+        )
+    }
+
+    @ViewBuilder
+    var receiptDetailView: some View {
+        if let selectedReceipt {
+            ReceiptView(
+                clothing: Clothing(from: selectedReceipt),
+                localImage: selectedReceipt.localImage,
+                registeredDate: selectedReceipt.registeredDate,
+                displayMode: .archived,
+                onClose: { self.selectedReceipt = nil }
+            )
+        }
+    }
+
     var receiptArchiveContent: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
@@ -137,8 +165,18 @@ private extension ArchiveView {
     }
 
     func receiptCardItem(_ receipt: ArchiveReceipt) -> some View {
-        ArchiveReceiptCard(receipt: receipt)
-            .padding(.top, ArchiveCarouselLayout.cardTopPadding)
+        Button {
+            selectedReceipt = receipt
+        } label: {
+            ArchiveReceiptCard(receipt: receipt)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(receiptCardAccessibilityLabel(for: receipt))
+        .padding(.top, ArchiveCarouselLayout.cardTopPadding)
+    }
+
+    func receiptCardAccessibilityLabel(for receipt: ArchiveReceipt) -> String {
+        "\(receipt.productName.replacingOccurrences(of: "\n", with: " ")), \(receipt.category.title), \(receipt.dDayText())"
     }
 
     var sortedReceipts: [ArchiveReceipt] {
