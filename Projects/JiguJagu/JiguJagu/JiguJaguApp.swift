@@ -11,7 +11,6 @@ import SwiftUI
 struct JiguJaguApp: App {
     var body: some Scene {
         WindowGroup {
-            //ContentView()
             HomeView()
         }
     }
