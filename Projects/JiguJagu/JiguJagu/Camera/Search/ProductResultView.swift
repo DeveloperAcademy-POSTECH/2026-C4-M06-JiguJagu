@@ -36,7 +36,7 @@ struct ProductResultView: View {
             .navigationTitle("상품 검색 결과")
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(item: $searchAnalysis) { analysis in
-                ProductSearchResultView(analysis: analysis)
+                SearchLoadingFlowView(analysis: analysis)
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {

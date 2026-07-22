@@ -18,12 +18,16 @@ struct SearchView: View {
     private let initialQuery: String?
     private let shouldSearchInitialQuery: Bool
     
-    init(items: [Clothing] = [], initialQuery: String? = nil) {
+    init(
+        items: [Clothing] = [],
+        initialQuery: String? = nil,
+        shouldSearchInitialQuery: Bool? = nil
+    ) {
         _items = State(initialValue: items)
         _searchText = State(initialValue: initialQuery ?? "")
         _submittedSearchText = State(initialValue: initialQuery ?? "")
         self.initialQuery = initialQuery
-        self.shouldSearchInitialQuery = items.isEmpty
+        self.shouldSearchInitialQuery = shouldSearchInitialQuery ?? items.isEmpty
     }
     
     private var filteredItems: [Clothing] {
