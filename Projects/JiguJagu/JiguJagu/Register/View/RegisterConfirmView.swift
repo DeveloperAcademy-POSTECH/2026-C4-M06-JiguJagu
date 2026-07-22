@@ -14,7 +14,8 @@ struct RegisterConfirmView: View {
     private var categoryText: String {
         clothing.receiptCategory
     }
-    
+    var localImage: UIImage? = nil
+
     var onBack: () -> Void = {}
     @Environment(\.dismiss) private var dismiss
     @State private var selectedMainCategory = ""
@@ -70,9 +71,11 @@ struct RegisterConfirmView: View {
     
     init(
         clothing: Clothing,
+        localImage: UIImage? = nil,
         onBack: @escaping () -> Void = {}
     ) {
         self.clothing = clothing
+        self.localImage = localImage
         self.onBack = onBack
         
         _editableBrand = State(
@@ -120,7 +123,10 @@ struct RegisterConfirmView: View {
                 
                 HStack {
                     Spacer()
-                    ClothingImageCard(url: clothing.productImageURL)
+                    ClothingImageCard(
+                        localImage: localImage,
+                        url: clothing.productImageURL
+                    )
                     Spacer()
                 }
                 
@@ -234,7 +240,8 @@ struct RegisterConfirmView: View {
             
             ReceiptView(
                 
-                clothing: Clothing.randomReceiptData(for: updatedClothing)
+                clothing: Clothing.randomReceiptData(for: updatedClothing),
+                localImage: localImage
                 
             )
             
@@ -283,6 +290,7 @@ private struct RegisterInfoField: View {
 }
 
 private struct ClothingImageCard: View {
+    var localImage: UIImage? = nil
     let url: URL?
     
     var body: some View {
@@ -295,7 +303,13 @@ private struct ClothingImageCard: View {
                 }
                 .frame(width: 180, height: 182)
             
-            if let url {
+            if let localImage {
+                // 누끼 딴 로컬 이미지 우선 표시
+                Image(uiImage: localImage)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 140, height: 142)
+            } else if let url {
                 
                 AsyncImage(url: url) { phase in
                     

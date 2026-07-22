@@ -9,21 +9,44 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var showCamera = false
+    @State private var selectedTicket: ArchiveCategory.HomeTicket?
+    
+    /// 상단 여백. 값을 키우면 로고를 포함한 전체 UI가 함께 아래로 내려갑니다.
+    private let contentTopPadding: CGFloat = 101
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            titleSection
-            ticketGrid
-            Spacer()
-            addButton
-        }
-        .padding(.horizontal)
-        .background {
-            Image("MainBG")
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(width: 532, height: 912)
-                .clipped()
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 24) {
+                titleSection
+                ticketGrid
+                Spacer()
+                addButton
+                    .padding(.leading, 16)
+            }
+            .padding(.horizontal)
+            .background {
+                ZStack {
+                    Image("MainBG")
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 532, height: 912)
+                        .clipped()
+                    
+                    VStack(spacing: 0) {
+                        TopGradientOverlay()
+                            .blendMode(.multiply)
+                        Spacer(minLength: 0)
+                    }
+                }
+            }
+            .navigationDestination(item: $selectedTicket) { ticket in
+                ArchiveView(
+                    initialCategory: ticket.archiveCategory,
+                    onBackButtonTap: { selectedTicket = nil }
+                )
+                .navigationBarBackButtonHidden(true)
+                .toolbar(.hidden, for: .navigationBar)
+            }
         }
     }
 }
@@ -43,7 +66,7 @@ extension HomeView {
                 .font(.pretendard.body5)
                 .foregroundStyle(.white)
         }
-        .padding(.top, 79)
+        .padding(.top, contentTopPadding)
         .padding(.leading, 16)
         .ignoresSafeArea()
     }
@@ -52,19 +75,19 @@ extension HomeView {
         HStack(alignment: .top, spacing: 26) {
             VStack(spacing: 21) {
                 CategoryTicketButton(title: "TOP", imageName: "TopButton") {
-                    // TODO
+                    selectedTicket = .top
                 }
                 CategoryTicketButton(title: "OUTER", imageName: "OuterButton") {
-                    // TODO
+                    selectedTicket = .outer
                 }
             }
             
             VStack(spacing: 21) {
                 CategoryTicketButton(title: "BOTTOM", imageName: "BottomButton") {
-                    // TODO
+                    selectedTicket = .bottom
                 }
                 CategoryTicketButton(title: "ALL", imageName: "AllButton") {
-                    // TODO
+                    selectedTicket = .all
                 }
             }
             .padding(.top, 64)
@@ -79,14 +102,17 @@ extension HomeView {
             Text("옷 등록")
                 .font(.pretendard.head3)
                 .foregroundStyle(.black)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
+                .frame(maxWidth: 335)
+                .padding(.vertical, 13)
                 .background(Color.white)
                 .clipShape(Capsule())
         }
         .padding(.bottom, 40)
         .fullScreenCover(isPresented: $showCamera) {
             LaundryCaptureFlow()
+                .onReceive(NotificationCenter.default.publisher(for: .goHome)) { _ in
+                    showCamera = false
+                }
         }
     }
 }
