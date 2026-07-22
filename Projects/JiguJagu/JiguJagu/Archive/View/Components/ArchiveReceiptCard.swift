@@ -26,7 +26,7 @@ struct ArchiveReceiptCard: View {
                 .frame(height: ArchiveReceiptCardLayout.edgeHeight)
 
             VStack(spacing: 14) {
-                receiptHeader
+                keptDaysInfo
 
                 dottedDivider
 
@@ -57,18 +57,11 @@ struct ArchiveReceiptCard: View {
 }
 
 private extension ArchiveReceiptCard {
-    var receiptHeader: some View {
-        HStack {
-            Text("Product")
-                .font(.pretendard.body2)
-                .foregroundStyle(Color.brown900)
-
-            Spacer()
-
-            Text(receipt.categoryPath)
-                .font(.pretendard.body3)
-                .foregroundStyle(Color.brown200)
-        }
+    var keptDaysInfo: some View {
+        Text(receipt.keptDaysText())
+            .font(.pretendard.body2)
+            .foregroundStyle(Color.brown900)
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     var productInfo: some View {

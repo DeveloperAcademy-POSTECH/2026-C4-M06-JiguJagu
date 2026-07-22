@@ -6,6 +6,10 @@
 
 import SwiftUI
 
+private enum ArchiveCarouselLayout {
+    static let cardTopPadding: CGFloat = 40
+}
+
 struct ArchiveView: View {
     @State private var controller: ArchiveController
     private let onBackButtonTap: () -> Void
@@ -127,15 +131,8 @@ private extension ArchiveView {
     }
 
     func receiptCardItem(_ receipt: ArchiveReceipt) -> some View {
-        VStack(spacing: 8) {
-            Text(receipt.keptDaysText())
-                .font(.pretendard.head4)
-                .foregroundStyle(Color.white)
-                .frame(width: 266)
-                .padding(.top, 10)
-
-            ArchiveReceiptCard(receipt: receipt)
-        }
+        ArchiveReceiptCard(receipt: receipt)
+            .padding(.top, ArchiveCarouselLayout.cardTopPadding)
     }
 
     var sortedReceipts: [ArchiveReceipt] {
