@@ -15,7 +15,7 @@ struct ReceiptView: View {
     
     private var formatter: DateFormatter {
         let formatter = DateFormatter()
-        formatter.dateFormat = "dd-MMMM-yyyy"
+        formatter.dateFormat = "yyyy.MM.dd"
         return formatter
     }
     
