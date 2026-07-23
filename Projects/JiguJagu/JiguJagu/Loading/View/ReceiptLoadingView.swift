@@ -38,6 +38,7 @@ struct ReceiptLoadingView: View {
                     )
             }
         }
+        .navigationBarBackButtonHidden(true)
         .background(Color.white)
         .ignoresSafeArea()
         .accessibilityIdentifier(LoadingAccessibilityIdentifier.receiptIssuingScreen)
