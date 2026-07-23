@@ -75,13 +75,13 @@ struct RegisterConfirmView: View {
             productName: editableProductName,
             mockImageName: clothing.mockImageName,
             productImageURL: clothing.productImageURL,
-            receiptCategory: clothing.receiptCategory,
-            category3: clothing.category3,
-            category4: clothing.category4,
+            receiptCategory: selectedMainCategory,
+            category3: selectedMainCategory,
+            category4: selectedSubCategory?.title ?? "",
             howToCare: clothing.howToCare,
             washingGuides: clothing.washingGuides,
             materials: clothing.materials,
-            color: clothing.color
+            color: selectedColor?.title ?? ""
         )
     }
     

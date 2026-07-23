@@ -46,74 +46,74 @@ struct SearchView: View {
     }
     
     var body: some View {
-        NavigationStack {
-            ScrollViewReader { proxy in
-                ZStack(alignment: .bottomTrailing) {
-                    ScrollView {
-                        VStack(spacing: 20) {
-                            Color.clear
-                                .frame(height: 0)
-                                .id("top")
-                            
-                            searchBar()
-                            
-                            SearchResultSummary(
-                                count: filteredItems.count,
-                                action: {
-                                    showRegisterFlow = true
+        
+        ScrollViewReader { proxy in
+            ZStack(alignment: .bottomTrailing) {
+                ScrollView {
+                    VStack(spacing: 20) {
+                        Color.clear
+                            .frame(height: 0)
+                            .id("top")
+                        
+                        searchBar()
+                        
+                        SearchResultSummary(
+                            count: filteredItems.count,
+                            action: {
+                                showRegisterFlow = true
+                            }
+                        )
+                        
+                        if isSearching {
+                            searchProgressView
+                        } else if filteredItems.isEmpty {
+                            emptyStateView
+                        } else {
+                            SearchResultGrid(
+                                items: filteredItems,
+                                onSelect: { item in
+                                    selectedItem = item
                                 }
                             )
-                            
-                            if isSearching {
-                                searchProgressView
-                            } else if filteredItems.isEmpty {
-                                emptyStateView
-                            } else {
-                                SearchResultGrid(
-                                    items: filteredItems,
-                                    onSelect: { item in
-                                        selectedItem = item
-                                    }
-                                )
-                            }
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 20)
                     }
-                    
-                    if !filteredItems.isEmpty {
-                        BottomGradientOverlay()
-                    }
-                    
-                    FloatingUpButton {
-                        scrollToTop(proxy)
-                    }
-                    .padding(.trailing, 35.5)
-                    .padding(.bottom, 33)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 20)
                 }
-                .ignoresSafeArea(edges: .bottom)
-                .navigationDestination(isPresented: Binding(
-                    get: { selectedItem != nil },
-                    set: { if !$0 { selectedItem = nil } }
-                )) {
-                    if let item = selectedItem {
-                        RegisterConfirmView(
-                            clothing: item
-                        )
-                    }
-                }.navigationDestination(isPresented: $showRegisterFlow) {
-                    RegisterFlowView()
+                
+                if !filteredItems.isEmpty {
+                    BottomGradientOverlay()
                 }
+                
+                FloatingUpButton {
+                    scrollToTop(proxy)
+                }
+                .padding(.trailing, 35.5)
+                .padding(.bottom, 33)
             }
-            .navigationBarBackButtonHidden(true)
-            .task {
-                if shouldSearchInitialQuery,
-                   let initialQuery,
-                   !initialQuery.isEmpty {
-                    await searchNaver(query: initialQuery)
+            .ignoresSafeArea(edges: .bottom)
+            .navigationDestination(isPresented: Binding(
+                get: { selectedItem != nil },
+                set: { if !$0 { selectedItem = nil } }
+            )) {
+                if let item = selectedItem {
+                    RegisterConfirmView(
+                        clothing: item
+                    )
                 }
+            }.navigationDestination(isPresented: $showRegisterFlow) {
+                RegisterFlowView()
             }
         }
+        .navigationBarBackButtonHidden(true)
+        .task {
+            if shouldSearchInitialQuery,
+               let initialQuery,
+               !initialQuery.isEmpty {
+                await searchNaver(query: initialQuery)
+            }
+        }
+        
     }
 }
 
@@ -131,12 +131,12 @@ private extension SearchView {
             }
         )
     }
-
+    
     var searchProgressView: some View {
         VStack(spacing: 12) {
             ProgressView()
                 .tint(Color.primary500)
-
+            
             Text("상품을 검색하고 있어요...")
                 .font(Font.pretendard.head3)
                 .foregroundStyle(Color.grayScale600)
@@ -144,14 +144,14 @@ private extension SearchView {
         .frame(maxWidth: .infinity)
         .padding(.top, 260)
     }
-
+    
     var emptyStateView: some View {
         VStack(spacing: 10) {
             Text(searchErrorMessage ?? "검색 결과가 없습니다.")
                 .font(Font.pretendard.head3)
                 .foregroundStyle(Color.grayScale600)
                 .multilineTextAlignment(.center)
-
+            
             if searchErrorMessage != nil {
                 Text("검색어를 수정해 다시 시도해 주세요.")
                     .font(Font.pretendard.body5)

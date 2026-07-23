@@ -10,6 +10,7 @@ import SwiftUI
 struct SearchTopBar: View {
     
     @Binding var searchText: String
+    @Environment(\.dismiss) private var dismiss
     
     var onSearch: () -> Void = {}
     
@@ -17,7 +18,7 @@ struct SearchTopBar: View {
         HStack(spacing: 12) {
             
             Button {
-                print("뒤로가기")
+                dismiss()
             } label: {
                 Image(systemName: "arrow.backward")
                     .foregroundColor(Color.grayScale900)
