@@ -22,7 +22,7 @@ struct LoadingProgressConfiguration: Equatable {
         maximumLoopProgress: 0.96,
         progressIncrement: 0.006,
         tickMilliseconds: 45,
-        message: "비슷한 의류를 찾고 있어요...",
+        message: "옷을 찾고 있어요...",
         accessibilityProgressLabel: "의류 탐색 진행률"
     )
 

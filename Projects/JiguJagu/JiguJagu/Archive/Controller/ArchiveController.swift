@@ -6,12 +6,14 @@
 
 import Foundation
 import Observation
+import SwiftData
 
 @Observable
 final class ArchiveController {
     var searchText = ""
     var selectedCategory: ArchiveCategory = .all
     var selectedSubcategory: ArchiveSubcategory?
+    private(set) var receiptLoadErrorMessage: String?
     private(set) var receipts: [ArchiveReceipt]
 
     init(
@@ -51,6 +53,18 @@ final class ArchiveController {
 
     func setReceipts(_ receipts: [ArchiveReceipt]) {
         self.receipts = receipts
+    }
+
+    func loadReceipts(
+        from store: SwiftDataReceiptStore,
+        context: ModelContext
+    ) {
+        do {
+            receipts = try store.loadReceipts(from: context)
+            receiptLoadErrorMessage = nil
+        } catch {
+            receiptLoadErrorMessage = "보관함을 불러오지 못했어요."
+        }
     }
 
     func selectCategory(_ category: ArchiveCategory) {

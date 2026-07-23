@@ -42,7 +42,8 @@ struct HomeView: View {
             .navigationDestination(item: $selectedTicket) { ticket in
                 ArchiveView(
                     initialCategory: ticket.archiveCategory,
-                    onBackButtonTap: { selectedTicket = nil }
+                    onBackButtonTap: { selectedTicket = nil },
+                    onRegisterButtonTap: openRegistrationFromArchive
                 )
                 .navigationBarBackButtonHidden(true)
                 .toolbar(.hidden, for: .navigationBar)
@@ -112,8 +113,13 @@ extension HomeView {
             LaundryCaptureFlow()
                 .onReceive(NotificationCenter.default.publisher(for: .goHome)) { _ in
                     showCamera = false
-                }
+            }
         }
+    }
+
+    private func openRegistrationFromArchive() {
+        selectedTicket = nil
+        showCamera = true
     }
 }
 

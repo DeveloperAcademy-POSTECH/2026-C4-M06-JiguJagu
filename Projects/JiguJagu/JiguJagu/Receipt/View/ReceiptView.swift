@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 import UIKit
 import Combine
 
@@ -85,6 +86,7 @@ enum ReceiptDisplayMode {
 }
 
 struct ReceiptView: View {
+    @Environment(\.modelContext) private var modelContext
     
     let clothing: Clothing
     let localImage: UIImage?
@@ -101,7 +103,10 @@ struct ReceiptView: View {
     @State private var controller = ReceiptAnimationController()
     @State private var isPrinting = false
     @State private var showArchive = false
+    @State private var isSavingToArchive = false
+    @State private var archiveSaveErrorMessage: String?
     @StateObject private var shareController = ReceiptShareController()
+    private let receiptStore = SwiftDataReceiptStore()
 
     init(
         clothing: Clothing,
@@ -173,17 +178,37 @@ struct ReceiptView: View {
         .navigationBarBackButtonHidden(true)
         .navigationDestination(isPresented: $showArchive) {
             ArchiveView(
-                receipts: [ArchiveReceipt(from: clothing, localImage: localImage)],
                 initialCategory: .all,
                 onBackButtonTap: { showArchive = false }
             )
             .navigationBarBackButtonHidden(true)
             .toolbar(.hidden, for: .navigationBar)
         }
+        .alert(
+            "보관함에 저장하지 못했어요",
+            isPresented: isShowingArchiveSaveError
+        ) {
+            Button("확인") {
+                archiveSaveErrorMessage = nil
+            }
+        } message: {
+            Text(archiveSaveErrorMessage ?? "잠시 후 다시 시도해주세요.")
+        }
     }
 }
 
 private extension ReceiptView {
+    var isShowingArchiveSaveError: Binding<Bool> {
+        Binding(
+            get: { archiveSaveErrorMessage != nil },
+            set: { isPresented in
+                if !isPresented {
+                    archiveSaveErrorMessage = nil
+                }
+            }
+        )
+    }
+
     @ViewBuilder
     var receiptTopArea: some View {
         if displayMode.showsPrinter {
@@ -207,8 +232,9 @@ private extension ReceiptView {
         ReceiptTopActions(
             shareImage: shareController.shareImage,
             onClose: onClose,
-            onArchive: { showArchive = true },
-            showsArchiveButton: displayMode.showsArchiveAction
+            onArchive: saveReceiptToArchive,
+            showsArchiveButton: displayMode.showsArchiveAction,
+            isArchiveButtonDisabled: isSavingToArchive
         )
     }
 
@@ -243,6 +269,28 @@ private extension ReceiptView {
         }
 
         controller.skipPrinting(proxy: proxy)
+    }
+
+    func saveReceiptToArchive() {
+        guard !isSavingToArchive else {
+            return
+        }
+
+        isSavingToArchive = true
+
+        do {
+            let receipt = ArchiveReceipt(
+                from: clothing,
+                localImage: localImage,
+                registeredDate: registeredDate
+            )
+            try receiptStore.save(receipt, in: modelContext)
+            showArchive = true
+        } catch {
+            archiveSaveErrorMessage = "영수증 저장 중 문제가 생겼어요."
+        }
+
+        isSavingToArchive = false
     }
 }
 

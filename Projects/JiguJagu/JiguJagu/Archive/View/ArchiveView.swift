@@ -5,6 +5,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 private enum ArchiveCarouselLayout {
     nonisolated static let cardTopPadding: CGFloat = 40
@@ -16,23 +17,32 @@ private enum ArchiveCarouselLayout {
 }
 
 struct ArchiveView: View {
+    @Environment(\.modelContext) private var modelContext
+
     @State private var controller: ArchiveController
     @State private var focusedReceiptItemID: String?
     @State private var selectedReceipt: ArchiveReceipt?
+    private let receiptStore = SwiftDataReceiptStore()
+    private let loadsPersistedReceipts: Bool
     private let onBackButtonTap: () -> Void
+    private let onRegisterButtonTap: () -> Void
 
     init(
-        receipts: [ArchiveReceipt] = ArchiveReceipt.previewItems,
+        receipts: [ArchiveReceipt]? = nil,
         initialCategory: ArchiveCategory = .all,
-        onBackButtonTap: @escaping () -> Void = {}
+        loadsPersistedReceipts: Bool? = nil,
+        onBackButtonTap: @escaping () -> Void = {},
+        onRegisterButtonTap: @escaping () -> Void = {}
     ) {
         _controller = State(
             initialValue: ArchiveController(
-                receipts: receipts,
+                receipts: receipts ?? [],
                 initialCategory: initialCategory
             )
         )
+        self.loadsPersistedReceipts = loadsPersistedReceipts ?? (receipts == nil)
         self.onBackButtonTap = onBackButtonTap
+        self.onRegisterButtonTap = onRegisterButtonTap
     }
 
     var body: some View {
@@ -63,10 +73,59 @@ struct ArchiveView: View {
         .navigationDestination(isPresented: isShowingReceiptDetail) {
             receiptDetailView
         }
+        .task {
+            loadPersistedReceiptsIfNeeded()
+        }
     }
 }
 
 private extension ArchiveView {
+    func loadPersistedReceiptsIfNeeded() {
+        guard loadsPersistedReceipts else {
+            return
+        }
+
+        controller.loadReceipts(
+            from: receiptStore,
+            context: modelContext
+        )
+    }
+
+    func emptyStatePrimaryAction() {
+        if controller.receiptLoadErrorMessage != nil {
+            loadPersistedReceiptsIfNeeded()
+        } else if shouldShowRegisterEmptyState {
+            onRegisterButtonTap()
+        } else {
+            controller.resetFilters()
+        }
+    }
+
+    var emptyStateStyle: ArchiveEmptyStateStyle {
+        if let receiptLoadErrorMessage = controller.receiptLoadErrorMessage {
+            return .loadFailed(message: receiptLoadErrorMessage)
+        }
+
+        if controller.receipts.isEmpty {
+            return .noReceipts
+        }
+
+        if controller.selectedSubcategory != nil {
+            return .noSubcategoryReceipts
+        }
+
+        return .noResults
+    }
+
+    var shouldShowRegisterEmptyState: Bool {
+        switch emptyStateStyle {
+        case .noReceipts, .noSubcategoryReceipts:
+            return true
+        case .noResults, .loadFailed:
+            return false
+        }
+    }
+
     var isShowingReceiptDetail: Binding<Bool> {
         Binding(
             get: { selectedReceipt != nil },
@@ -96,8 +155,8 @@ private extension ArchiveView {
             VStack(spacing: 0) {
                 if controller.filteredReceipts.isEmpty {
                     ArchiveEmptyStateView(
-                        hasActiveFilter: controller.hasActiveFilter,
-                        onResetButtonTap: controller.resetFilters
+                        style: emptyStateStyle,
+                        onResetButtonTap: emptyStatePrimaryAction
                     )
                     .padding(.top, emptyReceiptTopPadding(availableHeight: geometry.size.height))
                 } else {
