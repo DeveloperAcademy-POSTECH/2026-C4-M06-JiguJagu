@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct JiguJaguApp: App {
@@ -13,5 +14,12 @@ struct JiguJaguApp: App {
         WindowGroup {
             HomeView()
         }
+        .modelContainer(
+            for: [
+                ArchiveReceiptEntity.self,
+                ArchiveMaterialEntity.self,
+                ArchiveWashingGuideEntity.self
+            ]
+        )
     }
 }
