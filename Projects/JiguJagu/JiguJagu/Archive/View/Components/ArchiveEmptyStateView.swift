@@ -8,6 +8,7 @@ import SwiftUI
 
 struct ArchiveEmptyStateView: View {
     let hasActiveFilter: Bool
+    var loadErrorMessage: String?
     let onResetButtonTap: () -> Void
 
     var body: some View {
@@ -65,15 +66,27 @@ private extension ArchiveEmptyStateView {
     }
 
     var title: String {
-        hasActiveFilter ? "조건에 맞는 옷이 없어요!" : "등록된 옷이 없어요!"
+        if let loadErrorMessage {
+            return loadErrorMessage
+        }
+
+        return hasActiveFilter ? "조건에 맞는 옷이 없어요!" : "등록된 옷이 없어요!"
     }
 
     var message: String {
-        hasActiveFilter ? "다른 조건으로 찾아주세요" : "옷을 등록해주세요"
+        if loadErrorMessage != nil {
+            return "잠시 후 다시 시도해주세요"
+        }
+
+        return hasActiveFilter ? "다른 조건으로 찾아주세요" : "옷을 등록해주세요"
     }
 
     var buttonTitle: String {
-        hasActiveFilter ? "전체 보기" : "옷 등록"
+        if loadErrorMessage != nil {
+            return "다시 시도"
+        }
+
+        return hasActiveFilter ? "전체 보기" : "옷 등록"
     }
 }
 

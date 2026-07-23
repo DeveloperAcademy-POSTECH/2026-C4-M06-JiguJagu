@@ -5,6 +5,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 private enum ArchiveCarouselLayout {
     nonisolated static let cardTopPadding: CGFloat = 40
@@ -16,22 +17,28 @@ private enum ArchiveCarouselLayout {
 }
 
 struct ArchiveView: View {
+    @Environment(\.modelContext) private var modelContext
+
     @State private var controller: ArchiveController
     @State private var focusedReceiptItemID: String?
     @State private var selectedReceipt: ArchiveReceipt?
+    private let receiptStore = SwiftDataReceiptStore()
+    private let loadsPersistedReceipts: Bool
     private let onBackButtonTap: () -> Void
 
     init(
-        receipts: [ArchiveReceipt] = ArchiveReceipt.previewItems,
+        receipts: [ArchiveReceipt]? = nil,
         initialCategory: ArchiveCategory = .all,
+        loadsPersistedReceipts: Bool? = nil,
         onBackButtonTap: @escaping () -> Void = {}
     ) {
         _controller = State(
             initialValue: ArchiveController(
-                receipts: receipts,
+                receipts: receipts ?? [],
                 initialCategory: initialCategory
             )
         )
+        self.loadsPersistedReceipts = loadsPersistedReceipts ?? (receipts == nil)
         self.onBackButtonTap = onBackButtonTap
     }
 
@@ -63,10 +70,32 @@ struct ArchiveView: View {
         .navigationDestination(isPresented: isShowingReceiptDetail) {
             receiptDetailView
         }
+        .task {
+            loadPersistedReceiptsIfNeeded()
+        }
     }
 }
 
 private extension ArchiveView {
+    func loadPersistedReceiptsIfNeeded() {
+        guard loadsPersistedReceipts else {
+            return
+        }
+
+        controller.loadReceipts(
+            from: receiptStore,
+            context: modelContext
+        )
+    }
+
+    func emptyStatePrimaryAction() {
+        if controller.receiptLoadErrorMessage != nil {
+            loadPersistedReceiptsIfNeeded()
+        } else {
+            controller.resetFilters()
+        }
+    }
+
     var isShowingReceiptDetail: Binding<Bool> {
         Binding(
             get: { selectedReceipt != nil },
@@ -97,7 +126,8 @@ private extension ArchiveView {
                 if controller.filteredReceipts.isEmpty {
                     ArchiveEmptyStateView(
                         hasActiveFilter: controller.hasActiveFilter,
-                        onResetButtonTap: controller.resetFilters
+                        loadErrorMessage: controller.receiptLoadErrorMessage,
+                        onResetButtonTap: emptyStatePrimaryAction
                     )
                     .padding(.top, emptyReceiptTopPadding(availableHeight: geometry.size.height))
                 } else {
