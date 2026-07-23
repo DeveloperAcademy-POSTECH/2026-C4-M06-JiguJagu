@@ -151,8 +151,31 @@ struct CameraCaptureView: View {
     private var bottomArea: some View {
         VStack(spacing: 28) {
             captionRow
-            captureButton
+            
+            ZStack {
+                // 가운데: 촬영 버튼
+                captureButton
+                
+                // 오른쪽: 전/후면 전환
+                HStack {
+                    Spacer()
+                    switchCameraButton
+                }
+                .padding(.trailing, 32)
+            }
         }
+    }
+    
+    private var switchCameraButton: some View {
+        Button(action: camera.switchCamera) {
+            Image(systemName: "arrow.triangle.2.circlepath.camera")
+                .font(.system(size: 22, weight: .medium))
+                .foregroundStyle(.white)
+                .frame(width: 48, height: 48)
+                .background(Color.black.opacity(0.35))
+                .clipShape(Circle())
+        }
+        .disabled(!camera.isConfigured)
     }
     
     @ViewBuilder
