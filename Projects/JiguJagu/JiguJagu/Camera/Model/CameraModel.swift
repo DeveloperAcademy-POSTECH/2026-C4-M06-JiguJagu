@@ -26,6 +26,8 @@ final class CameraModel: NSObject, ObservableObject {
     @Published var permissionDenied = false
     /// 현재 플래시 모드 (off → on → auto 순환)
     @Published var flashMode: AVCaptureDevice.FlashMode = .off
+    /// 현재 사용 중인 카메라 위치 (후면/전면)
+    @Published var cameraPosition: AVCaptureDevice.Position = .back
     
     // MARK: - Capture Objects (accessed on sessionQueue)
     
@@ -40,6 +42,10 @@ final class CameraModel: NSObject, ObservableObject {
     /// 취소로 continuation을 먼저 정리한 뒤, 뒤늦게 도착한 delegate 콜백이
     /// 이후의 새 요청을 잘못 resume 하는 것을 막기 위한 토큰입니다.
     private nonisolated(unsafe) var pendingCaptureID: Int64?
+    /// 현재 세션에 연결된 카메라 입력. 전환 시 교체합니다. sessionQueue에서만 접근.
+    private nonisolated(unsafe) var videoDeviceInput: AVCaptureDeviceInput?
+    /// 진행 중인 촬영이 전면 카메라인지 여부. 결과 이미지 좌우 반전 판단용. sessionQueue에서만 접근.
+    private nonisolated(unsafe) var pendingUsesFrontCamera = false
     
     // MARK: - Permission & Configuration
     
@@ -89,6 +95,7 @@ final class CameraModel: NSObject, ObservableObject {
                 return
             }
             self.session.addInput(input)
+            self.videoDeviceInput = input
             
             // 사진 출력
             if self.session.canAddOutput(self.photoOutput) {
@@ -118,6 +125,47 @@ final class CameraModel: NSObject, ObservableObject {
         sessionQueue.async { [weak self] in
             guard let self, self.session.isRunning else { return }
             self.session.stopRunning()
+        }
+    }
+    
+    // MARK: - Camera Position
+    
+    /// 후면 ↔ 전면 카메라를 전환합니다. (셀카 모드)
+    func switchCamera() {
+        let newPosition: AVCaptureDevice.Position = (cameraPosition == .back) ? .front : .back
+        
+        sessionQueue.async { [weak self] in
+            guard let self else { return }
+            
+            guard
+                let device = AVCaptureDevice.default(.builtInWideAngleCamera,
+                                                     for: .video,
+                                                     position: newPosition),
+                let newInput = try? AVCaptureDeviceInput(device: device)
+            else {
+                return
+            }
+            
+            self.session.beginConfiguration()
+            
+            if let currentInput = self.videoDeviceInput {
+                self.session.removeInput(currentInput)
+            }
+            
+            if self.session.canAddInput(newInput) {
+                self.session.addInput(newInput)
+                self.videoDeviceInput = newInput
+                
+                Task { @MainActor [weak self] in
+                    self?.cameraPosition = newPosition
+                }
+            } else if let currentInput = self.videoDeviceInput,
+                      self.session.canAddInput(currentInput) {
+                // 실패 시 기존 입력으로 롤백
+                self.session.addInput(currentInput)
+            }
+            
+            self.session.commitConfiguration()
         }
     }
     
@@ -176,6 +224,8 @@ final class CameraModel: NSObject, ObservableObject {
                     // 이 요청을 식별할 토큰과 continuation을 저장
                     self.captureContinuation = continuation
                     self.pendingCaptureID = settings.uniqueID
+                    self.pendingUsesFrontCamera =
+                        (self.videoDeviceInput?.device.position == .front)
 
                     self.photoOutput.capturePhoto(
                         with: settings,
@@ -227,8 +277,34 @@ extension CameraModel: AVCapturePhotoCaptureDelegate {
             self.captureContinuation = nil
             self.pendingCaptureID = nil
 
-            let image = imageData.flatMap { UIImage(data: $0) }
+            let usesFront = self.pendingUsesFrontCamera
+            self.pendingUsesFrontCamera = false
+            
+            var image = imageData.flatMap { UIImage(data: $0) }
+            // 전면 카메라는 프리뷰가 거울처럼 보이므로 결과도 좌우를 맞춰줍니다.
+            if usesFront, let captured = image {
+                image = captured.horizontallyFlipped()
+            }
             continuation.resume(returning: image)
+        }
+    }
+}
+
+
+// MARK: - UIImage Mirroring
+
+extension UIImage {
+    
+    /// 이미지를 좌우로 뒤집습니다. (전면 카메라 결과 보정용)
+    func horizontallyFlipped() -> UIImage {
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = scale
+        format.opaque = false
+        
+        return UIGraphicsImageRenderer(size: size, format: format).image { context in
+            context.cgContext.translateBy(x: size.width, y: 0)
+            context.cgContext.scaleBy(x: -1, y: 1)
+            draw(in: CGRect(origin: .zero, size: size))
         }
     }
 }
