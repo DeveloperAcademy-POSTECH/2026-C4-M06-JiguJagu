@@ -6,9 +6,15 @@
 
 import SwiftUI
 
+enum ArchiveEmptyStateStyle {
+    case noReceipts
+    case noSubcategoryReceipts
+    case noResults
+    case loadFailed(message: String)
+}
+
 struct ArchiveEmptyStateView: View {
-    let hasActiveFilter: Bool
-    var loadErrorMessage: String?
+    let style: ArchiveEmptyStateStyle
     let onResetButtonTap: () -> Void
 
     var body: some View {
@@ -66,27 +72,38 @@ private extension ArchiveEmptyStateView {
     }
 
     var title: String {
-        if let loadErrorMessage {
-            return loadErrorMessage
+        switch style {
+        case .noReceipts:
+            return "등록된 옷이 없어요!"
+        case .noSubcategoryReceipts:
+            return "이 카테고리에 등록된 옷이 없어요!"
+        case .noResults:
+            return "조건에 맞는 옷이 없어요!"
+        case .loadFailed(let message):
+            return message
         }
-
-        return hasActiveFilter ? "조건에 맞는 옷이 없어요!" : "등록된 옷이 없어요!"
     }
 
     var message: String {
-        if loadErrorMessage != nil {
+        switch style {
+        case .noReceipts, .noSubcategoryReceipts:
+            return "옷을 등록해주세요"
+        case .noResults:
+            return "다른 조건으로 찾아주세요"
+        case .loadFailed:
             return "잠시 후 다시 시도해주세요"
         }
-
-        return hasActiveFilter ? "다른 조건으로 찾아주세요" : "옷을 등록해주세요"
     }
 
     var buttonTitle: String {
-        if loadErrorMessage != nil {
+        switch style {
+        case .noReceipts, .noSubcategoryReceipts:
+            return "옷 등록"
+        case .noResults:
+            return "전체 보기"
+        case .loadFailed:
             return "다시 시도"
         }
-
-        return hasActiveFilter ? "전체 보기" : "옷 등록"
     }
 }
 
@@ -117,7 +134,7 @@ private struct EmptyReceiptEdge: Shape {
 
 #Preview("No Receipts") {
     ArchiveEmptyStateView(
-        hasActiveFilter: false,
+        style: .noReceipts,
         onResetButtonTap: {}
     )
     .background {
@@ -130,7 +147,7 @@ private struct EmptyReceiptEdge: Shape {
 
 #Preview("No Results") {
     ArchiveEmptyStateView(
-        hasActiveFilter: true,
+        style: .noResults,
         onResetButtonTap: {}
     )
     .background {

@@ -25,12 +25,14 @@ struct ArchiveView: View {
     private let receiptStore = SwiftDataReceiptStore()
     private let loadsPersistedReceipts: Bool
     private let onBackButtonTap: () -> Void
+    private let onRegisterButtonTap: () -> Void
 
     init(
         receipts: [ArchiveReceipt]? = nil,
         initialCategory: ArchiveCategory = .all,
         loadsPersistedReceipts: Bool? = nil,
-        onBackButtonTap: @escaping () -> Void = {}
+        onBackButtonTap: @escaping () -> Void = {},
+        onRegisterButtonTap: @escaping () -> Void = {}
     ) {
         _controller = State(
             initialValue: ArchiveController(
@@ -40,6 +42,7 @@ struct ArchiveView: View {
         )
         self.loadsPersistedReceipts = loadsPersistedReceipts ?? (receipts == nil)
         self.onBackButtonTap = onBackButtonTap
+        self.onRegisterButtonTap = onRegisterButtonTap
     }
 
     var body: some View {
@@ -91,8 +94,35 @@ private extension ArchiveView {
     func emptyStatePrimaryAction() {
         if controller.receiptLoadErrorMessage != nil {
             loadPersistedReceiptsIfNeeded()
+        } else if shouldShowRegisterEmptyState {
+            onRegisterButtonTap()
         } else {
             controller.resetFilters()
+        }
+    }
+
+    var emptyStateStyle: ArchiveEmptyStateStyle {
+        if let receiptLoadErrorMessage = controller.receiptLoadErrorMessage {
+            return .loadFailed(message: receiptLoadErrorMessage)
+        }
+
+        if controller.receipts.isEmpty {
+            return .noReceipts
+        }
+
+        if controller.selectedSubcategory != nil {
+            return .noSubcategoryReceipts
+        }
+
+        return .noResults
+    }
+
+    var shouldShowRegisterEmptyState: Bool {
+        switch emptyStateStyle {
+        case .noReceipts, .noSubcategoryReceipts:
+            return true
+        case .noResults, .loadFailed:
+            return false
         }
     }
 
@@ -125,8 +155,7 @@ private extension ArchiveView {
             VStack(spacing: 0) {
                 if controller.filteredReceipts.isEmpty {
                     ArchiveEmptyStateView(
-                        hasActiveFilter: controller.hasActiveFilter,
-                        loadErrorMessage: controller.receiptLoadErrorMessage,
+                        style: emptyStateStyle,
                         onResetButtonTap: emptyStatePrimaryAction
                     )
                     .padding(.top, emptyReceiptTopPadding(availableHeight: geometry.size.height))
