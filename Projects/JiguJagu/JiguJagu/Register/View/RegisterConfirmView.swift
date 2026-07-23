@@ -31,8 +31,14 @@ struct RegisterConfirmView: View {
 
     /// 카드/영수증에 표시할 이미지. 재촬영 > 전달받은 사진 순.
     private var displayImage: UIImage? {
-        // 재촬영 > 전달받은 사진 > 최근 촬영(전역 저장소) 순
-        retakenImage ?? localImage ?? CapturedImageStore.shared.lastCutoutImage
+        // 재촬영한 사진이 있으면 항상 최우선
+        if let retakenImage { return retakenImage }
+        // 촬영 경로에서 직접 전달받은 사진
+        if let localImage { return localImage }
+        // 상품 검색에서 고른 상품은 API 이미지(URL)를 그대로 써야 하므로
+        // 최근 촬영 이미지는 URL이 없는 경우(직접 등록)에만 사용합니다.
+        guard clothing.productImageURL == nil else { return nil }
+        return CapturedImageStore.shared.lastCutoutImage
     }
     
     private func convertMainCategory(
