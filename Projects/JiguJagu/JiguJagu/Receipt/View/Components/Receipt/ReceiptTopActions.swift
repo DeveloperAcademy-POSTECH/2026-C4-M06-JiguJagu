@@ -16,6 +16,7 @@ struct ReceiptTopActions: View {
     }
     var onArchive: () -> Void = {}
     var showsArchiveButton = true
+    var isArchiveButtonDisabled = false
     
     @State private var showShare = false
     
@@ -55,6 +56,9 @@ struct ReceiptTopActions: View {
                             .foregroundStyle(.white)
                             .offset(y: 3.5)
                     }
+                    .disabled(isArchiveButtonDisabled)
+                    .opacity(isArchiveButtonDisabled ? 0.5 : 1)
+                    .accessibilityLabel("영수증 보관함에 저장")
                 }
             }
             .offset(x: -5)

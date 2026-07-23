@@ -104,7 +104,11 @@ extension ArchiveReceipt {
 
     /// 등록 완료된 Clothing(랜덤 재질/날짜 포함)을 보관함 카드용 ArchiveReceipt로 변환합니다.
     /// - Parameter localImage: 누끼 딴 로컬 이미지 (카드에 우선 표시)
-    init(from clothing: Clothing, localImage: UIImage? = nil) {
+    init(
+        from clothing: Clothing,
+        localImage: UIImage? = nil,
+        registeredDate: Date = Date()
+    ) {
         let category = Self.archiveCategory(from: clothing.category3)
 
         self.init(
@@ -116,7 +120,7 @@ extension ArchiveReceipt {
             productImageName: clothing.mockImageName ?? "MockProduct",
             productImageURL: clothing.productImageURL?.absoluteString,
             localImage: localImage,
-            registeredDate: Date(),
+            registeredDate: registeredDate,
             materials: clothing.materials,
             careTips: clothing.howToCare,
             washingGuides: clothing.washingGuides,
