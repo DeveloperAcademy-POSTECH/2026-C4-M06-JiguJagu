@@ -38,6 +38,7 @@ struct LoadingView: View {
                     )
             }
         }
+        .navigationBarBackButtonHidden(true)
         .background(Color.white)
         .ignoresSafeArea()
         .accessibilityIdentifier(LoadingAccessibilityIdentifier.clothingSearchScreen)

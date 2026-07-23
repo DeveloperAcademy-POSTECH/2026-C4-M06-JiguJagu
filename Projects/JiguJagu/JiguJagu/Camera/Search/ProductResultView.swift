@@ -14,31 +14,31 @@ struct ProductResultView: View {
     private static let loadingProgressIncrement = 0.012
     private static let loadingProgressTickNanoseconds: UInt64 = 80_000_000
     private static let completionPauseNanoseconds: UInt64 = 180_000_000
-
+    
     let image: UIImage?
     var onDone: () -> Void = {}
     
     var onSearch: () -> Void = {}
     
     var onRegister: () -> Void = {}
-
+    
     @State private var result: ClothingIdentification?
     @State private var errorMessage: String?
     @State private var isLoading = true
     @State private var loadingProgress = Self.initialLoadingProgress
-
+    
     /// 배경을 제거(누끼)한 옷 이미지. 준비되면 원본 대신 이걸 보여준다.
     @State private var cutoutImage: UIImage?
-
+    
     /// 값이 설정되면 검색 로딩 화면으로 push 된다.
     @State private var loadingSearchAnalysis: ClothingAnalysis?
-
+    
     /// true가 되면 옷 등록 확인 화면으로 push 된다.
     @State private var showRegister = false
     /// 등록 화면으로 넘길 변환된 옷 데이터.
     @State private var registerClothing: Clothing?
-
-
+    
+    
     var body: some View {
         NavigationStack {
             Group {
@@ -51,7 +51,7 @@ struct ProductResultView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .navigationTitle("상품 검색 결과")
+            .navigationTitle(isLoading ? "" : "상품 검색 결과")
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(item: $loadingSearchAnalysis) { analysis in
                 SearchLoadingFlowView(analysis: analysis)
@@ -74,9 +74,9 @@ struct ProductResultView: View {
             await loadProductResult()
         }
     }
-
+    
     // MARK: - States
-
+    
     private var loadingView: some View {
         LoadingView(
             controller: LoadingController(configuration: .clothingSearch),
@@ -102,7 +102,7 @@ struct ProductResultView: View {
                         Capsule().stroke(Color.grayScale300, lineWidth: 1)
                     )
             }
-
+            
             // 등록하기 (주요 · Primary) — 분석 데이터로 등록 확인 화면 진입
             Button {
                 if let result {
@@ -124,7 +124,7 @@ struct ProductResultView: View {
         .padding(.vertical, 8)
         .background(.background)
     }
-
+    
     private func resultView(_ item: ClothingIdentification) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -135,31 +135,31 @@ struct ProductResultView: View {
                         .frame(height: 240)
                         .frame(maxWidth: .infinity)
                 }
-
+                
                 VStack(alignment: .leading, spacing: 8) {
                     Text(item.itemName)
                         .font(.system(size: 22, weight: .bold))
-
+                    
                     // 카테고리: 대분류 · 세부분류
                     HStack(spacing: 8) {
                         tag(item.categoryDisplayName)
                         tag(item.subCategory, highlighted: true)
                     }
                 }
-
+                
                 // 브랜드 카드 (확정 또는 추측)
                 if let brand = item.displayBrand {
                     brandCard(brand: brand, item: item)
                 }
-
+                
                 Text(item.itemDescription)
                     .font(.system(size: 15))
                     .foregroundStyle(.secondary)
-
+                
                 if let confidence = item.confidence {
                     confidenceRow("분석 신뢰도", value: confidence)
                 }
-
+                
                 VStack(alignment: .leading, spacing: 10) {
                     if !item.colors.isEmpty {
                         labeledRow("색상", value: item.colors.joined(separator: ", "))
@@ -171,7 +171,7 @@ struct ProductResultView: View {
                         labeledRow("패턴", value: pattern)
                     }
                 }
-
+                
                 if !item.searchKeywords.isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("검색 키워드")
@@ -191,7 +191,7 @@ struct ProductResultView: View {
             .padding()
         }
     }
-
+    
     private var errorView: some View {
         VStack(spacing: 12) {
             Image(systemName: "exclamationmark.triangle")
@@ -210,9 +210,9 @@ struct ProductResultView: View {
             .padding(.top, 8)
         }
     }
-
+    
     // MARK: - Components
-
+    
     /// 브랜드 표시 카드. 추측이면 "추측" 뱃지와 근거를 함께 보여준다.
     private func brandCard(brand: String, item: ClothingIdentification) -> some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -222,7 +222,7 @@ struct ProductResultView: View {
                     .foregroundStyle(.secondary)
                 Text(brand)
                     .font(.system(size: 17, weight: .semibold))
-
+                
                 if item.isBrandGuessed {
                     Text("추측")
                         .font(.system(size: 11, weight: .bold))
@@ -247,13 +247,13 @@ struct ProductResultView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-
+            
             if let reason = item.brandReason, !reason.isEmpty {
                 Text(reason)
                     .font(.system(size: 13))
                     .foregroundStyle(.secondary)
             }
-
+            
             if item.isBrandGuessed {
                 Text("※ 로고가 확인되지 않아 디자인 특징으로 추측한 결과예요.")
                     .font(.system(size: 11))
@@ -265,7 +265,7 @@ struct ProductResultView: View {
         .background(Color.gray.opacity(0.08))
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
-
+    
     private func tag(_ text: String, highlighted: Bool = false) -> some View {
         Text(text)
             .font(.system(size: 13, weight: .medium))
@@ -275,7 +275,7 @@ struct ProductResultView: View {
             .background(highlighted ? Color.accentColor : Color.gray.opacity(0.15))
             .clipShape(Capsule())
     }
-
+    
     private func labeledRow(_ label: String, value: String) -> some View {
         HStack(alignment: .top, spacing: 8) {
             Text(label)
@@ -286,7 +286,7 @@ struct ProductResultView: View {
                 .font(.system(size: 15))
         }
     }
-
+    
     private func confidenceRow(_ label: String, value: Double) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
@@ -308,11 +308,11 @@ struct ProductResultView: View {
 private struct FlexibleWrap<Item: Hashable, Content: View>: View {
     let items: [Item]
     let content: (Item) -> Content
-
+    
     var body: some View {
         var width: CGFloat = 0
         var height: CGFloat = 0
-
+        
         return GeometryReader { geo in
             ZStack(alignment: .topLeading) {
                 ForEach(items, id: \.self) { item in
@@ -347,28 +347,28 @@ private extension ProductResultView {
         result = nil
         cutoutImage = nil
         loadingProgress = Self.initialLoadingProgress
-
+        
         let progressTask = Task {
             await runRecognitionProgressLoop()
         }
-
+        
         async let identifying: Void = identify()
         async let cutting: Void = extractCutout()
         _ = await (identifying, cutting)
-
+        
         progressTask.cancel()
         loadingProgress = 1
         try? await Task.sleep(nanoseconds: Self.completionPauseNanoseconds)
         isLoading = false
     }
-
+    
     func runRecognitionProgressLoop() async {
         while !Task.isCancelled {
             guard loadingProgress < Self.maximumWaitingProgress else {
                 try? await Task.sleep(nanoseconds: Self.loadingProgressTickNanoseconds)
                 continue
             }
-
+            
             loadingProgress = min(
                 loadingProgress + Self.loadingProgressIncrement,
                 Self.maximumWaitingProgress
@@ -376,15 +376,15 @@ private extension ProductResultView {
             try? await Task.sleep(nanoseconds: Self.loadingProgressTickNanoseconds)
         }
     }
-
+    
     func startSearchLoading() {
         guard let result else {
             return
         }
-
+        
         loadingSearchAnalysis = ClothingAnalysis(from: result)
     }
-
+    
     func identify() async {
         guard let image else {
             errorMessage = "분석할 사진이 없습니다."
@@ -397,16 +397,16 @@ private extension ProductResultView {
             errorMessage = error.localizedDescription
         }
     }
-
+    
     /// 키가 설정돼 있지 않으면 APIConfigError 를 던진다.
     func makeService() throws -> ProductSearchService {
         ProductSearchService(apiKey: try APIConfig.openAIKey)
     }
-
+    
     /// 원본 사진에서 옷(피사체)만 분리해 배경을 제거합니다.
     func extractCutout() async {
         guard let image else { return }
-
+        
         // 방향 정규화 후 누끼 추출 (Vision은 .up 기준이 안정적)
         let normalized = image.normalizedUp()
         let cutout = await ForegroundCutout.extract(from: normalized)

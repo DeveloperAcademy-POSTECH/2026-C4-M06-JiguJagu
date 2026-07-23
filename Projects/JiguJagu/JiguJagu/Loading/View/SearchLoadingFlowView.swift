@@ -30,6 +30,10 @@ struct SearchLoadingFlowView: View {
                 )
             }
         }
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .navigationBar)
+        .navigationBarBackButtonHidden(true)
         .task {
             await controller.loadSearchResults()
         }
