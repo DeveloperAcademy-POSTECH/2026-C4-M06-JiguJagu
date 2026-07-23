@@ -158,3 +158,21 @@ extension ArchiveReceipt {
         return candidates.first ?? ArchiveSubcategory(id: "unknown", title: trimmed.isEmpty ? "그 외" : trimmed, category: category)
     }
 }
+
+extension Clothing {
+    init(from receipt: ArchiveReceipt) {
+        self.init(
+            brand: receipt.brandName,
+            productName: receipt.productName.replacingOccurrences(of: "\n", with: " "),
+            mockImageName: receipt.productImageName,
+            productImageURL: receipt.productImageURL.flatMap(URL.init(string:)),
+            receiptCategory: receipt.categoryPath,
+            category3: receipt.category.title,
+            category4: receipt.subcategory.title,
+            howToCare: receipt.careTips,
+            washingGuides: receipt.washingGuides,
+            materials: receipt.materials,
+            color: ""
+        )
+    }
+}

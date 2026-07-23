@@ -15,6 +15,7 @@ struct ReceiptTopActions: View {
         NotificationCenter.default.post(name: .goHome, object: nil)
     }
     var onArchive: () -> Void = {}
+    var showsArchiveButton = true
     
     @State private var showShare = false
     
@@ -45,13 +46,15 @@ struct ReceiptTopActions: View {
                     }
                 }
                 
-                Button {
-                    onArchive()
-                } label: {
-                    Image(systemName: "folder")
-                        .font(.system(size: 23, weight: .medium))
-                        .foregroundStyle(.white)
-                        .offset(y: 3.5)
+                if showsArchiveButton {
+                    Button {
+                        onArchive()
+                    } label: {
+                        Image(systemName: "folder")
+                            .font(.system(size: 23, weight: .medium))
+                            .foregroundStyle(.white)
+                            .offset(y: 3.5)
+                    }
                 }
             }
             .offset(x: -5)
