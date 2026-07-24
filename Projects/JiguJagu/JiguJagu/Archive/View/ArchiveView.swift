@@ -178,7 +178,7 @@ private extension ArchiveView {
     func receiptCards(screenWidth: CGFloat) -> some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(alignment: .top, spacing: ArchiveCarouselLayout.cardSpacing) {
-                ForEach(displayReceiptItems) { item in
+                ForEach(carouselState.displayItems) { item in
                     receiptCardItem(item.receipt)
                         .id(item.id)
                         .scrollTransition(.interactive, axis: .horizontal) { content, phase in
@@ -203,10 +203,10 @@ private extension ArchiveView {
         .scrollTargetBehavior(.viewAligned)
         .scrollPosition(id: $focusedReceiptItemID, anchor: .center)
         .onAppear {
-            focusedReceiptItemID = focusedReceiptID
+            focusedReceiptItemID = carouselState.initialFocusedItemID
         }
-        .onChange(of: filteredReceiptIDs) { _, _ in
-            focusedReceiptItemID = focusedReceiptID
+        .onChange(of: carouselReceiptIDs) { _, _ in
+            focusedReceiptItemID = carouselState.initialFocusedItemID
         }
     }
 
@@ -238,64 +238,13 @@ private extension ArchiveView {
         "\(receipt.productName.replacingOccurrences(of: "\n", with: " ")), \(receipt.category.title), \(receipt.dDayText())"
     }
 
-    var sortedReceipts: [ArchiveReceipt] {
-        // 보관함의 기준 카드는 항상 최신 등록 영수증이므로 등록일 내림차순으로 정렬합니다.
-        controller.filteredReceipts.sorted { lhs, rhs in
-            lhs.registeredDate > rhs.registeredDate
-        }
+    var carouselReceiptIDs: [String] {
+        carouselState.receiptIDs
     }
 
-    var sortedReceiptIDs: [String] {
-        sortedReceipts.map(\.id)
+    var carouselState: ArchiveCarouselState {
+        ArchiveCarouselState(receipts: controller.filteredReceipts)
     }
-
-    var filteredReceiptIDs: [String] {
-        controller.filteredReceipts.map(\.id)
-    }
-
-    var displayReceiptItems: [ArchiveReceiptDisplayItem] {
-        let receipts = sortedReceipts
-
-        if receipts.count == 2 {
-            // 카드가 2개일 때는 최신 카드 양쪽에 같은 이전 카드를 배치해 순환 구조를 보여줍니다.
-            return [
-                ArchiveReceiptDisplayItem(id: "left-\(receipts[1].id)", receipt: receipts[1]),
-                ArchiveReceiptDisplayItem(id: "center-\(receipts[0].id)", receipt: receipts[0]),
-                ArchiveReceiptDisplayItem(id: "right-\(receipts[1].id)", receipt: receipts[1])
-            ]
-        }
-
-        if receipts.count >= 3 {
-            // 최신 카드가 중앙에 오도록 가장 오래된 카드를 앞에 붙여 왼쪽 미리보기 카드로 사용합니다.
-            let oldestReceipt = receipts[receipts.count - 1]
-            let centerAndRightReceipts = receipts.dropLast()
-            let orderedReceipts = [oldestReceipt] + centerAndRightReceipts
-
-            return orderedReceipts.enumerated().map { index, receipt in
-                ArchiveReceiptDisplayItem(id: "\(index)-\(receipt.id)", receipt: receipt)
-            }
-        }
-
-        return receipts.map { receipt in
-            ArchiveReceiptDisplayItem(id: receipt.id, receipt: receipt)
-        }
-    }
-
-    var focusedReceiptID: String? {
-        guard let newestReceipt = sortedReceipts.first else {
-            return nil
-        }
-
-        // 2개 배치에서는 최신 카드가 중복 id 사이에 있으므로 중앙 전용 id로 초기 포커스를 맞춥니다.
-        return sortedReceipts.count == 2 ? "center-\(newestReceipt.id)" : displayReceiptItems.first {
-            $0.receipt.id == newestReceipt.id
-        }?.id
-    }
-}
-
-private struct ArchiveReceiptDisplayItem: Identifiable {
-    let id: String
-    let receipt: ArchiveReceipt
 }
 
 #Preview {
