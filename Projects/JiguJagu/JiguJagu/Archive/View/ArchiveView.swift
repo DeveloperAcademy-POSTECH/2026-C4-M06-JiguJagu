@@ -14,14 +14,23 @@ private enum ArchiveCarouselLayout {
     nonisolated static let sideCardHeightScale: CGFloat = 0.82
     nonisolated static let sideCardOpacity: CGFloat = 0.78
     nonisolated static let sideCardYOffset: CGFloat = 28
+    nonisolated static let swipeThreshold: CGFloat = 70
+    nonisolated static let flickThreshold: CGFloat = 110
+    nonisolated static let dragMinimumDistance: CGFloat = 12
+    nonisolated static let animation = Animation.spring(response: 0.34, dampingFraction: 0.82)
+    nonisolated static let commitAnimationDuration: UInt64 = 340_000_000
 }
 
 struct ArchiveView: View {
     @Environment(\.modelContext) private var modelContext
 
     @State private var controller: ArchiveController
-    @State private var focusedReceiptItemID: String?
+    @State private var focusedReceiptIndex = 0
+    @State private var focusedReceiptID: String?
+    @State private var carouselSettledOffset: CGFloat = 0
+    @State private var isCommittingCarouselMove = false
     @State private var selectedReceipt: ArchiveReceipt?
+    @GestureState private var carouselDragTranslation: CGFloat = 0
     private let receiptStore = SwiftDataReceiptStore()
     private let loadsPersistedReceipts: Bool
     private let onBackButtonTap: () -> Void
@@ -176,42 +185,37 @@ private extension ArchiveView {
     }
 
     func receiptCards(screenWidth: CGFloat) -> some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(alignment: .top, spacing: ArchiveCarouselLayout.cardSpacing) {
-                ForEach(displayReceiptItems) { item in
-                    receiptCardItem(item.receipt)
-                        .id(item.id)
-                        .scrollTransition(.interactive, axis: .horizontal) { content, phase in
-                            content
-                                .scaleEffect(
-                                    x: phase.isIdentity ? 1.0 : ArchiveCarouselLayout.sideCardWidthScale,
-                                    y: phase.isIdentity ? 1.0 : ArchiveCarouselLayout.sideCardHeightScale
-                                )
-                                .opacity(phase.isIdentity ? 1.0 : ArchiveCarouselLayout.sideCardOpacity)
-                                .offset(y: phase.isIdentity ? 0 : ArchiveCarouselLayout.sideCardYOffset)
-                        }
-                }
+        HStack(alignment: .top, spacing: ArchiveCarouselLayout.cardSpacing) {
+            ForEach(carouselDisplayItems) { item in
+                receiptCardItem(item)
+                    .id(item.id)
+                    .scaleEffect(
+                        x: carouselWidthScale(for: item),
+                        y: carouselHeightScale(for: item)
+                    )
+                    .opacity(carouselOpacity(for: item))
+                    .offset(y: carouselYOffset(for: item))
             }
-            .scrollTargetLayout()
         }
-        .contentMargins(
-            .horizontal,
-            carouselSideMargin(screenWidth: screenWidth),
-            for: .scrollContent
-        )
-        .scrollBounceBehavior(.basedOnSize)
-        .scrollTargetBehavior(.viewAligned)
-        .scrollPosition(id: $focusedReceiptItemID, anchor: .center)
+        .frame(width: carouselContentWidth)
+        .offset(x: carouselBaseOffset(screenWidth: screenWidth) + carouselVisualOffset)
+        .frame(width: screenWidth, alignment: .leading)
+        .contentShape(Rectangle())
+        .animation(.interactiveSpring(response: 0.24, dampingFraction: 0.86), value: carouselDragTranslation)
+        .highPriorityGesture(carouselDragGesture)
+        .clipped()
+        .accessibilityElement(children: .contain)
+        .accessibilityAdjustableAction { direction in
+            moveFocusedReceipt(
+                direction: direction == .increment ? .next : .previous
+            )
+        }
         .onAppear {
-            focusedReceiptItemID = focusedReceiptID
+            syncFocusedReceiptIndexWithCurrentReceipts()
         }
-        .onChange(of: filteredReceiptIDs) { _, _ in
-            focusedReceiptItemID = focusedReceiptID
+        .onChange(of: carouselReceiptIDs) { _, _ in
+            syncFocusedReceiptIndexWithCurrentReceipts()
         }
-    }
-
-    func carouselSideMargin(screenWidth: CGFloat) -> CGFloat {
-        max((screenWidth - ArchiveReceiptCardLayout.width) / 2, 24)
     }
 
     func emptyReceiptTopPadding(availableHeight: CGFloat) -> CGFloat {
@@ -223,14 +227,20 @@ private extension ArchiveView {
         return min(preferredTopPadding, max(0, maximumTopPadding))
     }
 
-    func receiptCardItem(_ receipt: ArchiveReceipt) -> some View {
+    func receiptCardItem(_ item: ArchiveCarouselDisplayItem) -> some View {
         Button {
-            selectedReceipt = receipt
+            if item.position == .current {
+                selectedReceipt = item.receipt
+            } else {
+                moveFocusedReceipt(direction: item.position.carouselDirection)
+            }
         } label: {
-            ArchiveReceiptCard(receipt: receipt)
+            ArchiveReceiptCard(receipt: item.receipt)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(receiptCardAccessibilityLabel(for: receipt))
+        .accessibilityHidden(item.position != .current)
+        .accessibilityLabel(receiptCardAccessibilityLabel(for: item.receipt))
+        .accessibilityHint("영수증 상세를 엽니다.")
         .padding(.top, ArchiveCarouselLayout.cardTopPadding)
     }
 
@@ -238,64 +248,243 @@ private extension ArchiveView {
         "\(receipt.productName.replacingOccurrences(of: "\n", with: " ")), \(receipt.category.title), \(receipt.dDayText())"
     }
 
-    var sortedReceipts: [ArchiveReceipt] {
-        // 보관함의 기준 카드는 항상 최신 등록 영수증이므로 등록일 내림차순으로 정렬합니다.
-        controller.filteredReceipts.sorted { lhs, rhs in
-            lhs.registeredDate > rhs.registeredDate
-        }
+    var carouselReceiptIDs: [String] {
+        carouselState.receiptIDs
     }
 
-    var sortedReceiptIDs: [String] {
-        sortedReceipts.map(\.id)
+    var carouselState: ArchiveCarouselState {
+        ArchiveCarouselState(receipts: controller.filteredReceipts)
     }
 
-    var filteredReceiptIDs: [String] {
-        controller.filteredReceipts.map(\.id)
+    var carouselDisplayItems: [ArchiveCarouselDisplayItem] {
+        carouselState.displayItems(focusedIndex: focusedReceiptIndex)
     }
 
-    var displayReceiptItems: [ArchiveReceiptDisplayItem] {
-        let receipts = sortedReceipts
+    var carouselContentWidth: CGFloat {
+        ArchiveReceiptCardLayout.width * CGFloat(carouselDisplayItems.count) +
+        ArchiveCarouselLayout.cardSpacing * CGFloat(max(carouselDisplayItems.count - 1, 0))
+    }
 
-        if receipts.count == 2 {
-            // 카드가 2개일 때는 최신 카드 양쪽에 같은 이전 카드를 배치해 순환 구조를 보여줍니다.
-            return [
-                ArchiveReceiptDisplayItem(id: "left-\(receipts[1].id)", receipt: receipts[1]),
-                ArchiveReceiptDisplayItem(id: "center-\(receipts[0].id)", receipt: receipts[0]),
-                ArchiveReceiptDisplayItem(id: "right-\(receipts[1].id)", receipt: receipts[1])
-            ]
-        }
+    var carouselPageWidth: CGFloat {
+        ArchiveReceiptCardLayout.width + ArchiveCarouselLayout.cardSpacing
+    }
 
-        if receipts.count >= 3 {
-            // 최신 카드가 중앙에 오도록 가장 오래된 카드를 앞에 붙여 왼쪽 미리보기 카드로 사용합니다.
-            let oldestReceipt = receipts[receipts.count - 1]
-            let centerAndRightReceipts = receipts.dropLast()
-            let orderedReceipts = [oldestReceipt] + centerAndRightReceipts
+    var carouselVisualOffset: CGFloat {
+        carouselSettledOffset + carouselDragTranslation
+    }
 
-            return orderedReceipts.enumerated().map { index, receipt in
-                ArchiveReceiptDisplayItem(id: "\(index)-\(receipt.id)", receipt: receipt)
+    var carouselDragGesture: some Gesture {
+        DragGesture(minimumDistance: ArchiveCarouselLayout.dragMinimumDistance)
+            .updating($carouselDragTranslation) { value, state, _ in
+                guard carouselState.receipts.count > 1,
+                      !isCommittingCarouselMove else {
+                    return
+                }
+
+                state = value.translation.width
             }
+            .onEnded { value in
+                moveFocusedReceiptIfNeeded(
+                    translationWidth: value.translation.width,
+                    predictedTranslationWidth: value.predictedEndTranslation.width
+                )
+            }
+    }
+
+    func carouselBaseOffset(screenWidth: CGFloat) -> CGFloat {
+        let centeredCardOffset = (screenWidth - ArchiveReceiptCardLayout.width) / 2
+
+        guard carouselDisplayItems.count > 1 else {
+            return centeredCardOffset
         }
 
-        return receipts.map { receipt in
-            ArchiveReceiptDisplayItem(id: receipt.id, receipt: receipt)
+        return centeredCardOffset - carouselPageWidth
+    }
+
+    func carouselCenterProgress(for item: ArchiveCarouselDisplayItem) -> CGFloat {
+        let distanceFromCenter = abs(item.position.slotOffset(pageWidth: carouselPageWidth) + carouselVisualOffset)
+        return min(distanceFromCenter / carouselPageWidth, 1)
+    }
+
+    func carouselWidthScale(for item: ArchiveCarouselDisplayItem) -> CGFloat {
+        interpolate(
+            from: 1.0,
+            to: ArchiveCarouselLayout.sideCardWidthScale,
+            progress: carouselCenterProgress(for: item)
+        )
+    }
+
+    func carouselHeightScale(for item: ArchiveCarouselDisplayItem) -> CGFloat {
+        interpolate(
+            from: 1.0,
+            to: ArchiveCarouselLayout.sideCardHeightScale,
+            progress: carouselCenterProgress(for: item)
+        )
+    }
+
+    func carouselOpacity(for item: ArchiveCarouselDisplayItem) -> CGFloat {
+        interpolate(
+            from: 1.0,
+            to: ArchiveCarouselLayout.sideCardOpacity,
+            progress: carouselCenterProgress(for: item)
+        )
+    }
+
+    func carouselYOffset(for item: ArchiveCarouselDisplayItem) -> CGFloat {
+        interpolate(
+            from: 0,
+            to: ArchiveCarouselLayout.sideCardYOffset,
+            progress: carouselCenterProgress(for: item)
+        )
+    }
+
+    func interpolate(
+        from startValue: CGFloat,
+        to endValue: CGFloat,
+        progress: CGFloat
+    ) -> CGFloat {
+        startValue + (endValue - startValue) * progress
+    }
+
+    func moveFocusedReceiptIfNeeded(
+        translationWidth: CGFloat,
+        predictedTranslationWidth: CGFloat
+    ) {
+        guard carouselState.receipts.count > 1,
+              !isCommittingCarouselMove else {
+            return
+        }
+
+        if shouldCommitLeftSwipe(
+            translationWidth: translationWidth,
+            predictedTranslationWidth: predictedTranslationWidth
+        ) {
+            moveFocusedReceipt(
+                direction: .next,
+                releaseOffset: translationWidth
+            )
+        } else if shouldCommitRightSwipe(
+            translationWidth: translationWidth,
+            predictedTranslationWidth: predictedTranslationWidth
+        ) {
+            moveFocusedReceipt(
+                direction: .previous,
+                releaseOffset: translationWidth
+            )
         }
     }
 
-    var focusedReceiptID: String? {
-        guard let newestReceipt = sortedReceipts.first else {
-            return nil
+    func moveFocusedReceipt(
+        direction: ArchiveCarouselMoveDirection,
+        releaseOffset: CGFloat = 0
+    ) {
+        guard carouselState.receipts.count > 1,
+              !isCommittingCarouselMove else {
+            return
         }
 
-        // 2개 배치에서는 최신 카드가 중복 id 사이에 있으므로 중앙 전용 id로 초기 포커스를 맞춥니다.
-        return sortedReceipts.count == 2 ? "center-\(newestReceipt.id)" : displayReceiptItems.first {
-            $0.receipt.id == newestReceipt.id
-        }?.id
+        isCommittingCarouselMove = true
+
+        withTransaction(Transaction(animation: nil)) {
+            carouselSettledOffset = releaseOffset
+        }
+
+        withAnimation(ArchiveCarouselLayout.animation) {
+            carouselSettledOffset = direction.settledOffset(pageWidth: carouselPageWidth)
+        }
+
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: ArchiveCarouselLayout.commitAnimationDuration)
+            commitFocusedReceiptMove(direction: direction)
+        }
+    }
+
+    func commitFocusedReceiptMove(direction: ArchiveCarouselMoveDirection) {
+        guard !carouselState.receipts.isEmpty else {
+            carouselSettledOffset = 0
+            isCommittingCarouselMove = false
+            return
+        }
+
+        switch direction {
+        case .previous:
+            focusedReceiptIndex = carouselState.previousIndex(from: focusedReceiptIndex)
+        case .next:
+            focusedReceiptIndex = carouselState.nextIndex(from: focusedReceiptIndex)
+        }
+
+        focusedReceiptID = carouselState.receipts[focusedReceiptIndex].id
+
+        withTransaction(Transaction(animation: nil)) {
+            carouselSettledOffset = 0
+        }
+
+        isCommittingCarouselMove = false
+    }
+
+    func shouldCommitLeftSwipe(
+        translationWidth: CGFloat,
+        predictedTranslationWidth: CGFloat
+    ) -> Bool {
+        translationWidth <= -ArchiveCarouselLayout.swipeThreshold ||
+        predictedTranslationWidth <= -ArchiveCarouselLayout.flickThreshold
+    }
+
+    func shouldCommitRightSwipe(
+        translationWidth: CGFloat,
+        predictedTranslationWidth: CGFloat
+    ) -> Bool {
+        translationWidth >= ArchiveCarouselLayout.swipeThreshold ||
+        predictedTranslationWidth >= ArchiveCarouselLayout.flickThreshold
+    }
+
+    func syncFocusedReceiptIndexWithCurrentReceipts() {
+        guard let focusedReceiptID,
+              let focusedIndex = carouselState.index(for: focusedReceiptID) else {
+            focusedReceiptIndex = 0
+            self.focusedReceiptID = carouselState.receipts.first?.id
+            return
+        }
+
+        focusedReceiptIndex = focusedIndex
+        self.focusedReceiptID = carouselState.receipts[focusedIndex].id
     }
 }
 
-private struct ArchiveReceiptDisplayItem: Identifiable {
-    let id: String
-    let receipt: ArchiveReceipt
+private enum ArchiveCarouselMoveDirection {
+    case previous
+    case next
+
+    func settledOffset(pageWidth: CGFloat) -> CGFloat {
+        switch self {
+        case .previous:
+            return pageWidth
+        case .next:
+            return -pageWidth
+        }
+    }
+}
+
+private extension ArchiveCarouselDisplayPosition {
+    var carouselDirection: ArchiveCarouselMoveDirection {
+        switch self {
+        case .previous:
+            return .previous
+        case .current, .next:
+            return .next
+        }
+    }
+
+    func slotOffset(pageWidth: CGFloat) -> CGFloat {
+        switch self {
+        case .previous:
+            return -pageWidth
+        case .current:
+            return 0
+        case .next:
+            return pageWidth
+        }
+    }
 }
 
 #Preview {
