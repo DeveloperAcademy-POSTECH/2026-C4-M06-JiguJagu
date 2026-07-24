@@ -205,8 +205,10 @@ private extension SearchView {
 }
 
 #Preview {
-    SearchView(
-        items: [],
-        initialQuery: "버버리"
-    )
+    NavigationStack {
+        SearchView(
+            items: [],
+            initialQuery: "버버리"
+        )
+    }
 }

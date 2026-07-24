@@ -31,7 +31,7 @@ struct SearchResultSummary: View {
             Button(action: action) {
                 
                 HStack(spacing: 11) {
-                    Text("옷 자체 등록")
+                    Text("직접 등록하기")
                         .font(Font.pretendard.body2)
                         .foregroundStyle(Color.primary500)
                     Image(systemName: "chevron.right")
