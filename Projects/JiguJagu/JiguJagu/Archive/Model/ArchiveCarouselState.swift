@@ -19,14 +19,6 @@ struct ArchiveCarouselState {
         receipts.map(\.id)
     }
 
-    var displayItems: [ArchiveCarouselDisplayItem] {
-        displayItems(focusedIndex: 0)
-    }
-
-    var initialFocusedItemID: String? {
-        displayItems.first(where: { $0.position == .current })?.id
-    }
-
     func displayItems(focusedIndex: Int) -> [ArchiveCarouselDisplayItem] {
         guard !receipts.isEmpty else {
             return []
