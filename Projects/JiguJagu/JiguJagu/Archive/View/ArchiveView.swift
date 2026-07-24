@@ -14,14 +14,18 @@ private enum ArchiveCarouselLayout {
     nonisolated static let sideCardHeightScale: CGFloat = 0.82
     nonisolated static let sideCardOpacity: CGFloat = 0.78
     nonisolated static let sideCardYOffset: CGFloat = 28
+    nonisolated static let swipeThreshold: CGFloat = 70
+    nonisolated static let animation = Animation.spring(response: 0.34, dampingFraction: 0.82)
 }
 
 struct ArchiveView: View {
     @Environment(\.modelContext) private var modelContext
 
     @State private var controller: ArchiveController
-    @State private var focusedReceiptItemID: String?
+    @State private var focusedReceiptIndex = 0
+    @State private var focusedReceiptID: String?
     @State private var selectedReceipt: ArchiveReceipt?
+    @GestureState private var carouselDragOffset: CGFloat = 0
     private let receiptStore = SwiftDataReceiptStore()
     private let loadsPersistedReceipts: Bool
     private let onBackButtonTap: () -> Void
@@ -176,37 +180,31 @@ private extension ArchiveView {
     }
 
     func receiptCards(screenWidth: CGFloat) -> some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(alignment: .top, spacing: ArchiveCarouselLayout.cardSpacing) {
-                ForEach(carouselState.displayItems) { item in
-                    receiptCardItem(item.receipt)
-                        .id(item.id)
-                        .scrollTransition(.interactive, axis: .horizontal) { content, phase in
-                            content
-                                .scaleEffect(
-                                    x: phase.isIdentity ? 1.0 : ArchiveCarouselLayout.sideCardWidthScale,
-                                    y: phase.isIdentity ? 1.0 : ArchiveCarouselLayout.sideCardHeightScale
-                                )
-                                .opacity(phase.isIdentity ? 1.0 : ArchiveCarouselLayout.sideCardOpacity)
-                                .offset(y: phase.isIdentity ? 0 : ArchiveCarouselLayout.sideCardYOffset)
-                        }
-                }
+        HStack(alignment: .top, spacing: ArchiveCarouselLayout.cardSpacing) {
+            ForEach(carouselDisplayItems) { item in
+                receiptCardItem(item.receipt)
+                    .id(item.id)
+                    .scaleEffect(
+                        x: item.position == .current ? 1.0 : ArchiveCarouselLayout.sideCardWidthScale,
+                        y: item.position == .current ? 1.0 : ArchiveCarouselLayout.sideCardHeightScale
+                    )
+                    .opacity(item.position == .current ? 1.0 : ArchiveCarouselLayout.sideCardOpacity)
+                    .offset(y: item.position == .current ? 0 : ArchiveCarouselLayout.sideCardYOffset)
             }
-            .scrollTargetLayout()
         }
-        .contentMargins(
-            .horizontal,
-            carouselSideMargin(screenWidth: screenWidth),
-            for: .scrollContent
-        )
-        .scrollBounceBehavior(.basedOnSize)
-        .scrollTargetBehavior(.viewAligned)
-        .scrollPosition(id: $focusedReceiptItemID, anchor: .center)
+        .frame(width: carouselContentWidth)
+        .offset(x: carouselBaseOffset(screenWidth: screenWidth) - carouselDragOffset)
+        .frame(width: screenWidth, alignment: .leading)
+        .contentShape(Rectangle())
+        .animation(ArchiveCarouselLayout.animation, value: focusedReceiptIndex)
+        .animation(.interactiveSpring(response: 0.24, dampingFraction: 0.86), value: carouselDragOffset)
+        .gesture(carouselDragGesture)
+        .clipped()
         .onAppear {
-            focusedReceiptItemID = carouselState.initialFocusedItemID
+            syncFocusedReceiptIndexWithCurrentReceipts()
         }
         .onChange(of: carouselReceiptIDs) { _, _ in
-            focusedReceiptItemID = carouselState.initialFocusedItemID
+            syncFocusedReceiptIndexWithCurrentReceipts()
         }
     }
 
@@ -244,6 +242,73 @@ private extension ArchiveView {
 
     var carouselState: ArchiveCarouselState {
         ArchiveCarouselState(receipts: controller.filteredReceipts)
+    }
+
+    var carouselDisplayItems: [ArchiveCarouselDisplayItem] {
+        carouselState.displayItems(focusedIndex: focusedReceiptIndex)
+    }
+
+    var carouselContentWidth: CGFloat {
+        ArchiveReceiptCardLayout.width * CGFloat(carouselDisplayItems.count) +
+        ArchiveCarouselLayout.cardSpacing * CGFloat(max(carouselDisplayItems.count - 1, 0))
+    }
+
+    var carouselPageWidth: CGFloat {
+        ArchiveReceiptCardLayout.width + ArchiveCarouselLayout.cardSpacing
+    }
+
+    var carouselDragGesture: some Gesture {
+        DragGesture()
+            .updating($carouselDragOffset) { value, state, _ in
+                guard carouselState.receipts.count > 1 else {
+                    return
+                }
+
+                state = value.translation.width
+            }
+            .onEnded { value in
+                moveFocusedReceiptIfNeeded(translationWidth: value.translation.width)
+            }
+    }
+
+    func carouselBaseOffset(screenWidth: CGFloat) -> CGFloat {
+        let centeredCardOffset = (screenWidth - ArchiveReceiptCardLayout.width) / 2
+
+        guard carouselDisplayItems.count > 1 else {
+            return centeredCardOffset
+        }
+
+        return centeredCardOffset - carouselPageWidth
+    }
+
+    func moveFocusedReceiptIfNeeded(translationWidth: CGFloat) {
+        guard carouselState.receipts.count > 1 else {
+            return
+        }
+
+        if translationWidth <= -ArchiveCarouselLayout.swipeThreshold {
+            withAnimation(ArchiveCarouselLayout.animation) {
+                focusedReceiptIndex = carouselState.previousIndex(from: focusedReceiptIndex)
+            }
+        } else if translationWidth >= ArchiveCarouselLayout.swipeThreshold {
+            withAnimation(ArchiveCarouselLayout.animation) {
+                focusedReceiptIndex = carouselState.nextIndex(from: focusedReceiptIndex)
+            }
+        }
+
+        focusedReceiptID = carouselState.receipts[focusedReceiptIndex].id
+    }
+
+    func syncFocusedReceiptIndexWithCurrentReceipts() {
+        guard let focusedReceiptID,
+              let focusedIndex = carouselState.index(for: focusedReceiptID) else {
+            focusedReceiptIndex = 0
+            self.focusedReceiptID = carouselState.receipts.first?.id
+            return
+        }
+
+        focusedReceiptIndex = focusedIndex
+        self.focusedReceiptID = carouselState.receipts[focusedIndex].id
     }
 }
 

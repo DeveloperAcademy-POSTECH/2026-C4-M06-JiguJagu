@@ -20,45 +20,91 @@ struct ArchiveCarouselState {
     }
 
     var displayItems: [ArchiveCarouselDisplayItem] {
-        if receipts.count == 2 {
-            return [
-                ArchiveCarouselDisplayItem(id: "left-\(receipts[1].id)", receipt: receipts[1]),
-                ArchiveCarouselDisplayItem(id: "center-\(receipts[0].id)", receipt: receipts[0]),
-                ArchiveCarouselDisplayItem(id: "right-\(receipts[1].id)", receipt: receipts[1])
-            ]
-        }
-
-        if receipts.count >= 3 {
-            let oldestReceipt = receipts[receipts.count - 1]
-            let centerAndRightReceipts = receipts.dropLast()
-            let orderedReceipts = [oldestReceipt] + centerAndRightReceipts
-
-            return orderedReceipts.enumerated().map { index, receipt in
-                ArchiveCarouselDisplayItem(id: "\(index)-\(receipt.id)", receipt: receipt)
-            }
-        }
-
-        return receipts.map { receipt in
-            ArchiveCarouselDisplayItem(id: receipt.id, receipt: receipt)
-        }
+        displayItems(focusedIndex: 0)
     }
 
     var initialFocusedItemID: String? {
-        guard let newestReceipt = receipts.first else {
-            return nil
+        displayItems.first(where: { $0.position == .current })?.id
+    }
+
+    func displayItems(focusedIndex: Int) -> [ArchiveCarouselDisplayItem] {
+        guard !receipts.isEmpty else {
+            return []
         }
 
-        if receipts.count == 2 {
-            return "center-\(newestReceipt.id)"
+        guard receipts.count > 1 else {
+            return [
+                ArchiveCarouselDisplayItem(
+                    id: makeDisplayItemID(position: .current, receiptIndex: 0),
+                    receipt: receipts[0],
+                    receiptIndex: 0,
+                    position: .current
+                )
+            ]
         }
 
-        return displayItems.first {
-            $0.receipt.id == newestReceipt.id
-        }?.id
+        let currentIndex = normalizedIndex(focusedIndex)
+        let previousIndex = previousIndex(from: currentIndex)
+        let nextIndex = nextIndex(from: currentIndex)
+
+        return [
+            makeDisplayItem(position: .previous, receiptIndex: previousIndex),
+            makeDisplayItem(position: .current, receiptIndex: currentIndex),
+            makeDisplayItem(position: .next, receiptIndex: nextIndex)
+        ]
+    }
+
+    func normalizedIndex(_ index: Int) -> Int {
+        guard !receipts.isEmpty else {
+            return 0
+        }
+
+        return (index % receipts.count + receipts.count) % receipts.count
+    }
+
+    func previousIndex(from index: Int) -> Int {
+        normalizedIndex(index - 1)
+    }
+
+    func nextIndex(from index: Int) -> Int {
+        normalizedIndex(index + 1)
+    }
+
+    func index(for receiptID: String) -> Int? {
+        receipts.firstIndex { $0.id == receiptID }
+    }
+}
+
+private extension ArchiveCarouselState {
+    func makeDisplayItem(
+        position: ArchiveCarouselDisplayPosition,
+        receiptIndex: Int
+    ) -> ArchiveCarouselDisplayItem {
+        ArchiveCarouselDisplayItem(
+            id: makeDisplayItemID(position: position, receiptIndex: receiptIndex),
+            receipt: receipts[receiptIndex],
+            receiptIndex: receiptIndex,
+            position: position
+        )
+    }
+
+    func makeDisplayItemID(
+        position: ArchiveCarouselDisplayPosition,
+        receiptIndex: Int
+    ) -> String {
+        "\(position.rawValue)-\(receiptIndex)-\(receipts[receiptIndex].id)"
     }
 }
 
 struct ArchiveCarouselDisplayItem: Identifiable {
     let id: String
     let receipt: ArchiveReceipt
+    let receiptIndex: Int
+    let position: ArchiveCarouselDisplayPosition
+}
+
+enum ArchiveCarouselDisplayPosition: String {
+    case previous
+    case current
+    case next
 }
