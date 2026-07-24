@@ -12,16 +12,24 @@ final class RegisterFlowController: ObservableObject {
     @Published private(set) var route: RegisterFlowRoute = .category
     @Published private(set) var completedProductInput: RegisterProductInputState?
     @Published private(set) var completedDraft: RegisterDraft?
-    @Published var showConfirm = false
     
     func moveBack() {
         switch route {
         case .category:
             break
+            
         case .detail:
             route = .category
+            
         case .productInfo(let draft):
-            route = draft.mainCategory.skipsDetailSelection ? .category : .detail(draft.mainCategory)
+            route = draft.mainCategory.skipsDetailSelection
+            ? .category
+            : .detail(draft.mainCategory)
+            
+        case .confirm:
+            if let draft = completedDraft {
+                route = .productInfo(draft)
+            }
         }
     }
     
@@ -50,16 +58,33 @@ final class RegisterFlowController: ObservableObject {
         
         completedProductInput = inputState
         
-        if case .productInfo(let draft) = route {
-            completedDraft = draft
+        guard case .productInfo(let draft) = route else {
+            return
         }
         
-        showConfirm = true
+        completedDraft = draft
+        
+        route = .confirm(
+            Clothing(
+                brand: inputState.brandName,
+                productName: inputState.productName,
+                mockImageName: nil,
+                productImageURL: nil,
+                receiptCategory: "\(draft.mainCategory.displayName) > \(draft.subcategory?.title ?? "그 외")",
+                category3: draft.mainCategory.displayName,
+                category4: draft.subcategory?.title ?? "그 외",
+                howToCare: [],
+                washingGuides: [],
+                materials: [],
+                color: draft.color?.title ?? "유색"
+            )
+        )
     }
 }
 
-enum RegisterFlowRoute: Equatable {
+enum RegisterFlowRoute {
     case category
     case detail(RegisterMainCategory)
     case productInfo(RegisterDraft)
+    case confirm(Clothing)
 }
