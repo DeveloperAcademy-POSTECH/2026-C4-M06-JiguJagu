@@ -17,18 +17,18 @@ struct RegisterConfirmView: View {
     var localImage: UIImage? = nil
     
     var onBack: () -> Void = {}
-    @Environment(\.dismiss) private var dismiss
+    
     @State private var selectedMainCategory = ""
     @State private var selectedSubCategory: ArchiveSubcategory?
     @State private var selectedColor: RegisterColorOption?
     @State private var editableBrand: String = ""
     @State private var editableProductName: String = ""
     @State private var showReceipt = false
-
+    
     /// 이미지 카드에서 재촬영한 사진(누끼 처리됨). 있으면 최우선 사용.
     @State private var retakenImage: UIImage?
     @State private var showCamera = false
-
+    
     /// 카드/영수증에 표시할 이미지. 재촬영 > 전달받은 사진 순.
     private var displayImage: UIImage? {
         // 재촬영한 사진이 있으면 항상 최우선
@@ -123,7 +123,6 @@ struct RegisterConfirmView: View {
             RegisterHeaderView(
                 onBack: {
                     onBack()
-                    dismiss()
                 }
             )
             VStack(alignment: .leading, spacing: 24) {
@@ -274,7 +273,7 @@ struct RegisterConfirmView: View {
 private struct RetakeCameraView: View {
     @Environment(\.dismiss) private var dismiss
     let onCapture: (UIImage) -> Void
-
+    
     var body: some View {
         CameraCaptureView(
             config: .clothing,
@@ -375,7 +374,7 @@ private struct ClothingImageCard: View {
                 
                 .frame(width: 180, height: 182)
             }
-
+            
             // 우측 상단 카메라 버튼 (재촬영)
             VStack {
                 HStack {
