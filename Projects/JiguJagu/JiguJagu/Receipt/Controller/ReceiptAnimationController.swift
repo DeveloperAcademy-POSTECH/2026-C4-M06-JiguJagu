@@ -48,12 +48,12 @@ final class ReceiptAnimationController {
 
             try? await Task.sleep(for: .milliseconds(200))
 
-            await MainActor.run {
-                proxy.scrollTo(
-                    "receiptBottom",
-                    anchor: .bottom
-                )
-            }
+//            await MainActor.run {
+//                proxy.scrollTo(
+//                    "receiptBottom",
+//                    anchor: .bottom
+//                )
+//            }
         }
     }
     
