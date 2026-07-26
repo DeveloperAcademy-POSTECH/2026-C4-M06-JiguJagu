@@ -8,7 +8,7 @@ import SwiftUI
 
 enum ArchiveEmptyStateStyle {
     case noReceipts
-    case noSubcategoryReceipts
+    case noCategoryReceipts(category: String)
     case noResults
     case loadFailed(message: String)
 }
@@ -70,15 +70,34 @@ private extension ArchiveEmptyStateView {
         .foregroundStyle(Color.black)
         .multilineTextAlignment(.center)
     }
+    
+    func particleChanger(_ word: String) -> String {
+        guard let lastCharacter = word.last else {
+            return "가"
+        }
+
+        let unicode = String(lastCharacter).unicodeScalars.first!.value
+
+        // 한글 음절 여부 + 종성 여부 확인
+        if (0xAC00...0xD7A3).contains(unicode) {
+            let hasFinalConsonant = (unicode - 0xAC00) % 28 != 0
+            return hasFinalConsonant ? "이" : "가"
+        }
+
+        return "가"
+    }
 
     var title: String {
         switch style {
         case .noReceipts:
             return "등록된 옷이 없어요!"
-        case .noSubcategoryReceipts:
-            return "이 카테고리에 등록된 옷이 없어요!"
+
+        case .noCategoryReceipts(let category):
+            return "등록된 \(category)\(particleChanger(category)) 없어요!"
+
         case .noResults:
             return "조건에 맞는 옷이 없어요!"
+
         case .loadFailed(let message):
             return message
         }
@@ -86,10 +105,12 @@ private extension ArchiveEmptyStateView {
 
     var message: String {
         switch style {
-        case .noReceipts, .noSubcategoryReceipts:
+        case .noReceipts, .noCategoryReceipts:
             return "옷을 등록해주세요"
+
         case .noResults:
             return "다른 조건으로 찾아주세요"
+
         case .loadFailed:
             return "잠시 후 다시 시도해주세요"
         }
@@ -97,7 +118,7 @@ private extension ArchiveEmptyStateView {
 
     var buttonTitle: String {
         switch style {
-        case .noReceipts, .noSubcategoryReceipts:
+        case .noReceipts, .noCategoryReceipts:
             return "옷 등록"
         case .noResults:
             return "전체 보기"

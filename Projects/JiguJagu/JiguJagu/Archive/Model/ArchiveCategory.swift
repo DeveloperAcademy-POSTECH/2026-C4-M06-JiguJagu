@@ -11,11 +11,11 @@ enum ArchiveCategory: String, CaseIterable, Identifiable {
     case tops
     case bottoms
     case outers
-
+    
     var id: String {
         rawValue
     }
-
+    
     var title: String {
         switch self {
         case .all:
@@ -28,7 +28,7 @@ enum ArchiveCategory: String, CaseIterable, Identifiable {
             return "Outers"
         }
     }
-
+    
     var subcategories: [ArchiveSubcategory] {
         switch self {
         case .all:
@@ -45,7 +45,7 @@ enum ArchiveCategory: String, CaseIterable, Identifiable {
     var displayName: String {
         switch self {
         case .all:
-            return "전체"
+            return "옷"
         case .tops:
             return "상의"
         case .bottoms:
@@ -63,16 +63,16 @@ extension ArchiveCategory {
         case bottom
         case outer
         case all
-
+        
         var id: String {
             rawValue
         }
-
+        
         /// 홈 티켓 버튼에 노출되는 제목입니다.
         var title: String {
             rawValue.uppercased()
         }
-
+        
         /// 아카이브 화면에서 초기 선택될 카테고리입니다.
         var archiveCategory: ArchiveCategory {
             switch self {

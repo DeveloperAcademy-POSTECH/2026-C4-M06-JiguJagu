@@ -115,12 +115,25 @@ private extension ArchiveView {
             return .loadFailed(message: receiptLoadErrorMessage)
         }
 
-        if controller.receipts.isEmpty {
-            return .noReceipts
-        }
+        if controller.filteredReceipts.isEmpty {
+            // 필터 없음 + 전체 데이터 없음
+            if controller.selectedCategory == .all &&
+               controller.selectedSubcategory == nil &&
+               controller.searchText.isEmpty {
+                return .noReceipts
+            }
 
-        if controller.selectedSubcategory != nil {
-            return .noSubcategoryReceipts
+            // 소분류 선택
+            if let subcategory = controller.selectedSubcategory {
+                return .noCategoryReceipts(category: subcategory.title)
+            }
+
+            // 대분류 선택
+            if controller.selectedCategory != .all {
+                return .noCategoryReceipts(category: controller.selectedCategory.displayName)
+            }
+
+            return .noResults
         }
 
         return .noResults
@@ -128,7 +141,7 @@ private extension ArchiveView {
 
     var shouldShowRegisterEmptyState: Bool {
         switch emptyStateStyle {
-        case .noReceipts, .noSubcategoryReceipts:
+        case .noReceipts, .noCategoryReceipts:
             return true
         case .noResults, .loadFailed:
             return false
