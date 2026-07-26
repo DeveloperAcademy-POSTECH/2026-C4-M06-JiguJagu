@@ -62,9 +62,3 @@ private extension ReceiptLoadingFlowView {
         }
     }
 }
-
-#Preview {
-    ReceiptLoadingFlowView(
-        clothing: Clothing.mocks[0]
-    )
-}

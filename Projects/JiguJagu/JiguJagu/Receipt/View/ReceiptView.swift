@@ -293,9 +293,3 @@ private extension ReceiptView {
         isSavingToArchive = false
     }
 }
-
-#Preview {
-    ReceiptView(
-        clothing: Clothing.mocks[0]
-    )
-}

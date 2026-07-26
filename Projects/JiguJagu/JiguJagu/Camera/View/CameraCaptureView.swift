@@ -275,18 +275,28 @@ struct LaundryCaptureFlow: View {
     @State private var clothingImage: UIImage?
     @State private var tagImage: UIImage?
     
+    /// "옷 검색하기"를 누르면 true가 되어 옷 검색 화면이 올라옵니다.
+    @State private var showClothingSearch = false
+    
     var body: some View {
         switch step {
         case .clothing:
             CameraCaptureView(
                 config: .clothing,
-                onLeadingAction: { dismiss() },              // X → 플로우 종료
-                onHelperAction: { /* 옷 검색 화면으로 이동 */ },
+                onLeadingAction: { dismiss() },                // X → 플로우 종료
+                onHelperAction: { showClothingSearch = true }, // "옷 검색하기" → 검색 화면
                 onCapture: { image in
                     clothingImage = image
                     step = .clothingConfirm                   // 촬영 → 확인 화면
                 }
             )
+            .fullScreenCover(isPresented: $showClothingSearch) {
+                // SearchView 내부에서 navigationDestination을 사용하므로 NavigationStack으로 감쌉니다.
+                // SearchTopBar의 ← 버튼(dismiss)을 누르면 이 화면이 닫히며 옷 촬영 화면으로 돌아옵니다.
+                NavigationStack {
+                    SearchView()
+                }
+            }
             
         case .clothingConfirm:
             if let clothingImage {
@@ -301,6 +311,7 @@ struct LaundryCaptureFlow: View {
         case .tag:
             CameraCaptureView(
                 config: .tag,
+                revealHelperAfter: 2,                         // 2초 뒤 "촬영 건너뛰기" 안내로 전환
                 onLeadingAction: { step = .clothing },        // ← 옷 촬영으로 복귀
                 onHelperAction: { step = .result },           // 세탁 라벨 촬영 건너뛰기 → 상품 검색
                 onCapture: { image in

@@ -5,8 +5,6 @@
 //  Created by 채유성 on 7/19/26.
 //
 
-#if DEBUG
-
 import Foundation
 
 extension Clothing {
@@ -253,5 +251,3 @@ extension Clothing {
         )
     ]
 }
-
-#endif
