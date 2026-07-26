@@ -15,7 +15,7 @@ final class ArchiveController {
     var selectedSubcategory: ArchiveSubcategory?
     private(set) var receiptLoadErrorMessage: String?
     private(set) var receipts: [ArchiveReceipt]
-
+    
     init(
         receipts: [ArchiveReceipt] = [],
         initialCategory: ArchiveCategory = .all
@@ -23,19 +23,21 @@ final class ArchiveController {
         self.receipts = receipts
         self.selectedCategory = initialCategory
     }
-
+    
     var categories: [ArchiveCategory] {
         ArchiveCategory.allCases
     }
-
+    
     var availableSubcategories: [ArchiveSubcategory] {
         if selectedCategory == .all {
-            return ArchiveSubcategory.all
+            return ArchiveSubcategory.all.filter {
+                $0.title != "그 외"
+            }
         }
-
+        
         return selectedCategory.subcategories
     }
-
+    
     var filteredReceipts: [ArchiveReceipt] {
         receipts.filter { receipt in
             matchesCategory(receipt) &&
@@ -43,18 +45,18 @@ final class ArchiveController {
             matchesSearchText(receipt)
         }
     }
-
+    
     var hasActiveFilter: Bool {
         // 필터나 검색어가 있으면 전체 빈 상태가 아니라 검색/필터 결과 없음 상태로 처리합니다.
         selectedCategory != .all ||
         selectedSubcategory != nil ||
         !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
-
+    
     func setReceipts(_ receipts: [ArchiveReceipt]) {
         self.receipts = receipts
     }
-
+    
     func loadReceipts(
         from store: SwiftDataReceiptStore,
         context: ModelContext
@@ -66,24 +68,24 @@ final class ArchiveController {
             receiptLoadErrorMessage = "보관함을 불러오지 못했어요."
         }
     }
-
+    
     func selectCategory(_ category: ArchiveCategory) {
         selectedCategory = category
         selectedSubcategory = nil
     }
-
+    
     func selectSubcategory(_ subcategory: ArchiveSubcategory) {
         selectedSubcategory = subcategory
     }
-
+    
     func selectAllSubcategories() {
         selectedSubcategory = nil
     }
-
+    
     func clearSearchText() {
         searchText = ""
     }
-
+    
     func resetFilters() {
         searchText = ""
         selectedCategory = .all
@@ -95,22 +97,22 @@ private extension ArchiveController {
     func matchesCategory(_ receipt: ArchiveReceipt) -> Bool {
         selectedCategory == .all || receipt.category == selectedCategory
     }
-
+    
     func matchesSubcategory(_ receipt: ArchiveReceipt) -> Bool {
         guard let selectedSubcategory else {
             return true
         }
-
+        
         return receipt.subcategory == selectedSubcategory
     }
-
+    
     func matchesSearchText(_ receipt: ArchiveReceipt) -> Bool {
         let keyword = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-
+        
         guard !keyword.isEmpty else {
             return true
         }
-
+        
         return receipt.searchKeywords.contains {
             $0.localizedCaseInsensitiveContains(keyword)
         }
