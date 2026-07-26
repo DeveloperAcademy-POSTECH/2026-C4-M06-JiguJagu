@@ -115,9 +115,23 @@ private extension ArchiveView {
             return .loadFailed(message: receiptLoadErrorMessage)
         }
         
+        
+        if controller.receipts.isEmpty {
+            return .noReceipts
+        }
+        
+        // 필터 결과가 없는 경우
         if controller.filteredReceipts.isEmpty {
+            
+            // All + 검색/필터 없음
+            if controller.selectedCategory == .all &&
+                controller.selectedSubcategory == nil &&
+                controller.searchText.isEmpty {
+                return .noReceipts
+            }
+            
+            // 세부 카테고리 없음
             if let subcategory = controller.selectedSubcategory {
-                
                 if subcategory.title == "그 외" {
                     return .noCategoryReceipts(
                         category: controller.selectedCategory.displayName
@@ -129,12 +143,14 @@ private extension ArchiveView {
                 )
             }
             
+            // 대분류 없음
             if controller.selectedCategory != .all {
                 return .noCategoryReceipts(
                     category: controller.selectedCategory.displayName
                 )
             }
             
+            // 검색 결과 없음
             return .noResults
         }
         
