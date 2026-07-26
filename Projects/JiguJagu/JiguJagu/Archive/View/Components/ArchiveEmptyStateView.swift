@@ -32,7 +32,7 @@ struct ArchiveEmptyStateView: View {
                     .scaledToFit()
                     .opacity(0.5)
                     .frame(width: 117, height: 117)
-                    .padding(.top, 112)
+                    .padding(.top, 60)
 
                 Button(action: onResetButtonTap) {
                     Text(buttonTitle)
@@ -42,7 +42,7 @@ struct ArchiveEmptyStateView: View {
                         .background(Color.black)
                         .clipShape(Capsule())
                 }
-                .padding(.top, 104)
+                .padding(.top, 90)
             }
             .frame(
                 width: ArchiveReceiptCardLayout.width,

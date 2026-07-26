@@ -100,6 +100,15 @@ private extension ArchiveView {
         )
     }
     
+    func receiptTopOffset(availableHeight: CGFloat) -> CGFloat {
+        let receiptHeight = ArchiveReceiptCardLayout.bodyHeight +
+        ArchiveReceiptCardLayout.edgeHeight * 2
+        
+        let overflow = receiptHeight - availableHeight
+        
+        return overflow > 0 ? -overflow / 2 : 0
+    }
+    
     func emptyStatePrimaryAction() {
         if controller.receiptLoadErrorMessage != nil {
             loadPersistedReceiptsIfNeeded()
@@ -108,6 +117,17 @@ private extension ArchiveView {
         } else {
             controller.resetFilters()
         }
+    }
+    
+    func receiptTopPadding(availableHeight: CGFloat) -> CGFloat {
+        let receiptHeight = ArchiveReceiptCardLayout.bodyHeight +
+        ArchiveReceiptCardLayout.edgeHeight * 2
+        
+        let bottomPadding: CGFloat = 20
+        
+        let availableTop = availableHeight - receiptHeight - bottomPadding
+        
+        return max(20, availableTop / 2)
     }
     
     var emptyStateStyle: ArchiveEmptyStateStyle {
@@ -201,6 +221,7 @@ private extension ArchiveView {
                     .padding(.top, emptyReceiptTopPadding(availableHeight: geometry.size.height))
                 } else {
                     receiptCards(screenWidth: geometry.size.width)
+                        .offset(y: receiptTopOffset(availableHeight: geometry.size.height))
                 }
             }
             .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
