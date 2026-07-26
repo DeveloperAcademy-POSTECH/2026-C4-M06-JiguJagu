@@ -29,6 +29,8 @@ struct RegisterConfirmView: View {
     @State private var retakenImage: UIImage?
     @State private var showCamera = false
     
+    @Environment(\.dismiss) private var dismiss
+    
     /// 카드/영수증에 표시할 이미지. 재촬영 > 전달받은 사진 순.
     private var displayImage: UIImage? {
         // 재촬영한 사진이 있으면 항상 최우선
@@ -123,6 +125,7 @@ struct RegisterConfirmView: View {
             RegisterHeaderView(
                 onBack: {
                     onBack()
+                    dismiss()
                 }
             )
             VStack(alignment: .leading, spacing: 24) {
