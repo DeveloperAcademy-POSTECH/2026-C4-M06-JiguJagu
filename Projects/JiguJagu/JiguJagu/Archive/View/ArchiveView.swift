@@ -23,7 +23,7 @@ private enum ArchiveCarouselLayout {
 
 struct ArchiveView: View {
     @Environment(\.modelContext) private var modelContext
-
+    
     @State private var controller: ArchiveController
     @State private var focusedReceiptIndex = 0
     @State private var focusedReceiptID: String?
@@ -35,7 +35,7 @@ struct ArchiveView: View {
     private let loadsPersistedReceipts: Bool
     private let onBackButtonTap: () -> Void
     private let onRegisterButtonTap: () -> Void
-
+    
     init(
         receipts: [ArchiveReceipt]? = nil,
         initialCategory: ArchiveCategory = .all,
@@ -53,16 +53,16 @@ struct ArchiveView: View {
         self.onBackButtonTap = onBackButtonTap
         self.onRegisterButtonTap = onRegisterButtonTap
     }
-
+    
     var body: some View {
         @Bindable var controller = controller
-
+        
         VStack(spacing: 0) {
             ArchiveHeaderView(
                 searchText: $controller.searchText,
                 onBackButtonTap: onBackButtonTap
             )
-
+            
             ArchiveCategoryFilterView(
                 categories: controller.categories,
                 selectedCategory: controller.selectedCategory,
@@ -73,7 +73,7 @@ struct ArchiveView: View {
                 onSubcategoryTap: { controller.selectSubcategory($0) }
             )
             .zIndex(1)
-
+            
             receiptArchiveContent
                 .zIndex(0)
         }
@@ -93,13 +93,22 @@ private extension ArchiveView {
         guard loadsPersistedReceipts else {
             return
         }
-
+        
         controller.loadReceipts(
             from: receiptStore,
             context: modelContext
         )
     }
-
+    
+    func receiptTopOffset(availableHeight: CGFloat) -> CGFloat {
+        let receiptHeight = ArchiveReceiptCardLayout.bodyHeight +
+        ArchiveReceiptCardLayout.edgeHeight * 2
+        
+        let overflow = receiptHeight - availableHeight
+        
+        return overflow > 0 ? -overflow / 2 : 0
+    }
+    
     func emptyStatePrimaryAction() {
         if controller.receiptLoadErrorMessage != nil {
             loadPersistedReceiptsIfNeeded()
@@ -109,32 +118,74 @@ private extension ArchiveView {
             controller.resetFilters()
         }
     }
-
+    
+    func receiptTopPadding(availableHeight: CGFloat) -> CGFloat {
+        let receiptHeight = ArchiveReceiptCardLayout.bodyHeight +
+        ArchiveReceiptCardLayout.edgeHeight * 2
+        
+        let bottomPadding: CGFloat = 20
+        
+        let availableTop = availableHeight - receiptHeight - bottomPadding
+        
+        return max(20, availableTop / 2)
+    }
+    
     var emptyStateStyle: ArchiveEmptyStateStyle {
         if let receiptLoadErrorMessage = controller.receiptLoadErrorMessage {
             return .loadFailed(message: receiptLoadErrorMessage)
         }
-
+        
+        
         if controller.receipts.isEmpty {
             return .noReceipts
         }
-
-        if controller.selectedSubcategory != nil {
-            return .noSubcategoryReceipts
+        
+        // 필터 결과가 없는 경우
+        if controller.filteredReceipts.isEmpty {
+            
+            // All + 검색/필터 없음
+            if controller.selectedCategory == .all &&
+                controller.selectedSubcategory == nil &&
+                controller.searchText.isEmpty {
+                return .noReceipts
+            }
+            
+            // 세부 카테고리 없음
+            if let subcategory = controller.selectedSubcategory {
+                if subcategory.title == "그 외" {
+                    return .noCategoryReceipts(
+                        category: controller.selectedCategory.displayName
+                    )
+                }
+                
+                return .noCategoryReceipts(
+                    category: subcategory.title
+                )
+            }
+            
+            // 대분류 없음
+            if controller.selectedCategory != .all {
+                return .noCategoryReceipts(
+                    category: controller.selectedCategory.displayName
+                )
+            }
+            
+            // 검색 결과 없음
+            return .noResults
         }
-
+        
         return .noResults
     }
-
+    
     var shouldShowRegisterEmptyState: Bool {
         switch emptyStateStyle {
-        case .noReceipts, .noSubcategoryReceipts:
+        case .noReceipts, .noCategoryReceipts:
             return true
         case .noResults, .loadFailed:
             return false
         }
     }
-
+    
     var isShowingReceiptDetail: Binding<Bool> {
         Binding(
             get: { selectedReceipt != nil },
@@ -145,7 +196,7 @@ private extension ArchiveView {
             }
         )
     }
-
+    
     @ViewBuilder
     var receiptDetailView: some View {
         if let selectedReceipt {
@@ -158,7 +209,7 @@ private extension ArchiveView {
             )
         }
     }
-
+    
     var receiptArchiveContent: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
@@ -170,6 +221,7 @@ private extension ArchiveView {
                     .padding(.top, emptyReceiptTopPadding(availableHeight: geometry.size.height))
                 } else {
                     receiptCards(screenWidth: geometry.size.width)
+                        .offset(y: receiptTopOffset(availableHeight: geometry.size.height))
                 }
             }
             .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
@@ -183,7 +235,7 @@ private extension ArchiveView {
             }
         }
     }
-
+    
     func receiptCards(screenWidth: CGFloat) -> some View {
         HStack(alignment: .top, spacing: ArchiveCarouselLayout.cardSpacing) {
             ForEach(carouselDisplayItems) { item in
@@ -217,16 +269,16 @@ private extension ArchiveView {
             syncFocusedReceiptIndexWithCurrentReceipts()
         }
     }
-
+    
     func emptyReceiptTopPadding(availableHeight: CGFloat) -> CGFloat {
         let preferredTopPadding: CGFloat = 49
         let minimumBottomPadding: CGFloat = 30
         let receiptHeight = ArchiveReceiptCardLayout.bodyHeight + ArchiveReceiptCardLayout.edgeHeight * 2
         let maximumTopPadding = availableHeight - receiptHeight - minimumBottomPadding
-
+        
         return min(preferredTopPadding, max(0, maximumTopPadding))
     }
-
+    
     func receiptCardItem(_ item: ArchiveCarouselDisplayItem) -> some View {
         Button {
             if item.position == .current {
@@ -243,36 +295,36 @@ private extension ArchiveView {
         .accessibilityHint("영수증 상세를 엽니다.")
         .padding(.top, ArchiveCarouselLayout.cardTopPadding)
     }
-
+    
     func receiptCardAccessibilityLabel(for receipt: ArchiveReceipt) -> String {
         "\(receipt.productName.replacingOccurrences(of: "\n", with: " ")), \(receipt.category.title), \(receipt.dDayText())"
     }
-
+    
     var carouselReceiptIDs: [String] {
         carouselState.receiptIDs
     }
-
+    
     var carouselState: ArchiveCarouselState {
         ArchiveCarouselState(receipts: controller.filteredReceipts)
     }
-
+    
     var carouselDisplayItems: [ArchiveCarouselDisplayItem] {
         carouselState.displayItems(focusedIndex: focusedReceiptIndex)
     }
-
+    
     var carouselContentWidth: CGFloat {
         ArchiveReceiptCardLayout.width * CGFloat(carouselDisplayItems.count) +
         ArchiveCarouselLayout.cardSpacing * CGFloat(max(carouselDisplayItems.count - 1, 0))
     }
-
+    
     var carouselPageWidth: CGFloat {
         ArchiveReceiptCardLayout.width + ArchiveCarouselLayout.cardSpacing
     }
-
+    
     var carouselVisualOffset: CGFloat {
         carouselSettledOffset + carouselDragTranslation
     }
-
+    
     var carouselDragGesture: some Gesture {
         DragGesture(minimumDistance: ArchiveCarouselLayout.dragMinimumDistance)
             .updating($carouselDragTranslation) { value, state, _ in
@@ -280,7 +332,7 @@ private extension ArchiveView {
                       !isCommittingCarouselMove else {
                     return
                 }
-
+                
                 state = value.translation.width
             }
             .onEnded { value in
@@ -290,22 +342,22 @@ private extension ArchiveView {
                 )
             }
     }
-
+    
     func carouselBaseOffset(screenWidth: CGFloat) -> CGFloat {
         let centeredCardOffset = (screenWidth - ArchiveReceiptCardLayout.width) / 2
-
+        
         guard carouselDisplayItems.count > 1 else {
             return centeredCardOffset
         }
-
+        
         return centeredCardOffset - carouselPageWidth
     }
-
+    
     func carouselCenterProgress(for item: ArchiveCarouselDisplayItem) -> CGFloat {
         let distanceFromCenter = abs(item.position.slotOffset(pageWidth: carouselPageWidth) + carouselVisualOffset)
         return min(distanceFromCenter / carouselPageWidth, 1)
     }
-
+    
     func carouselWidthScale(for item: ArchiveCarouselDisplayItem) -> CGFloat {
         interpolate(
             from: 1.0,
@@ -313,7 +365,7 @@ private extension ArchiveView {
             progress: carouselCenterProgress(for: item)
         )
     }
-
+    
     func carouselHeightScale(for item: ArchiveCarouselDisplayItem) -> CGFloat {
         interpolate(
             from: 1.0,
@@ -321,7 +373,7 @@ private extension ArchiveView {
             progress: carouselCenterProgress(for: item)
         )
     }
-
+    
     func carouselOpacity(for item: ArchiveCarouselDisplayItem) -> CGFloat {
         interpolate(
             from: 1.0,
@@ -329,7 +381,7 @@ private extension ArchiveView {
             progress: carouselCenterProgress(for: item)
         )
     }
-
+    
     func carouselYOffset(for item: ArchiveCarouselDisplayItem) -> CGFloat {
         interpolate(
             from: 0,
@@ -337,7 +389,7 @@ private extension ArchiveView {
             progress: carouselCenterProgress(for: item)
         )
     }
-
+    
     func interpolate(
         from startValue: CGFloat,
         to endValue: CGFloat,
@@ -345,7 +397,7 @@ private extension ArchiveView {
     ) -> CGFloat {
         startValue + (endValue - startValue) * progress
     }
-
+    
     func moveFocusedReceiptIfNeeded(
         translationWidth: CGFloat,
         predictedTranslationWidth: CGFloat
@@ -354,7 +406,7 @@ private extension ArchiveView {
               !isCommittingCarouselMove else {
             return
         }
-
+        
         if shouldCommitLeftSwipe(
             translationWidth: translationWidth,
             predictedTranslationWidth: predictedTranslationWidth
@@ -373,7 +425,7 @@ private extension ArchiveView {
             )
         }
     }
-
+    
     func moveFocusedReceipt(
         direction: ArchiveCarouselMoveDirection,
         releaseOffset: CGFloat = 0
@@ -382,46 +434,46 @@ private extension ArchiveView {
               !isCommittingCarouselMove else {
             return
         }
-
+        
         isCommittingCarouselMove = true
-
+        
         withTransaction(Transaction(animation: nil)) {
             carouselSettledOffset = releaseOffset
         }
-
+        
         withAnimation(ArchiveCarouselLayout.animation) {
             carouselSettledOffset = direction.settledOffset(pageWidth: carouselPageWidth)
         }
-
+        
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: ArchiveCarouselLayout.commitAnimationDuration)
             commitFocusedReceiptMove(direction: direction)
         }
     }
-
+    
     func commitFocusedReceiptMove(direction: ArchiveCarouselMoveDirection) {
         guard !carouselState.receipts.isEmpty else {
             carouselSettledOffset = 0
             isCommittingCarouselMove = false
             return
         }
-
+        
         switch direction {
         case .previous:
             focusedReceiptIndex = carouselState.previousIndex(from: focusedReceiptIndex)
         case .next:
             focusedReceiptIndex = carouselState.nextIndex(from: focusedReceiptIndex)
         }
-
+        
         focusedReceiptID = carouselState.receipts[focusedReceiptIndex].id
-
+        
         withTransaction(Transaction(animation: nil)) {
             carouselSettledOffset = 0
         }
-
+        
         isCommittingCarouselMove = false
     }
-
+    
     func shouldCommitLeftSwipe(
         translationWidth: CGFloat,
         predictedTranslationWidth: CGFloat
@@ -429,7 +481,7 @@ private extension ArchiveView {
         translationWidth <= -ArchiveCarouselLayout.swipeThreshold ||
         predictedTranslationWidth <= -ArchiveCarouselLayout.flickThreshold
     }
-
+    
     func shouldCommitRightSwipe(
         translationWidth: CGFloat,
         predictedTranslationWidth: CGFloat
@@ -437,7 +489,7 @@ private extension ArchiveView {
         translationWidth >= ArchiveCarouselLayout.swipeThreshold ||
         predictedTranslationWidth >= ArchiveCarouselLayout.flickThreshold
     }
-
+    
     func syncFocusedReceiptIndexWithCurrentReceipts() {
         guard let focusedReceiptID,
               let focusedIndex = carouselState.index(for: focusedReceiptID) else {
@@ -445,7 +497,7 @@ private extension ArchiveView {
             self.focusedReceiptID = carouselState.receipts.first?.id
             return
         }
-
+        
         focusedReceiptIndex = focusedIndex
         self.focusedReceiptID = carouselState.receipts[focusedIndex].id
     }
@@ -454,7 +506,7 @@ private extension ArchiveView {
 private enum ArchiveCarouselMoveDirection {
     case previous
     case next
-
+    
     func settledOffset(pageWidth: CGFloat) -> CGFloat {
         switch self {
         case .previous:
@@ -474,7 +526,7 @@ private extension ArchiveCarouselDisplayPosition {
             return .next
         }
     }
-
+    
     func slotOffset(pageWidth: CGFloat) -> CGFloat {
         switch self {
         case .previous:
@@ -503,7 +555,7 @@ private extension ArchiveReceipt {
     static var previewTwoItems: [ArchiveReceipt] {
         Array(previewItems.prefix(2))
     }
-
+    
     static let previewItems: [ArchiveReceipt] = [
         ArchiveReceipt(
             id: "preview-outers",

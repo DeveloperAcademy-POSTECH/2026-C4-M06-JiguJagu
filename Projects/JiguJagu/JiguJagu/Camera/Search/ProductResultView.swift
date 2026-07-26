@@ -91,10 +91,10 @@ struct ProductResultView: View {
                 startSearchLoading()
                 onSearch()
             } label: {
-                Text("검색하기")
+                Text("다른 옷 찾기")
                     .font(.pretendard.head3)
                     .foregroundStyle(Color.grayScale900)
-                    .frame(width: 108)
+                    .frame(width: 130)
                     .frame(height: 52)
                     .background(Color.white)
                     .clipShape(Capsule())
@@ -414,4 +414,13 @@ private extension ProductResultView {
         // 등록 확인 화면에서 꺼내 쓸 수 있도록 전역 저장 (누끼 실패 시 원본)
         CapturedImageStore.shared.store(cutout ?? image)
     }
+}
+
+#Preview("상품 검색 결과") {
+    ProductResultView(
+        image: UIImage(systemName: "tshirt"),
+        onDone: {},
+        onSearch: {},
+        onRegister: {}
+    )
 }

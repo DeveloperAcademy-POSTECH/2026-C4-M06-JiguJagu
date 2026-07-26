@@ -9,7 +9,7 @@ import SwiftUI
 enum ArchiveReceiptCardLayout {
     static let width: CGFloat = 266
     static let edgeHeight: CGFloat = 18
-    static let bodyHeight: CGFloat = 488
+    static let bodyHeight: CGFloat = 440
     static let horizontalPadding: CGFloat = 24
     static let verticalPadding: CGFloat = 18
     static let dividerTopSpacing: CGFloat = 14
@@ -17,8 +17,8 @@ enum ArchiveReceiptCardLayout {
     static let materialTopSpacing: CGFloat = 24
     static let footerTopSpacing: CGFloat = 20
     static let dateTopSpacing: CGFloat = 12
-    static let productImageHeight: CGFloat = 150
-    static let productImageTopSpacing: CGFloat = 16
+    static let productImageHeight: CGFloat = 110
+    static let productImageTopSpacing: CGFloat = 12
     static let materialBarcodeHeight: CGFloat = 20
     static let materialListTopSpacing: CGFloat = 8
     static let materialRowSpacing: CGFloat = 3
@@ -59,7 +59,8 @@ struct ArchiveReceiptCard: View {
             .padding(.vertical, ArchiveReceiptCardLayout.verticalPadding)
             .frame(
                 width: ArchiveReceiptCardLayout.width,
-                alignment: .top
+                height: ArchiveReceiptCardLayout.bodyHeight,
+                alignment: .center
             )
             .background(Color.BG)
 
