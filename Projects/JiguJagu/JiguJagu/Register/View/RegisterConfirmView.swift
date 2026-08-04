@@ -121,139 +121,143 @@ struct RegisterConfirmView: View {
     }
     
     var body: some View {
-        ScrollView {
-            RegisterHeaderView(
-                onBack: {
-                    onBack()
-                    dismiss()
-                }
-            )
-            VStack(alignment: .leading, spacing: 24) {
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("옷 정보를 확인해주세요!")
-                        .font(.title2).fontWeight(.bold)
-                    Text("정보 확인 후, 의류 영수증을 발급해보세요.")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-                .padding(.bottom, 8)
-                
-                HStack {
-                    Spacer()
-                    ClothingImageCard(
-                        localImage: displayImage,
-                        url: clothing.productImageURL,
-                        onCameraTap: { showCamera = true }
-                    )
-                    Spacer()
-                }
-                
-                RegisterInfoField(
-                    title: "브랜드명",
-                    value: $editableBrand,
-                    titleFont: Font.pretendard.head4,
-                    valueFont: Font.pretendard.head4,
-                    titleColor: Color.grayScale900,
-                    valueColor: Color.grayScale500
-                )
-                
-                RegisterInfoField(
-                    title: "제품명",
-                    value: $editableProductName,
-                    titleFont: Font.pretendard.head4,
-                    valueFont: Font.pretendard.head4,
-                    titleColor: Color.grayScale900,
-                    valueColor: Color.grayScale500
-                )
-                
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("카테고리")
-                        .font(Font.pretendard.head4)
-                    RegisterChipFlowLayout {
-                        RegisterSelectionChip(title: "상의", isSelected: selectedMainCategory == "상의") {
-                            selectedMainCategory = "상의"
-                            selectedSubCategory = nil
-                        }
-                        RegisterSelectionChip(title: "하의", isSelected: selectedMainCategory == "하의") {
-                            selectedMainCategory = "하의"
-                            selectedSubCategory = nil
-                        }
-                        RegisterSelectionChip(title: "아우터", isSelected: selectedMainCategory == "아우터") {
-                            selectedMainCategory = "아우터"
-                            selectedSubCategory = nil
-                        }
-                        RegisterSelectionChip(title: "그 외", isSelected: selectedMainCategory == "그 외") {
-                            selectedMainCategory = "그 외"
-                            selectedSubCategory = nil
-                        }
+        ZStack {
+            Color.white
+                .ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                RegisterHeaderView(
+                    onBack: {
+                        onBack()
+                        dismiss()
                     }
-                }
+                )
                 
-                if selectedMainCategory != "그 외" {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("세부 카테고리")
-                            .font(Font.pretendard.head4)
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 24) {
                         
-                        RegisterChipFlowLayout {
-                            ForEach(availableSubcategories) { category in
-                                RegisterSelectionChip(
-                                    title: category.title,
-                                    isSelected: selectedSubCategory?.id == category.id
-                                ) {
-                                    selectedSubCategory = category
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("옷 정보를 확인해주세요!")
+                                .font(.title2).fontWeight(.bold)
+                            Text("정보 확인 후, 의류 영수증을 발급해보세요.")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.bottom, 8)
+                        
+                        HStack {
+                            Spacer()
+                            ClothingImageCard(
+                                localImage: displayImage,
+                                url: clothing.productImageURL,
+                                onCameraTap: { showCamera = true }
+                            )
+                            Spacer()
+                        }
+                        
+                        RegisterInfoField(
+                            title: "브랜드명",
+                            value: $editableBrand,
+                            titleFont: Font.pretendard.head4,
+                            valueFont: Font.pretendard.head4,
+                            titleColor: Color.grayScale900,
+                            valueColor: Color.grayScale500
+                        )
+                        
+                        RegisterInfoField(
+                            title: "제품명",
+                            value: $editableProductName,
+                            titleFont: Font.pretendard.head4,
+                            valueFont: Font.pretendard.head4,
+                            titleColor: Color.grayScale900,
+                            valueColor: Color.grayScale500
+                        )
+                        
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("카테고리")
+                                .font(Font.pretendard.head4)
+                            RegisterChipFlowLayout {
+                                RegisterSelectionChip(title: "상의", isSelected: selectedMainCategory == "상의") {
+                                    selectedMainCategory = "상의"
+                                    selectedSubCategory = nil
+                                }
+                                RegisterSelectionChip(title: "하의", isSelected: selectedMainCategory == "하의") {
+                                    selectedMainCategory = "하의"
+                                    selectedSubCategory = nil
+                                }
+                                RegisterSelectionChip(title: "아우터", isSelected: selectedMainCategory == "아우터") {
+                                    selectedMainCategory = "아우터"
+                                    selectedSubCategory = nil
+                                }
+                                RegisterSelectionChip(title: "그 외", isSelected: selectedMainCategory == "그 외") {
+                                    selectedMainCategory = "그 외"
+                                    selectedSubCategory = nil
                                 }
                             }
                         }
-                    }
-                }
-                
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("색상")
-                        .font(Font.pretendard.head4)
-                    RegisterChipFlowLayout {
-                        RegisterColorChip(option: .black, isSelected: selectedColor == .black) {
-                            selectedColor = .black
-                        }
-                        RegisterColorChip(option: .white, isSelected: selectedColor == .white) {
-                            selectedColor = .white
-                        }
-                        RegisterColorChip(option: .colored, isSelected: selectedColor == .colored) {
-                            selectedColor = .colored
-                        }
-                    }
-                }
-                
-                Spacer(minLength: 24)
-                
-                HStack(alignment: .center, spacing: 8) {
-                    
-                    
-                    Button {
                         
-                        showReceipt = true
+                        if selectedMainCategory != "그 외" {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("세부 카테고리")
+                                    .font(Font.pretendard.head4)
+                                
+                                RegisterChipFlowLayout {
+                                    ForEach(availableSubcategories) { category in
+                                        RegisterSelectionChip(
+                                            title: category.title,
+                                            isSelected: selectedSubCategory?.id == category.id
+                                        ) {
+                                            selectedSubCategory = category
+                                        }
+                                    }
+                                }
+                            }
+                        }
                         
-                    } label: {
-                        Text("영수증 발급")
-                            .font(Font.pretendard.head3)
-                            .foregroundStyle(Color.white)
-                            .frame(width: 371, height: 52, alignment: .center)
-                            .background(Color.primary500)
-                            .cornerRadius(83)
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("색상")
+                                .font(Font.pretendard.head4)
+                            RegisterChipFlowLayout {
+                                RegisterColorChip(option: .black, isSelected: selectedColor == .black) {
+                                    selectedColor = .black
+                                }
+                                RegisterColorChip(option: .white, isSelected: selectedColor == .white) {
+                                    selectedColor = .white
+                                }
+                                RegisterColorChip(option: .colored, isSelected: selectedColor == .colored) {
+                                    selectedColor = .colored
+                                }
+                            }
+                        }
+                        
+                        Spacer(minLength: 24)
+                        
+                        HStack(alignment: .center, spacing: 8) {
+                            
+                            Button {
+                                showReceipt = true
+                            } label: {
+                                Text("영수증 발급")
+                                    .font(Font.pretendard.head3)
+                                    .foregroundStyle(Color.white)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 52, alignment: .center)
+                                    .background(Color.primary500)
+                                    .cornerRadius(83)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        .padding(.top, 8)
                     }
-                    .buttonStyle(.plain)
+                    .padding()
                 }
-                .padding(.top, 8)
             }
-            .padding()
         }
         .navigationDestination(isPresented: $showReceipt) {
             
             ReceiptLoadingFlowView(
-                
                 clothing: Clothing.randomReceiptData(for: updatedClothing),
                 localImage: displayImage
-                
             )
             
         }
@@ -269,6 +273,7 @@ struct RegisterConfirmView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
     }
 }
 

@@ -61,7 +61,7 @@ struct ProductResultView: View {
                     RegisterConfirmView(
                         clothing: registerClothing,
                         localImage: cutoutImage ?? image
-                    )
+                    ).containerBackground(Color.white, for: .navigation)
                 }
             }
             .safeAreaInset(edge: .bottom) {
@@ -70,6 +70,8 @@ struct ProductResultView: View {
                 }
             }
         }
+        .toolbar(.hidden, for: .navigationBar)
+        
         .task {
             await loadProductResult()
         }
