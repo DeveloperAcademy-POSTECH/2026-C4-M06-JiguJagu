@@ -41,16 +41,24 @@ struct ProductResultView: View {
     
     var body: some View {
         NavigationStack {
-            Group {
-                if isLoading {
-                    loadingView
-                } else if let result {
-                    resultView(result)
-                } else {
-                    errorView
+            ZStack(alignment: .bottom) {
+                Color.white
+                    .ignoresSafeArea()
+                
+                Group {
+                    if isLoading {
+                        loadingView
+                    } else if let result {
+                        VStack(spacing: 0) {
+                            resultView(result)
+                            bottomButtons
+                        }
+                    } else {
+                        errorView
+                    }
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationTitle(isLoading ? "" : "상품 검색 결과")
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(item: $loadingSearchAnalysis) { analysis in
@@ -64,14 +72,8 @@ struct ProductResultView: View {
                     ).containerBackground(Color.white, for: .navigation)
                 }
             }
-            .safeAreaInset(edge: .bottom) {
-                if result != nil {
-                    bottomButtons
-                }
-            }
         }
         .toolbar(.hidden, for: .navigationBar)
-        
         .task {
             await loadProductResult()
         }
